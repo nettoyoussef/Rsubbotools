@@ -40,6 +40,9 @@ Rcpp::List subboafish(
   
   // dimension of the matrix
   size_t dim=(O_munknown?4:5);
+
+  // name of parameters
+  Rcpp::CharacterVector par(dim);
   
   // information matrix
   // allocates space
@@ -122,8 +125,14 @@ Rcpp::List subboafish(
     // m - m 
     I(4,4) = (dt1l*dt2l/al+dt1r*dt2r/ar)/A;
     
+    par = Rcpp::CharacterVector::create("bl", "br", "al", "ar", "m");
+    
+  }else{
+    par = Rcpp::CharacterVector::create("bl", "br", "al", "ar");
   }
 
+
+  
   // invert I; in J store temporary LU decomp. 
   gsl_matrix_memcpy (J,I);
   gsl_linalg_LU_decomp (J,P,&signum);
@@ -134,7 +143,13 @@ Rcpp::List subboafish(
   Rcpp::NumericVector std_err;
   std_err = gsl_matrix_diagonal(invI);
   std_err = std_err/size; 
-	    
+
+  // add name of parameters
+  Rcpp::DataFrame dt =
+    Rcpp::DataFrame::create( Rcpp::Named("par") = par
+			    ,Rcpp::Named("std_err") = std_err
+			    );
+  
   // creates information matrix
   Rcpp::NumericMatrix infmatrix =
     Rcpp::as<Rcpp::NumericMatrix>(Rcpp::wrap(I));
@@ -143,9 +158,13 @@ Rcpp::List subboafish(
   Rcpp::NumericMatrix inv_infmatrix =
     Rcpp::as<Rcpp::NumericMatrix>(Rcpp::wrap(invI));
 
+  // add names for the matrices
+  colnames(infmatrix) = par;
+  colnames(inv_infmatrix) = par;
+  
   Rcpp::List ans =
     Rcpp::List::create(
-		       Rcpp::Named("std_error") = std_err
+		       Rcpp::Named("std_error") = dt
 		       ,Rcpp::Named("infmatrix") = infmatrix
 		       ,Rcpp::Named("inv_infmatrix") = inv_infmatrix
 		       );

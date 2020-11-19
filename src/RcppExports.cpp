@@ -6,6 +6,38 @@
 
 using namespace Rcpp;
 
+// subboafish
+Rcpp::List subboafish(unsigned size, double bl, double br, double m, double al, double ar, unsigned O_munknown);
+RcppExport SEXP _Rsubbotools_subboafish(SEXP sizeSEXP, SEXP blSEXP, SEXP brSEXP, SEXP mSEXP, SEXP alSEXP, SEXP arSEXP, SEXP O_munknownSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< unsigned >::type size(sizeSEXP);
+    Rcpp::traits::input_parameter< double >::type bl(blSEXP);
+    Rcpp::traits::input_parameter< double >::type br(brSEXP);
+    Rcpp::traits::input_parameter< double >::type m(mSEXP);
+    Rcpp::traits::input_parameter< double >::type al(alSEXP);
+    Rcpp::traits::input_parameter< double >::type ar(arSEXP);
+    Rcpp::traits::input_parameter< unsigned >::type O_munknown(O_munknownSEXP);
+    rcpp_result_gen = Rcpp::wrap(subboafish(size, bl, br, m, al, ar, O_munknown));
+    return rcpp_result_gen;
+END_RCPP
+}
+// subbofish
+Rcpp::List subbofish(unsigned size, double b, double m, double a, unsigned O_munknown);
+RcppExport SEXP _Rsubbotools_subbofish(SEXP sizeSEXP, SEXP bSEXP, SEXP mSEXP, SEXP aSEXP, SEXP O_munknownSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< unsigned >::type size(sizeSEXP);
+    Rcpp::traits::input_parameter< double >::type b(bSEXP);
+    Rcpp::traits::input_parameter< double >::type m(mSEXP);
+    Rcpp::traits::input_parameter< double >::type a(aSEXP);
+    Rcpp::traits::input_parameter< unsigned >::type O_munknown(O_munknownSEXP);
+    rcpp_result_gen = Rcpp::wrap(subbofish(size, b, m, a, O_munknown));
+    return rcpp_result_gen;
+END_RCPP
+}
 // varcovar
 RcppGSL::Matrix varcovar(const Rcpp::NumericVector par, const size_t N, const size_t dim);
 RcppExport SEXP _Rsubbotools_varcovar(SEXP parSEXP, SEXP NSEXP, SEXP dimSEXP) {
@@ -50,6 +82,8 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_Rsubbotools_subboafish", (DL_FUNC) &_Rsubbotools_subboafish, 7},
+    {"_Rsubbotools_subbofish", (DL_FUNC) &_Rsubbotools_subbofish, 5},
     {"_Rsubbotools_varcovar", (DL_FUNC) &_Rsubbotools_varcovar, 3},
     {"_Rsubbotools_sortRcpp", (DL_FUNC) &_Rsubbotools_sortRcpp, 1},
     {"_Rsubbotools_subbofit", (DL_FUNC) &_Rsubbotools_subbofit, 9},
