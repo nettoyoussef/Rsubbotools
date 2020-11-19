@@ -1,0 +1,13 @@
+CXX_STD = CXX11
+PKG_LIBS = `$(R_HOME)/bin/Rscript -e "RcppGSL:::LdFlags()"`
+CXXFLAGS = -g -O0
+
+CC=g++
+CXX=g++
+CXX11=g++
+CXX14=g++
+cxx18=g++
+cxx1X=g++
+LDFLAGS=-L/usr/lib 
+
+
