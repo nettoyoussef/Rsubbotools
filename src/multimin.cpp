@@ -262,60 +262,61 @@ void do_data_transformation( std::vector<double> x
 
   for(i=0;i<n;i++){
     if(type[i] == NA_INTEGER){
-      x[i]= gsl_vector_get(y,i);
+      x[i]= y[i];
     }
     else
       switch(type[i]){
       case 0:/* (-inf,+inf) */
-        x[i]= gsl_vector_get(y,i); 
+        x[i]= y[i]; 
         break;
       case 1:/* [a,+inf) */
-        x[i]= xmin[i]+gsl_vector_get(y,i)*gsl_vector_get(y,i); 
+        x[i]= xmin[i]+y[i]*y[i]; 
         break;
       case 2:/* (-inf,a] */
-        x[i]= xmax[i]-gsl_vector_get(y,i)*gsl_vector_get(y,i); 
+        x[i]= xmax[i]-y[i]*y[i]; 
         break;
       case 3:/* [a,b] */
-        dtmp1 = sin( gsl_vector_get(y,i) );
+        dtmp1 = sin( y[i] );
         x[i]= .5*(xmin[i]*(1-dtmp1) +xmax[i]*(1+dtmp1)); 
         break;
       case 4:/* (a,+inf) */
-        dtmp1 = exp( gsl_vector_get(y,i) );
+        dtmp1 = exp( y[i] );
         x[i]= xmin[i]+dtmp1;
         break;
       case 5:/* (-inf,a) */
-        dtmp1 = -exp( gsl_vector_get(y,i) );
+        dtmp1 = -exp( y[i] );
         x[i]= xmax[i]+dtmp1;
         break;
       case 6:/* (a,b) */
-        dtmp1 = tanh( gsl_vector_get(y,i) );
+        dtmp1 = tanh( y[i] );
         x[i]= .5*(xmin[i]*(1-dtmp1) +xmax[i]*(1+dtmp1));
         break;
       case 7:/* (a,b) second approach */
-        dtmp1 = gsl_vector_get(y,i)/sqrt(1.+gsl_vector_get(y,i)*gsl_vector_get(y,i));
+        dtmp1 = y[i]/sqrt(1.+y[i]*y[i]);
         x[i]= .5*(xmin[i]*(1-dtmp1) +xmax[i]*(1+dtmp1));
         break;
       case 8:/* (a,+inf) second approach */
-        dtmp1 = sqrt(1.+gsl_vector_get(y,i)*gsl_vector_get(y,i));
-        x[i]= xmin[i] + .5*(gsl_vector_get(y,i)+dtmp1);
+        dtmp1 = sqrt(1.+y[i]*y[i]);
+        x[i]= xmin[i] + .5*(y[i]+dtmp1);
         break;
       case 9:/* (-inf,a) second approach */
-        dtmp1 = sqrt(1.+gsl_vector_get(y,i)*gsl_vector_get(y,i));
-        x[i]= xmax[i] + .5*(gsl_vector_get(y,i)-dtmp1);
+        dtmp1 = sqrt(1.+y[i]*y[i]);
+        x[i]= xmax[i] + .5*(y[i]-dtmp1);
         break;
       }
   }
 }
   
   
-void do_data_transformation_df( std::vector<double> x
-                               ,const size_t n
-                               ,const gsl_vector *y
-                               ,Rcpp::IntegerVector type
-                               ,Rcpp::NumericVector xmin
-                               ,Rcpp::NumericVector xmax
-                               ,std::vector<double> dx
-                               ){
+void do_data_transformation_df(
+			       Rcpp::NumericVector x
+			       ,const size_t n
+			       ,Rcpp::NumericVector y
+			       ,Rcpp::IntegerVector type
+			       ,Rcpp::NumericVector xmin
+			       ,Rcpp::NumericVector xmax
+			       ,Rcpp::NumericVector dx
+			       ){
 
   size_t i;
   double dtmp1,dtmp2;
@@ -330,35 +331,35 @@ void do_data_transformation_df( std::vector<double> x
         dx[i]= 1;
         break;
       case 1:/* [a,+inf) */
-        dx[i]= 2.*gsl_vector_get(y,i);
+        dx[i]= 2.*y[i];
         break;
       case 2:/* (-inf,a] */
-        dx[i]= -2.*gsl_vector_get(y,i);
+        dx[i]= -2.*y[i];
         break;
       case 3:/* [a,b] */
-        dx[i]= .5*(xmax[i]-xmin[i])*cos(gsl_vector_get(y,i));
+        dx[i]= .5*(xmax[i]-xmin[i])*cos(y[i]);
         break;
       case 4:/* (a,+inf) */
-        dx[i]= exp( gsl_vector_get(y,i) );
+        dx[i]= exp( y[i] );
         break;
       case 5:/* (-inf,a) */
-        dx[i]= -exp( gsl_vector_get(y,i) );
+        dx[i]= -exp( y[i] );
         break;
       case 6:/* (a,b) */
-        dtmp1 = cosh( gsl_vector_get(y,i) );
+        dtmp1 = cosh( y[i] );
         dx[i]= .5*(xmax[i]-xmin[i])/(dtmp1*dtmp1);
         break;
       case 7:/* (a,b) second approach */
-        dtmp1 = (1.+gsl_vector_get(y,i)*gsl_vector_get(y,i))*sqrt(1.+gsl_vector_get(y,i)*gsl_vector_get(y,i)) ;
+        dtmp1 = (1.+y[i]*y[i])*sqrt(1.+y[i]*y[i]) ;
         dx[i]= .5*(xmax[i]-xmin[i])/dtmp1;
         break;
       case 8:/* (a,+inf) second approach */
-        dtmp1 = gsl_vector_get(y,i);
+        dtmp1 = y[i];
         dtmp2 = sqrt(1.+dtmp1*dtmp1);
         dx[i]= .5*(dtmp1+dtmp2)/dtmp2;
         break;
       case 9:/* (-inf,a) second approach */
-        dtmp1 = gsl_vector_get(y,i);
+        dtmp1 = y[i];
         dtmp2 = sqrt(1.+dtmp1*dtmp1);
         dx[i]= .5*(dtmp2-dtmp1)/dtmp2;
         break;
@@ -385,7 +386,14 @@ static double g(const gsl_vector *y, void *gparams){
   Rcpp::NumericVector xmax = p->xmax;
 
   //double *x = (double *) multimin_alloc(sizeof(double)*n);
-  std::vector<double> x(n);
+  Rcpp::NumericVector x(n);
+  //std::vector<double> x(n);
+
+  // converts y to a Rcpp vector
+  Rcpp::NumericVector z = Rcpp::NumericVector(y->data, y->data + y->size);
+  
+  //Rcpp::Rcout << "Print z:" << std::endl;
+  //Rcpp::Rcout << z << std::endl;
 
   // variable transformation
   
@@ -396,9 +404,19 @@ static double g(const gsl_vector *y, void *gparams){
 
   // Notice: type is also a vector, so for each 
   // variable a different transformation can be selected
-  do_data_transformation(x, n, y, type, xmin, xmax);
 
-  p->f(p->data, n,x,p->fparams,&res);
+  // data transf. for x  
+  do_data_transformation(x, n, z, type, xmin, xmax);
+
+  //Rcpp::Rcout << "Print x:" << std::endl;
+  //Rcpp::Rcout << x << std::endl;
+
+  
+  p->f(p->data, n, x, p->fparams,&res);
+
+  //Rcpp::Rcout << "Print res:" << std::endl;
+  //Rcpp::Rcout << res << std::endl;
+  
   //free (x);
   return(res);
 
@@ -412,7 +430,9 @@ static double g(const gsl_vector *y, void *gparams){
 static void dg(const gsl_vector *y, void *gparams, gsl_vector *dg){
 
   struct g_params *p= (struct g_params *) gparams;
-  
+
+  // converts y to a Rcpp vector
+  Rcpp::NumericVector z = Rcpp::NumericVector(y->data, y->data + y->size);
   
   /* dereference useful stuff */
   const size_t n = p->n;
@@ -421,15 +441,20 @@ static void dg(const gsl_vector *y, void *gparams, gsl_vector *dg){
   Rcpp::NumericVector xmax = p->xmax;
 
   // x is the guess after the variable transformation
-  std::vector<double> x(n);
+  Rcpp::NumericVector x(n);
+  //std::vector<double> x(n);
   //double *x = (double *) multimin_alloc(sizeof(double)*n);
 
   // dx is the gradient after the variable transformation
-  std::vector<double> dx(n);
+  Rcpp::NumericVector dx(n);
+  //std::vector<double> dx(n);
   //double *dx = (double *) multimin_alloc(sizeof(double)*n);
 
-  std::vector<double> df(n);
+  Rcpp::NumericVector df(n);
+  //std::vector<double> df(n);
   //double *df = (double *) multimin_alloc(sizeof(double)*n);
+
+
   
 
   // variable transformation
@@ -443,10 +468,10 @@ static void dg(const gsl_vector *y, void *gparams, gsl_vector *dg){
   // variable a different transformation can be selected
   
   // data transf. for x  
-  do_data_transformation(x, n, y, type, xmin, xmax);
+  do_data_transformation(x, n, z, type, xmin, xmax);
 
   // data transf. for dx
-  do_data_transformation_df(x, n, y, type, xmin, xmax, dx);
+  do_data_transformation_df(x, n, z, type, xmin, xmax, dx);
 
   // find the gradient at x and update df with it 
   p->df(p->data, n, x, p->fparams, df);
@@ -488,15 +513,29 @@ static void gdg(const gsl_vector *y, void *gparams, double *g, gsl_vector *dg){
   
   size_t i;
 
+  // converts y to a Rcpp vector
+  Rcpp::NumericVector z = Rcpp::NumericVector(y->data, y->data + y->size);
+  
   /* dereference useful stuff */
   const size_t n = p->n;
   Rcpp::IntegerVector type = p->type;
   Rcpp::NumericVector xmin = p->xmin;
   Rcpp::NumericVector xmax = p->xmax;
 
-  std::vector<double> x(n);
-  std::vector<double> dx(n);
-  std::vector<double> df(n);
+
+  // x is the guess after the variable transformation
+  Rcpp::NumericVector x(n);
+  //std::vector<double> x(n);
+  //double *x = (double *) multimin_alloc(sizeof(double)*n);
+
+  // dx is the gradient after the variable transformation
+  Rcpp::NumericVector dx(n);
+  //std::vector<double> dx(n);
+  //double *dx = (double *) multimin_alloc(sizeof(double)*n);
+
+  Rcpp::NumericVector df(n);
+  //std::vector<double> df(n);
+  //double *df = (double *) multimin_alloc(sizeof(double)*n);
   
   //double *x  = (double *) multimin_alloc(sizeof(double)*n);
   //double *dx = (double *) multimin_alloc(sizeof(double)*n);
@@ -513,11 +552,11 @@ static void gdg(const gsl_vector *y, void *gparams, double *g, gsl_vector *dg){
   // variable a different transformation can be selected
 
   // data transf. for x  
-  do_data_transformation(x, n, y, type, xmin, xmax);
+  do_data_transformation(x, n, z, type, xmin, xmax);
 
   // data transf. for dx
-  do_data_transformation_df(x, n, y, type, xmin, xmax, dx);
-
+  do_data_transformation_df(x, n, z, type, xmin, xmax, dx);
+  
   // find the gradient at x and update df with it 
   p->fdf(p->data, n, x, p->fparams, g, df);
 
@@ -791,16 +830,16 @@ void do_initial_data_transform( std::vector<double> x
 //'             unsigned verbosity - if greater then 0 print info on intermediate steps 
 
 void multimin(
-               Rcpp::NumericVector data
-              ,size_t n
-	      ,std::vector<double> x
-              ,double *fun
-              ,Rcpp::IntegerVector type 
+	      Rcpp::NumericVector data
+	      ,size_t n
+	      ,Rcpp::NumericVector x
+	      ,double *fun
+	      ,Rcpp::IntegerVector type 
 	      ,Rcpp::NumericVector xmin
 	      ,Rcpp::NumericVector xmax
-              ,void (*f)    (Rcpp::NumericVector, const size_t, std::vector<double>, void *, double *)
-              ,void (* df)  (Rcpp::NumericVector, const size_t, std::vector<double>, void *, std::vector<double>)
-              ,void (* fdf) (Rcpp::NumericVector, const size_t, std::vector<double>, void *, double *, std::vector<double>)
+	      ,void (*f)    (Rcpp::NumericVector, const size_t, Rcpp::NumericVector, void *, double *)
+	      ,void (* df)  (Rcpp::NumericVector, const size_t, Rcpp::NumericVector, void *, Rcpp::NumericVector)
+	      ,void (* fdf) (Rcpp::NumericVector, const size_t, Rcpp::NumericVector, void *, double *, Rcpp::NumericVector)
               ,void *fparams
               ,const struct multimin_params oparams
               ){
@@ -812,7 +851,7 @@ void multimin(
   struct multimin_algorithm multimin_alg  =
     choose_algorithm(oparams.method);
   
-  gsl_vector *y  = gsl_vector_alloc (n);
+  RcppGSL::vector<double> y(n);
 
   // selects the algoritm for the optimization procedure
   //const gsl_multimin_fdfminimizer_type *Tfdf = multimin_alg->Tfdf;
@@ -821,17 +860,17 @@ void multimin(
   
   
   /* --- OUPUT ---------------------------------- */
-    Rprintf("MULTIMIN START\n");
-    Rprintf("#    method                         %s\n", multimin_alg.Tname);
+  Rprintf("MULTIMIN START\n");
+  Rprintf("#    method                         %s\n", multimin_alg.Tname);
 
-    if(oparams.method<4 || oparams.method==5){
+  if(oparams.method<4 || oparams.method==5){
 
-      Rprintf("#    initial step size              %g\n", oparams.step_size);
-      Rprintf("#    line minimization tolerance    %g\n", oparams.tol);
-      Rprintf("#    maximum number of iterations   %u\n", oparams.maxiter);
-      Rprintf("#    precision                      %g\n", oparams.epsabs);
+    Rprintf("#    initial step size              %g\n", oparams.step_size);
+    Rprintf("#    line minimization tolerance    %g\n", oparams.tol);
+    Rprintf("#    maximum number of iterations   %u\n", oparams.maxiter);
+    Rprintf("#    precision                      %g\n", oparams.epsabs);
 
-    }
+  }
     else{
 
       Rprintf("#    maximum number of iterations   %u\n",oparams.maxiter);
@@ -850,12 +889,12 @@ void multimin(
 			    );
 
 
-    {
-      double res;
-      Rprintf("Objective function initial value\n");
-      f(data, n, x, fparams, &res);
-      Rprintf("#    f=%.2e\n",res);
-    }
+  {
+    double res;
+    Rprintf("# Objective function initial value\n");
+    f(data, n, x, fparams, &res);
+    Rprintf("# f = %.2e\n", res);
+  }
   /* -------------------------------------------- */
 
 
@@ -894,58 +933,58 @@ void multimin(
   
     /* initialize minimizer */
     status1=gsl_multimin_fdfminimizer_set(s                        // algorithm used
-                                          ,&GdG                    // function to be minimized
-                                          ,y                       // initial point
-                                          ,oparams.step_size       // step size
-                                          ,oparams.tol             // tolerance of line minimization (error proxy)
-                                          );  
+					  ,&GdG                    // function to be minimized
+					  ,y                       // initial point
+					  ,oparams.step_size       // step size
+					  ,oparams.tol             // tolerance of line minimization (error proxy)
+					  );  
 
     if(status1){
-        Rcpp::stop("#ERROR: %s\n",gsl_strerror (status1));
+      Rcpp::stop("#ERROR: %s\n",gsl_strerror (status1));
     }
 
     /* +++++++++++++++++++++++++++++++++++++++++++++++ */
-    if(oparams.verbosity>2){
-       Rprintf("#    - start minimization \n");
-    }
+    //if(oparams.verbosity>2){
+    Rprintf("#    - start minimization \n");
+    //}
     /* +++++++++++++++++++++++++++++++++++++++++++++++ */
    
     do
       {
 
-        if( ++iter > oparams.maxiter) break;
+	if( ++iter > oparams.maxiter) break;
         
-        status1 = gsl_multimin_fdfminimizer_iterate (s);
+	status1 = gsl_multimin_fdfminimizer_iterate (s);
 
-        /* +++++++++++++++++++++++++++++++++++++++++++++++ */
-        if(oparams.verbosity>2){
-          Rprintf("#     [%d]",iter);
-          Rprintf(" g=%+12.6e  y=( ",s->f);
-          for(i=0;i<n;i++)
-            Rprintf("%+12.6e ",gsl_vector_get(s->x,i));
-          Rprintf(") dg=( ");
-          for(i=0;i<n;i++)
-            Rprintf("%+12.6e  ",gsl_vector_get(s->gradient,i));
-          Rprintf(") |dg|=%12.6e ",gsl_blas_dnrm2 (s->gradient));
-          Rprintf("|dx|=%12.6e\n",gsl_blas_dnrm2 (s->dx));
-        }
-        /* +++++++++++++++++++++++++++++++++++++++++++++++ */
+	/* +++++++++++++++++++++++++++++++++++++++++++++++ */
+	//if(oparams.verbosity>2){
+	Rprintf("#     [%d]",iter);
+	Rprintf(" g=%+12.6e  y=( ",s->f);
+	for(i=0;i<n;i++)
+	  Rprintf("%+12.6e ",gsl_vector_get(s->x,i));
+	Rprintf(") dg=( ");
+	for(i=0;i<n;i++)
+	  Rprintf("%+12.6e  ",gsl_vector_get(s->gradient,i));
+	Rprintf(") |dg|=%12.6e ",gsl_blas_dnrm2 (s->gradient));
+	Rprintf("|dx|=%12.6e\n",gsl_blas_dnrm2 (s->dx));
+	//}
+	/* +++++++++++++++++++++++++++++++++++++++++++++++ */
 
 
-        if(status1 && status1 != GSL_ENOPROG){
-          Rprintf("#WARNING: %s\n", gsl_strerror (status1));
-          break;
-        }
+	if(status1 && status1 != GSL_ENOPROG){
+	  Rprintf("#WARNING: %s\n", gsl_strerror (status1));
+	  break;
+	}
 
-        /* status2 = gsl_multimin_test_gradient (s->gradient,oparams.epsabs);  */
-        status2 = gsl_multimin_test_gradient (gsl_multimin_fdfminimizer_gradient(s),oparams.epsabs); 
+	/* status2 = gsl_multimin_test_gradient (s->gradient,oparams.epsabs);  */
+	status2 = gsl_multimin_test_gradient (gsl_multimin_fdfminimizer_gradient(s),oparams.epsabs); 
 
-        if(status1 == GSL_ENOPROG && status2==GSL_CONTINUE){
-          Rprintf("#    status: %s\n",gsl_strerror (status1));
-          break;
-        }
+	if(status1 == GSL_ENOPROG && status2==GSL_CONTINUE){
+	  Rprintf("#    status: %s\n",gsl_strerror (status1));
+	  break;
+	}
         
-     }
+      }
     while (status2 == GSL_CONTINUE);
 
     gsl_vector_memcpy (y,s->x);
@@ -953,10 +992,10 @@ void multimin(
     gsl_multimin_fdfminimizer_free (s);
 
     /* +++++++++++++++++++++++++++++++++++++++++++++++ */
-    if(oparams.verbosity>2){
-      Rprintf("#    - end minimization\n");
-      Rprintf("#    iterations %u\n",iter-1);
-    }
+    //if(oparams.verbosity>2){
+    Rprintf("#    - end minimization\n");
+    Rprintf("#    iterations %u\n",iter-1);
+    //}
     /* +++++++++++++++++++++++++++++++++++++++++++++++ */
 
   }
@@ -987,14 +1026,14 @@ void multimin(
     gsl_vector_set_all (ss,oparams.step_size+oparams.maxsize);
 
     /* --- OUPUT ---------------------------------- */
-    if(oparams.verbosity>0){
-      size_t i;
-      Rprintf("#    initial simplex sizes\n");
-      Rprintf("#    ");
-      for(i=0;i<n;i++)
-        Rprintf(" %g", gsl_vector_get(ss,i));
-      Rprintf("\n");
-    }
+    //if(oparams.verbosity>0){
+    size_t i;
+    Rprintf("#    initial simplex sizes\n");
+    Rprintf("#    ");
+    for(i=0;i<n;i++)
+      Rprintf(" %g", gsl_vector_get(ss,i));
+    Rprintf("\n");
+    //}
     /* -------------------------------------------- */
 
     /* Initialize minimizer */ 
@@ -1002,47 +1041,47 @@ void multimin(
 
     if(status1)
       {
-        Rprintf("#ERROR: %s\n",gsl_strerror (status1));
-        Rcpp::stop("Error on the minimization process.");
+	Rprintf("#ERROR: %s\n",gsl_strerror (status1));
+	Rcpp::stop("Error on the minimization process.");
       }
 
     /* +++++++++++++++++++++++++++++++++++++++++++++++ */
-    if(oparams.verbosity>2)
-      Rprintf("#    - start minimization \n");
+    //if(oparams.verbosity>2)
+    Rprintf("#    - start minimization \n");
     /* +++++++++++++++++++++++++++++++++++++++++++++++ */
 
     do
       {
 
-        if( ++iter > oparams.maxiter) break;
+	if( ++iter > oparams.maxiter) break;
 
-        status1 = gsl_multimin_fminimizer_iterate(s);
+	status1 = gsl_multimin_fminimizer_iterate(s);
 
-        size = gsl_multimin_fminimizer_size (s);
+	size = gsl_multimin_fminimizer_size (s);
 
-        /* +++++++++++++++++++++++++++++++++++++++++++++++ */
-        if(oparams.verbosity>2){
-          Rprintf("#    g=%g y=( ",s->fval);
-          for(i=0;i<n;i++)
-            Rprintf("%g ",gsl_vector_get(s->x,i));
-          Rprintf(") ");
-          Rprintf(" simplex size=%g ",size);
-          Rprintf("\n");
-        }
-        /* +++++++++++++++++++++++++++++++++++++++++++++++ */
+	/* +++++++++++++++++++++++++++++++++++++++++++++++ */
+	//if(oparams.verbosity>2){
+	Rprintf("#    g=%g y=( ",s->fval);
+	for(i=0;i<n;i++)
+	  Rprintf("%g ",gsl_vector_get(s->x,i));
+	Rprintf(") ");
+	Rprintf(" simplex size=%g ",size);
+	Rprintf("\n");
+	//}
+	/* +++++++++++++++++++++++++++++++++++++++++++++++ */
 
 
-        if(status1 && status1 != GSL_ENOPROG){
-          Rprintf("#WARNING: %s\n", gsl_strerror (status1));
-          break;
-        }
+	if(status1 && status1 != GSL_ENOPROG){
+	  Rprintf("#WARNING: %s\n", gsl_strerror (status1));
+	  break;
+	}
 
-        status2=gsl_multimin_test_size (size,oparams.maxsize);
+	status2=gsl_multimin_test_size (size,oparams.maxsize);
 
-        if(status1 == GSL_ENOPROG && status2==GSL_CONTINUE){
-          Rprintf("#    status: %s\n",gsl_strerror (status1));
-          break;
-        }
+	if(status1 == GSL_ENOPROG && status2==GSL_CONTINUE){
+	  Rprintf("#    status: %s\n",gsl_strerror (status1));
+	  break;
+	}
 
       }
     while (status2 == GSL_CONTINUE);
@@ -1052,27 +1091,28 @@ void multimin(
     gsl_multimin_fminimizer_free (s);
 
     /* +++++++++++++++++++++++++++++++++++++++++++++++ */
-    if(oparams.verbosity>2){
+    //if(oparams.verbosity>2){
       Rprintf("#    - end minimization\n");
       Rprintf("#    iterations %u\n",iter-1);
-    }
-    /* +++++++++++++++++++++++++++++++++++++++++++++++ */
+      //}
+      /* +++++++++++++++++++++++++++++++++++++++++++++++ */
 
-  }
+    }
 
   /* compute values of x */
-  do_data_transformation(x, n, y, type, xmin, xmax);
+  Rcpp::NumericVector z = Rcpp::NumericVector(y->data, y->data + y->size);
+  do_data_transformation(x, n, z, type, xmin, xmax);
 
 
   /* --- OUPUT ---------------------------------- */
-  if(oparams.verbosity>0){
-    for(i=0;i<n;i++)
+  //if(oparams.verbosity>0){
+  for(i=0;i<n;i++)
       Rprintf("#    %e -> x[%zd]=%e\n",gsl_vector_get(y,i),i,x[i]);
-    Rprintf("#--- MULTIMIN END --- \n");
-  }
-  /* -------------------------------------------- */
+  Rprintf("#--- MULTIMIN END --- \n");
+  //}
+    /* -------------------------------------------- */
 
 
-  gsl_vector_free (y);
+  // gsl_vector_free (y);
   
 }
