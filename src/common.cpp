@@ -64,6 +64,16 @@ double * RcppNum_to_double(Rcpp::NumericVector x){
 
 }
 
+// Utilities
+
+// [[Rcpp::export]]
+void sortRcpp(Rcpp::NumericVector x){
+
+ std::sort(x.begin(), x.end());
+
+}
+
+
 // Functions for optimization in the Subbotin Family
 
 

@@ -55,6 +55,10 @@ void subbotools_header(char const *,FILE *);
 // conversion functions
 double * RcppNum_to_double(Rcpp::NumericVector x);
 
+// utility functions
+
+// sort a vector
+void sortRcpp(Rcpp::NumericVector x);
 
 // copy a vector by value
 void Rcppdeepcopy(Rcpp::NumericVector x_orig, Rcpp::NumericVector x_dest);

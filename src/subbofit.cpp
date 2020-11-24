@@ -535,14 +535,6 @@ Rcpp::NumericVector optim_method_moments(
   return ans;
 }
 
-// [[Rcpp::export]]
-void sortRcpp(Rcpp::NumericVector x){
-
- std::sort(x.begin(), x.end());
-
-}
-
-
 
 //' subbofit
 //' Fit a power exponential density via maximum likelihood
