@@ -44,9 +44,6 @@ Rcpp::List subbofish(
   // correlation between a and b parameters
   double cor_ab;
 
-  // temp variables
-  unsigned utmp1;
-
   // dimension of the matrix
   size_t dim=(O_munknown?2:3);
 
