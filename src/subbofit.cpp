@@ -2,8 +2,6 @@
 //Main headers
 
 #include "common.h"
-#include "multimin.h" // this defines the multimin struct
-
 
 /*------------------*/
 
@@ -464,207 +462,6 @@ void subbo_objfdf(Rcpp::NumericVector data, const size_t n, Rcpp::NumericVector 
 
 }
 
-// - interv_step - interval optimization parameters 
-// - interv_oparams - interval optimization parameters
-Rcpp::List interval_optim(
-  Rcpp::NumericVector data
- ,Rcpp::IntegerVector type
- ,Rcpp::NumericVector xmin
- ,Rcpp::NumericVector xmax
- ,std::vector<double> x
- ,double fmin
- ,struct multimin_params interv_oparams 
- ,int interv_step 
- ,Rcpp::NumericVector par
-){
-
-
-  // local scope
-  double dtmp1;    
-  std::vector<double> xtmp(2); /* store the temporary minimum  */
-  unsigned int index;
-  unsigned int oldindex;
-  unsigned int utmp1;
-  unsigned int max;
-  unsigned int min;
-  unsigned int Size = data.size();
-  unsigned int n = 2; // number of parameters
-  
-
-  /* perform interval minimization */
-  /* ----------------------------- */
-
-  Rprintf("#--- INTERVAL-WISE OPTIMIZATION\n");
-
-  type[1] = 3;
-
-  /* find initial index s.t. m \in [data[index], data[index+1]] */
-  for(utmp1 = 0; data[utmp1]<=x[1] && utmp1<Size; utmp1++){
-    if(utmp1 == 0)
-      index = 0;
-    else if (utmp1 == Size)
-      index= Size-2;
-    else index = utmp1-1;
-  } 
-
-  xmin[1] = data[index];
-  xmax[1] = data[index+1];
-  x[1] = .5*(xmin[1]+xmax[1]);
-
-  multimin(
-            data           // sample
-     ,n              // number of parameters
-     ,x              // starting guess / returns parameters value
-           ,&fmin          // pointer to update the minimum likelihood
-           ,type           // type of transformation of the data
-           ,xmin           // minimum values for the parameters
-           ,xmax           // maximum values for the parameters
-           ,objf           // objective function to minimize
-           ,objdf          // df/dx of the objective function
-           ,objfdf         // objf + objdf
-           ,NULL           // fparams
-           ,interv_oparams // parameters for the optmization
-    );
-
-  /* set the value of b to initial minimum */
-  xtmp[0] = x[0];
-
-  max = min = index;
-
-
-  // Initial minimum 
-  Rprintf("Results of initial interval optimization: \n");
-  Rprintf("# interval        b      m      ll\n");
-  Rprintf("# [%+.3f:%+.3f] b=%.2f m=%.2f ll=%.2f\n",data[index], data[index+1],
-          x[0], x[1], fmin);
-  Rprintf("\n");
-
-  /* move to the right compute new local minima and compare with
-     global minimum */    
-  do {
-    oldindex = index;
-
-    for(utmp1 = max+1;
-        utmp1<=max+interv_step && utmp1<Size-1;
-        utmp1++){
-      
-      /* set boundaries on m */
-      xmin[1] = data[utmp1]; xmax[1] = data[utmp1+1];
-      /* set initial condition */
-      xtmp[0] = x[0];         /* set to the last best value */
-      xtmp[1] = .5*(xmin[1]+xmax[1]); /* set to the mid interval */
-
-      // sigfault
-      multimin(
-                data            // sample
-	 ,n               // number of parameters
-               ,xtmp		  // starting guess / returns parameters value
-               ,&dtmp1	  // pointer to update the minimum likelihood
-               ,type		  // type of transformation of the data
-               ,xmin		  // minimum values for the parameters
-               ,xmax		  // maximum values for the parameters
-               ,objf		  // objective function to minimize
-               ,objdf		  // df/dx of the objective function
-               ,objfdf	  // objf + objdf
-               ,NULL		  // fparams
-               ,interv_oparams  // parameters for the optmization
-	 );
-
-
-      if(dtmp1 < fmin){/* found new minimum */
-        index = utmp1;
-        x[0]  = xtmp[0]; x[1] = xtmp[1];
-        fmin  = dtmp1;
-
-        Rprintf("#>>> [%+.3e:%+.3e] ll=%e\n",
-                data[utmp1], data[utmp1+1], dtmp1);
-      }
-      else {/* NOT found new minimum */
-            Rprintf("#    [%+.3e:%+.3e] ll=%e\n",
-                    data[utmp1], data[utmp1+1], dtmp1);
-      }
-
-    }
-    max = utmp1-1;
-  }
-  while(index!=oldindex);
-
-  /* set the value of b to initial minimum */
-  xtmp[0] = x[0];
-
-
-  /* move to the left compute new local minima and compare with
-     global minimum */    
-
-  do {
-    oldindex = index;
-
-    for(utmp1 = min-1;
-        (int) utmp1 >= (int) min-interv_step && (int) utmp1 >= 0;
-        utmp1--){
-
-      /* set boundaries on m */
-      xmin[1] = data[utmp1]; xmax[1] = data[utmp1+1];
-      /* set initial condition */
-      xtmp[0] = x[0];         /* set to the last best value */
-      xtmp[1] = .5*(xmin[1]+xmax[1]); /* set to the mid interval */
-
-      multimin(
-                data               // sample
-	 ,n                  // number of parameters
-               ,xtmp		     // starting guess / returns parameters value
-               ,&dtmp1	     // pointer to update the minimum likelihood
-               ,type		     // type of transformation of the data
-               ,xmin		     // minimum values for the parameters
-               ,xmax		     // maximum values for the parameters
-               ,objf		     // objective function to minimize
-               ,objdf		     // df/dx of the objective function
-               ,objfdf	     // objf + objdf
-               ,NULL		     // fparams
-               ,interv_oparams     // parameters for the optmization
-	 );
-
-      if(dtmp1<fmin){/* found new minimum */
-        index = utmp1;
-        x[0] = xtmp[0]; x[1] = xtmp[1];
-        fmin = dtmp1;
-
-        Rprintf("#>>> [%+.3e:%+.3e] ll=%e\n",
-                data[utmp1], data[utmp1+1], dtmp1);
-      }
-      else {/* NOT found new minimum */
-            Rprintf("#    [%+.3e:%+.3e] ll=%e\n",
-	      data[utmp1], data[utmp1+1], dtmp1);
-      }
-
-    }
-  min = utmp1+1;
-  }
-  while(index!=oldindex);
-
-  /* store final values */
-  /* ------------------ */
-  par[0] = x[0];
-  par[1] = geta(data, x[0], x[1]);    
-  par[2] = x[1];
-
-  Rprintf("Results of interval optimization: \n");
-  Rprintf("#  par    b      a      m      ll\n");
-  Rprintf("#  value  %.3f  %.3f  %.3f  %.3f\n", par[0], par[1], par[2], fmin);
-  Rprintf("\n");
-  Rprintf("#  intervals explored: %d\n",max-min);
-  Rprintf("\n");
-
-  Rcpp::List ans =
-    Rcpp::List::create(
-		 Rcpp::Named("par") = par
-		 );
-
-  return ans;
-    
-
-}
-
 
 Rcpp::NumericVector optim_method_moments(
                                           Rcpp::NumericVector data
@@ -730,114 +527,11 @@ Rcpp::NumericVector optim_method_moments(
   return par;
 }
 
-
-Rcpp::List global_optim(
-		     Rcpp::NumericVector data
-                    ,double fmin
-                    ,struct multimin_params global_oparams
-		    ,Rcpp::NumericVector par
-		    ,Rcpp::Nullable<Rcpp::NumericVector> provided_m_ = R_NilValue
-                    ){  
-
-  /* ML estimation: global maximization */
-  /* ---------------------------------- */
-
-  // declare variables 
-  Rcpp::IntegerVector type(2);
-  Rcpp::NumericVector xmin(2);
-  Rcpp::NumericVector xmax(2);
-  std::vector<double> x(2); // x[0] = b x[1] = m 
-  unsigned int n = 2; // number of parameters
-
-  Rprintf("START OF GLOBAL OPTIMIZATION\n");
-
-  /* set initial minimization boundaries */
-  /* ----------------------------------- */
-
-  // parameters for b
-  type[0] = 4;   // interval: (a,+inf); transf: x=a + \exp(y)
-  xmin[0] = 0;   // b must be positive
-  xmax[0] = 0;   // not used
-  x[0] = par[0]; // receive previous optimization value as starting point
-
-  
-  if(provided_m_.isNotNull()){
-
-    // casting the null value
-    // necessary according to
-    // https://gallery.rcpp.org/articles/optional-null-function-arguments/
-    Rcpp::NumericVector provided_m(provided_m_); 
-    
-    // parameters for m
-    type[1] = 3; //interval: [a,b]; transf: x= \frac{ a(1-\sin(y)) + b(1+\sin(y)}{2}
-    xmin[1] = provided_m[0]; // uses the provided m to fix a value
-    xmax[1] = provided_m[0]; // uses the provided m to fix a value
-    x[1] = provided_m[0];
-
-
-  } 
-  else{
-
-    // parameters for m
-    type[1] = 0; // interval: (-inf,+inf); transf: x=y
-    xmin[1] = 0; // not used 
-    xmax[1] = 0; // not used 
-    x[1] = par[2]; // receives value from previous step
-
-  }
-
-  Rprintf("Parameters for global optimization: \n");
-  Rprintf("#  par  value type   xmin   xmax\n");
-  Rprintf("#  b    %.2f      %i   %.2f   %.2f\n", x[0], type[0], xmin[0], xmax[0]);
-  Rprintf("#  m    %.2f      %i   %.2f   %.2f\n", x[1], type[1], xmin[1], xmax[1]);
-  Rprintf("\n");
-  
-  /* perform global minimization */
-  /* --------------------------- */
-    
-  multimin(
-            data                  // sample
-           ,n			  // number of parameters
-           ,x			  // starting guess / returns parameters value
-           ,&fmin		  // pointer to update the minimum likelihood
-           ,type		  // type of transformation of the data
-           ,xmin		  // minimum values for the parameters
-           ,xmax		  // maximum values for the parameters
-           ,objf		  // objective function to minimize
-           ,objdf		  // df/dx of the objective function
-           ,objfdf		  // objf + objdf
-           ,NULL		  // fparams
-           ,global_oparams	  // parameters for the optmization
-     );
-
-  /* store final values */
-  /* ------------------ */
-  par[0] = x[0];
-  par[1] = geta(data, x[0], x[1]);    
-  par[2] = x[1];
-
-
-  Rprintf("Results of global optimization: \n");
-  Rprintf("#  par    b      a      m      ll\n");
-  Rprintf("#  value  %.3f  %.3f  %.3f  %.3f\n", x[0], geta(data, x[0], x[1]), x[1], fmin);
-  Rprintf("\n");
-    
-  
-  Rcpp::NumericVector x1 = Rcpp::wrap(x); 
-  
   Rcpp::List ans =
-          Rcpp::List::create(
-                              Rcpp::Named("par")  = par
-                             ,Rcpp::Named("type") = Rcpp::wrap(type)
-                             ,Rcpp::Named("xmin") = Rcpp::wrap(xmin)
-                             ,Rcpp::Named("xmax") = Rcpp::wrap(xmax)
-		             ,Rcpp::Named("x")    = x1
-                             ,Rcpp::Named("fmin") = fmin
-                            );
-
-
-  Rprintf("END OF GLOBAL OPTIMIZATION\n");
-    
+    Rcpp::List::create(
+		        Rcpp::Named("par") = par
+		       ,Rcpp::Named("fmin") = fmin
+		       );
   return ans;
 }
 
@@ -1059,26 +753,37 @@ Rcpp::List subbofit(
 
     if(method >= 4){
 
-    std::vector<double>  x = Rcpp::as<std::vector<double>>(g_opt_results["x"]);
+      g_opt_results = 
+	interval_optim(
+		       data
+		       ,g_opt_results["type"]
+		       ,g_opt_results["xmin"]
+		       ,g_opt_results["xmax"]
+		       ,x
+		       ,g_opt_results["fmin"]
+		       ,interv_oparams /* interval optimization parameters */
+		       ,interv_step /* interval optimization step */
+                       ,(unsigned) 2 
+                       ,(unsigned) 1
+		       ,subbo_objf
+		       ,subbo_objdf
+		       ,subbo_objfdf
+		       );
 
-    g_opt_results = 
-      interval_optim(
-                     data
-                    ,g_opt_results["type"]
-                    ,g_opt_results["xmin"]
-                    ,g_opt_results["xmax"]   
-		    ,x
-                    ,g_opt_results["fmin"]
-                    ,interv_oparams /* interval optimization parameters */
-                    ,interv_step /* interval optimization step */
-                    ,g_opt_results["par"]
-    		   );
 
+      
+     /* store final values */
+     /* ------------------ */
+      par[0] = x[0]; //sets b to the new minimum
+      par[2] = x[1]; //sets m to the new minimum
+      par[1] = geta(data, par[0], par[2]); // updates 'a' value
+      
+      // updates log-likelihood 
+      fmin = Rcpp::as<double>(g_opt_results["fmin"]);
     } 
-    
   }
 
-
+  // generate outputs
   // variables
   const size_t dim=(is_m_provided?2:3); /* set the size of the var-covar matrix */
 

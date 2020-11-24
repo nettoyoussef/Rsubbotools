@@ -419,330 +419,6 @@ void subboa_objfdf(Rcpp::NumericVector data, const size_t n, Rcpp::NumericVector
 
 
 
-Rcpp::List subboa_global_optim(
-		                Rcpp::NumericVector data
-                               ,double fmin
-                               ,struct multimin_params global_oparams
-		               ,Rcpp::NumericVector par
-		               ,Rcpp::Nullable<Rcpp::NumericVector> provided_m_ = R_NilValue
-			       ){
-
-  /* ML estimation: global maximization */
-  /* ---------------------------------- */
-
-  // declare variables 
-  unsigned int n = 5; // number of parameters
-  Rcpp::IntegerVector type(n);
-  Rcpp::NumericVector xmin(n);
-  Rcpp::NumericVector xmax(n);
-
-  // the initial guess take the value of the initial
-  // parameters
-  Rcpp::NumericVector x(n); // x[0] = bl, x[1] = br, x[2] = al, x[3] = ar, x[4] = m
-
-  Rprintf("START OF GLOBAL OPTIMIZATION\n");
-
-  /* set initial minimization boundaries */
-  /* ----------------------------------- */
-
-  // parameters for bl
-  type[0] = 4;   // interval: (a,+inf); transf: x=a + \exp(y)
-  xmin[0] = 0;   // bl must be positive
-  xmax[0] = 0;   // not used
-
-  // parameters for br
-  type[1] = 4;   // interval: (a,+inf); transf: x=a + \exp(y)
-  xmin[1] = 0;   // br must be positive
-  xmax[1] = 0;   // not used
-
-  // parameters for al
-  type[2] = 4;   // interval: (a,+inf); transf: x=a + \exp(y)
-  xmin[2] = 0;   // al must be positive
-  xmax[2] = 0;   // not used
-
-  // parameters for ar
-  type[3] = 4;   // interval: (a,+inf); transf: x=a + \exp(y)
-  xmin[3] = 0;   // ar must be positive
-  xmax[3] = 0;   // not used
-
-
-  if(provided_m_.isNotNull()){
-
-    // casting the null value
-    // necessary according to
-    // https://gallery.rcpp.org/articles/optional-null-function-arguments/
-    Rcpp::NumericVector provided_m(provided_m_); 
-    
-    // parameters for m
-    type[4] = 3; //interval: [a,b]; transf: x= \frac{ a(1-\sin(y)) + b(1+\sin(y)}{2}
-    xmin[4] = provided_m[0]; // uses the provided m to fix a value
-    xmax[4] = provided_m[0]; // uses the provided m to fix a value
-  } 
-  else{
-
-    // parameters for m
-    type[4] = 0; // interval: (-inf,+inf); transf: x=y
-    xmin[4] = 0; // not used 
-    xmax[4] = 0; // not used 
-  }
-
-  Rprintf("Parameters for global optimization: \n");
-  Rprintf("#  par  value type   xmin   xmax\n");
-  Rprintf("#  bl    %.2f      %i   %.2f   %.2f\n", par[0], type[0], xmin[0], xmax[0]);
-  Rprintf("#  br    %.2f      %i   %.2f   %.2f\n", par[1], type[1], xmin[1], xmax[1]);
-  Rprintf("#  al    %.2f      %i   %.2f   %.2f\n", par[2], type[2], xmin[2], xmax[2]);
-  Rprintf("#  ar    %.2f      %i   %.2f   %.2f\n", par[3], type[3], xmin[3], xmax[3]);
-  Rprintf("#  m     %.2f      %i   %.2f   %.2f\n", par[4], type[4], xmin[4], xmax[4]);
-  Rprintf("\n");
-  
-  /* perform global minimization */
-  /* --------------------------- */
-    
-  multimin(
-            data                  // sample
-           ,n			  // number of parameters
-           ,par			  // starting guess / returns parameters value
-           ,&fmin		  // pointer to update the minimum likelihood
-           ,type		  // type of transformation of the data
-           ,xmin		  // minimum values for the parameters
-           ,xmax		  // maximum values for the parameters
-           ,subboa_objf           // objective function to minimize
-           ,subboa_objdf          // df/dx of the objective function
-           ,subboa_objfdf         // objf + objdf
-           ,NULL                  // fparams
-           ,global_oparams	  // parameters for the optmization
-     );
-
-
-  /* store final values */
-  /* ------------------ */
-  Rprintf("Results of global optimization: \n");
-  Rprintf("#  par    bl      br      al      ar      m      ll\n");
-  Rprintf("#  value  %.3f  %.3f  %.3f  %.3f\n", par[0], par[1], par[2], par[3], par[4], fmin);
-  Rprintf("\n");
-    
-  
-  Rcpp::List ans =
-          Rcpp::List::create(
-                              Rcpp::Named("par")  = par
-                             ,Rcpp::Named("type") = Rcpp::wrap(type)
-                             ,Rcpp::Named("xmin") = Rcpp::wrap(xmin)
-                             ,Rcpp::Named("xmax") = Rcpp::wrap(xmax)
-                             ,Rcpp::Named("fmin") = fmin
-                            );
-
-
-  Rprintf("END OF GLOBAL OPTIMIZATION\n");
-    
-  return ans;
-}
-
-
-
-Rcpp::List subboa_interval_optim(
-                                  Rcpp::NumericVector data
-                                 ,Rcpp::IntegerVector type
-                                 ,Rcpp::NumericVector xmin
-                                 ,Rcpp::NumericVector xmax
-                                 ,Rcpp::NumericVector par
-                                 ,double fmin
-                                 ,struct multimin_params interv_oparams 
-                                 ,int interv_step 
-				 ){
-
-
-
-
-
-  // local scope
-  double dtmp1;    
-  Rcpp::NumericVector xtmp(5); /* store the temporary minimum  */
-  unsigned int index;
-  unsigned int oldindex;
-  unsigned int utmp1;
-  unsigned int max;
-  unsigned int min;
-  unsigned int Size = data.size();
-  unsigned int n = 5; // number of parameters
-
-
-  /* perform interval minimization */
-  /* ----------------------------- */
-
-  Rprintf("INTERVAL-WISE OPTIMIZATION\n");
-
-  
-  // check plausibility of specified number of intervals 
-  if(interv_step>Size/2){
-    Rprintf(
-      "#WARNING: Too much intervals specified. Number of intervals set to %d\n",
-      Size/2);
-    interv_step==Size/2;
-  }
-
-  // the value of m is bounded on compact intervals 
-  type[4] = 3;
-  
-  // find initial index s.t. m \in [data[index],data[index+1]] 
-  for(utmp1=0;data[utmp1]<=par[4] && utmp1<Size;utmp1++);
-
-  if(utmp1 == 0)
-    index = 0;
-  else if (utmp1 == Size)
-    index= Size-2;
-  else index = utmp1-1;
-
-  // set intervals
-  xmin[4]=data[index]; xmax[4]=data[index+1]; par[4]=.5*(xmin[4]+xmax[4]);
-
-  // perform initial minimization
-  multimin(
-            data           // sample
-           ,n              // number of parameters
-           ,par           // starting guess / returns parameters value
-           ,&fmin          // pointer to update the minimum likelihood
-           ,type           // type of transformation of the data
-           ,xmin           // minimum values for the parameters
-           ,xmax           // maximum values for the parameters
-           ,subboa_objf    // objective function to minimize
-           ,subboa_objdf   // df/dx of the objective function
-           ,subboa_objfdf  // objf + objdf
-           ,NULL           // fparams
-           ,interv_oparams // parameters for the optmization
-    );
-
-  max=min=index;
-  
-  Rprintf("#>>> [%+.3e:%+.3e] ll=%e\n",data[index],data[index+1],fmin);
-
-  // set the value to best estimation 
-  xtmp[0]=par[0]; xtmp[1]=par[1]; xtmp[2]=par[2]; xtmp[3]=par[3]; xtmp[4]=par[4];
-
-  // move to the right, compute new local minima and compare with
-  //   global minimum 
-  do{
-    oldindex=index;
-
-    // move to the right 
-    for(utmp1=max+1;
-        utmp1<=max+interv_step && utmp1<Size-1;
-        utmp1++){
-      
-      // set boundaries on m 
-      xmin[4]=data[utmp1]; xmax[4]=data[utmp1+1];
-      // set initial condition 
-      xtmp[4]=.5*(xmin[4]+xmax[4]);
-      
-      // perform minimization
-      multimin(
-                data            // sample
-	       ,n               // number of parameters
-               ,xtmp		// starting guess / returns parameters value
-               ,&dtmp1	        // pointer to update the minimum likelihood
-               ,type		// type of transformation of the data
-               ,xmin		// minimum values for the parameters
-               ,xmax		// maximum values for the parameters
-               ,subboa_objf	// objective function to minimize
-               ,subboa_objdf	// df/dx of the objective function
-               ,subboa_objfdf	// objf + objdf
-               ,NULL		// fparams
-               ,interv_oparams  // parameters for the optmization
-	 );
-
-      if(dtmp1<fmin){// found new minimum 
-        index=utmp1;
-        par[0]=xtmp[0]; par[1]=xtmp[1]; par[2]=xtmp[2]; par[3]=xtmp[3]; par[4]=xtmp[4];
-        fmin=dtmp1;
-        
-        Rprintf("#>>> [%+.3e:%+.3e] ll=%e\n",
-                data[utmp1],data[utmp1+1],dtmp1);
-      }
-      else {// NOT found new minimum 
-        Rprintf("#    [%+.3e:%+.3e] ll=%e\n",
-                data[utmp1],data[utmp1+1],dtmp1);
-      }
-    }
-    max=utmp1-1;
-  }
-  while(index!=oldindex);
-
-  // set the value to best estimation 
-  xtmp[0]=par[0];xtmp[1]=par[1];xtmp[2]=par[2];
-  
-  // move to the left, compute new local minima and compare with
-  //   global minimum 
-
-  // compute new local minima and compare with global minimum
-  do {
-
-    oldindex=index;
-    // move to the left 
-    for(utmp1=min-1;
-        (int) utmp1 >= (int) min-interv_step && (int) utmp1 >= 0;
-        utmp1--){
-      
-      // set boundaries on m 
-      xmin[4]=data[utmp1]; xmax[4]=data[utmp1+1];
-      // set initial condition 
-      xtmp[4]=.5*(xmin[4]+xmax[4]);
-
-      // perform minimization
-      multimin(
-                data            // sample
-	       ,n               // number of parameters
-               ,xtmp            // starting guess / returns parameters value
-               ,&dtmp1          // pointer to update the minimum likelihood
-               ,type            // type of transformation of the data
-               ,xmin            // minimum values for the parameters
-               ,xmax            // maximum values for the parameters
-               ,subboa_objf      // objective function to minimize
-               ,subboa_objdf     // df/dx of the objective function
-               ,subboa_objfdf    // objf + objdf
-               ,NULL            // fparams
-               ,interv_oparams  // parameters for the optmization
-	 );
-
-      
-      if(dtmp1<fmin){// found new minimum 
-        index=utmp1;
-        par[0]=xtmp[0]; par[1]=xtmp[1]; par[2]=xtmp[2]; par[3]=xtmp[3]; par[4]=xtmp[4];
-        fmin=dtmp1;
-        
-        Rprintf("#>>> [%+.3e:%+.3e] ll=%e\n",
-                data[utmp1],data[utmp1+1],dtmp1);
-      }
-      else {// NOT found new minimum 
-        Rprintf("#    [%+.3e:%+.3e] ll=%e\n",
-                data[utmp1],data[utmp1+1],dtmp1);
-      }
-      
-    }
-    
-    min=utmp1+1;
-  }
-  while(index!=oldindex);
-
-  /* store final values */
-  /* ------------------ */
-
-  Rprintf("Results of interval optimization: \n");
-  Rprintf("#  par    bl      br      al      ar      m      ll\n");
-  Rprintf("#  value  %.3f  %.3f  %.3f  %.3f\n", par[0], par[1], par[2], par[3], par[4], fmin);
-  Rprintf("\n");
-  Rprintf("#  intervals explored: %d\n",max-min);
-  Rprintf("\n");
-
-  Rcpp::List ans =
-    Rcpp::List::create(
-		 Rcpp::Named("par") = par
-		 );
-
-  return ans;
-
-}
-  
-
-
 // Fit asymmetric power exponential density. Read from files of from standard input\n\n");
 // Usage: %s [options] [files]\n\n",argv[0]);
 //  -O  output type (default 0)                \n");
@@ -893,9 +569,20 @@ Rcpp::List subboafit(
   /* -------------------- */
   if(method >= 2){
 
+    // notice: par is updated by reference
     Rcpp::List g_opt_results =
-      subboa_global_optim(data, fmin, global_oparams, par, provided_m_);
-
+      global_optim(
+		   data
+		   ,fmin
+                   ,global_oparams
+                   ,par
+                   ,(unsigned) 5
+                   ,(unsigned) 4
+		   ,subboa_objf
+		   ,subboa_objdf
+		   ,subboa_objfdf
+                   ,provided_m_
+		   );
 
     /* interval optimization  */
     /* ---------------------- */
@@ -903,16 +590,22 @@ Rcpp::List subboafit(
     if(method >= 4){
 
       g_opt_results = 
-        subboa_interval_optim(
-                               data
-                              ,g_opt_results["type"]
-                              ,g_opt_results["xmin"]
-                              ,g_opt_results["xmax"]   
-                              ,g_opt_results["par"]
-                              ,g_opt_results["fmin"]
-                              ,interv_oparams /* interval optimization parameters */
-                              ,interv_step /* interval optimization step */
-      		           );
+	interval_optim(
+		       data
+		       ,g_opt_results["type"]
+		       ,g_opt_results["xmin"]
+		       ,g_opt_results["xmax"]
+		       ,par
+		       ,g_opt_results["fmin"]
+		       ,interv_oparams /* interval optimization parameters */
+		       ,interv_step /* interval optimization step */
+                       ,(unsigned) 5 
+                       ,(unsigned) 4
+		       ,subboa_objf
+		       ,subboa_objdf
+		       ,subboa_objfdf
+		       );
+
     } 
   }
 

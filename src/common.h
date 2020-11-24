@@ -48,10 +48,49 @@ void subbotools_header(char const *,FILE *);
 /* C++ ----------- */
 #include<RcppGSL.h>
 // [[Rcpp::depends(RcppGSL)]]
+
+#include<Rcpp.h>
 /*- -------------- */
 
 // conversion functions
 double * RcppNum_to_double(Rcpp::NumericVector x);
+
+
+// copy a vector by value
+void Rcppdeepcopy(Rcpp::NumericVector x_orig, Rcpp::NumericVector x_dest);
+
+// functions for optimizing the Subbotin Family fit
+#include "multimin.h"
+
+Rcpp::List interval_optim(
+			  Rcpp::NumericVector data
+			  ,Rcpp::IntegerVector type
+			  ,Rcpp::NumericVector xmin
+			  ,Rcpp::NumericVector xmax
+			  ,Rcpp::NumericVector par
+			  ,double fmin
+			  ,struct multimin_params interv_oparams 
+			  ,int interv_step 
+			  ,unsigned n_param
+			  ,unsigned m_position
+			  ,void (*f)    (Rcpp::NumericVector, const size_t, Rcpp::NumericVector, void *, double *)
+			  ,void (* df)  (Rcpp::NumericVector, const size_t, Rcpp::NumericVector, void *, Rcpp::NumericVector)
+			  ,void (* fdf) (Rcpp::NumericVector, const size_t, Rcpp::NumericVector, void *, double *, Rcpp::NumericVector)
+			  );
+
+Rcpp::List global_optim(
+			Rcpp::NumericVector data
+			,double fmin
+			,struct multimin_params global_oparams
+			,Rcpp::NumericVector par
+			,unsigned n_param
+			,unsigned m_position
+			,void (*f)    (Rcpp::NumericVector, const size_t, Rcpp::NumericVector, void *, double *)
+			,void (* df)  (Rcpp::NumericVector, const size_t, Rcpp::NumericVector, void *, Rcpp::NumericVector)
+			,void (* fdf) (Rcpp::NumericVector, const size_t, Rcpp::NumericVector, void *, double *, Rcpp::NumericVector)
+			,Rcpp::Nullable<Rcpp::NumericVector> provided_m_ 
+			);
+
 
 /* functions for the information matrix of asymmetric subbotin  */
 double B0(double);

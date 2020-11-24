@@ -200,61 +200,100 @@ parameters. The members are
           if greater then 0 print info on intermediate steps
 
 */
+
 #include "multimin.h"
 
-struct g_params {
+// compute values of y for initial condition
+void do_initial_data_transform(
+			       Rcpp::NumericVector x
+			       ,const size_t n
+			       ,RcppGSL::vector<double> &y
+			       ,Rcpp::IntegerVector type
+			       ,Rcpp::NumericVector xmin
+			       ,Rcpp::NumericVector xmax
+			       ){
 
-  // sample to estimate the parameters/variables (rows)
-  Rcpp::NumericVector data;
+
+  size_t i;
+  double dtmp1;
+
+
+  Rprintf("INITIAL DATA TRANSFORMATION\n");
+
   
-  // dimension of the problem (number of parameters/variables) (columns)
-  size_t n;  
+  Rprintf("#    - variables initial value and boundaries\n");
+
+  for(i=0;i<n;i++){
+    if(type[i] == NA_INTEGER){
+      y[i] = x[i];
+      Rprintf("#    x[%d]=%.2f (-inf,+inf)   trans 0 -> %.2f\n",(int) i,x[i],gsl_vector_get(y,i));
+    }
+    else
+      switch(type[i]){
+      case 0:/* (-inf,+inf) */
+	y[i] = x[i];
+	Rprintf("#    x[%d]=%.2f (-inf,+inf)   trans 0 -> %.2f\n",(int) i,x[i],gsl_vector_get(y,i));
+        break;
+      case 1:/* [a,+inf) */
+	y[i] = sqrt( x[i]-xmin[i] );
+	Rprintf("#    x[%d]=%.2f [%.3g,+inf)   trans 1 -> %.2f\n",(int) i,x[i],xmin[i],gsl_vector_get(y,i));
+        break;
+      case 2:/* (-inf,a] */
+	y[i] = sqrt( xmax[i]-x[i] );
+	Rprintf("#    x[%d]=%.2f (-inf,%.3f]        trans 2 -> %.2f\n",(int) i,x[i],xmax[i],gsl_vector_get(y,i));
+        break;
+      case 3:/* [a,b] */
+        dtmp1 = (xmax[i]>xmin[i]?
+                 (2.*x[i]-xmax[i]-xmin[i])/(xmax[i]-xmin[i]) : 0);
+        /*       dtmp1 = (2.*x[i]-xmax[i]-xmin[i])/(xmax[i]-xmin[i]); */
+	y[i] = asin( dtmp1 );
+	Rprintf("#    x[%d]=%.2f [%.3f,%.3f] trans 3 -> %.2f\n",(int) i,x[i],xmin[i],xmax[i],gsl_vector_get(y,i));
+        break;
+      case 4:/* (a,+inf) */
+	y[i] = log( x[i]-xmin[i] );
+	Rprintf("#    x[%d]=%.2f (%.3f,+inf)  trans 4 -> %.2f\n",(int) i,x[i],xmin[i],gsl_vector_get(y,i));
+	break;
+      case 5:/* (-inf,a) */
+	y[i] = log( xmax[i]-x[i] );
+	Rprintf("#    x[%d]=%.2f (-inf,%.3f)  trans 5 -> %.2f\n",(int) i,x[i],xmax[i],gsl_vector_get(y,i));
+        break;
+      case 6:/* (a,b) */
+        dtmp1 = (2.*x[i]-xmax[i]-xmin[i])/(xmax[i]-xmin[i]);
+	y[i] = gsl_atanh ( dtmp1 );
+	Rprintf("#    x[%d]=%.2f (%.3f,%.3f) trans 6 -> %.2f\n",(int) i,x[i],xmin[i],xmax[i],gsl_vector_get(y,i));
+        break;
+      case 7:/* (a,b) second approach */
+        dtmp1 = (2.*x[i]-xmax[i]-xmin[i])/(xmax[i]-xmin[i]);
+	y[i] =  dtmp1/sqrt(1-dtmp1*dtmp1);
+	Rprintf("#    x[%d]=%.2f (%.3f,%.3f) trans 7 -> %.2f\n",(int) i,x[i],xmin[i],xmax[i],gsl_vector_get(y,i));
+        break;
+      case 8:/* (a,+inf) second approach */
+        dtmp1 = x[i]-xmin[i];
+	y[i] =  dtmp1-1./(4.*dtmp1);
+	Rprintf("#    x[%d]=%.2f (%.3f,+inf)  trans 8 -> %.2f\n",(int) i,x[i],xmin[i],gsl_vector_get(y,i));
+        break;
+      case 9:/* (-inf,a) second approach */
+        dtmp1 = xmax[i]-x[i];
+	y[i] =  1./(4.*dtmp1)-dtmp1;
+        Rprintf("#    x[%d]=%.2f (-inf,%.3f)  trans 9 -> %.2f\n",(int) i,x[i],xmax[i],gsl_vector_get(y,i));
+	break;
+      }
+  }
+
+
+  Rprintf("END OF DATA TRANSFORMATION\n");
   
-  // which transformation to do for each parameter/variable, if any
-  Rcpp::IntegerVector type;
-
-  // vector with minimum value for each parameter
-  Rcpp::NumericVector xmin;
-
-  // vector with maximum value for each parameter
-  Rcpp::NumericVector xmax;
-
-  // depending on the algorithm, one of the following
-  // functions is used for the minimization process
-  
-  // *f - function to be minimized
-  // Arguments, on this order, are
-  // vector of data
-  // size of vector
-  // initial guess pointer - is substituted by the final solution's position
-  // parameters to the minimization problem
-  // solution - minimum value obtained
-  void (*f) (Rcpp::NumericVector, const size_t, std::vector<double>, void *, double *);
-    
-  // *df - derivative of the function to be minimized
-  // Arguments, on this order, are
-  // vector of data
-  // size of vector
-  // initial guess pointer - is substituted by the final solution's position
-  // parameters to the minimization problem
-  // solution - minimum value obtained
-  void (* df) (Rcpp::NumericVector, const size_t, std::vector<double>, void *, std::vector<double>);
-    
-  // combination of f and df
-  void (* fdf) (Rcpp::NumericVector, const size_t, std::vector<double>, void *, double *, std::vector<double>);
-
-  // parameters for the functions
-  void *fparams;
-};
+}
 
 
-void do_data_transformation( std::vector<double> x
-                            ,const size_t n
-                            ,const gsl_vector *y
-                            ,Rcpp::IntegerVector type
-                            ,Rcpp::NumericVector xmin
-                            ,Rcpp::NumericVector xmax
-                            ){
+void do_data_transformation(
+			    Rcpp::NumericVector x
+			    ,const size_t n
+			    ,Rcpp::NumericVector y
+			    ,Rcpp::IntegerVector type
+			    ,Rcpp::NumericVector xmin
+			    ,Rcpp::NumericVector xmax
+			    ){
 
   
   size_t i;
@@ -659,87 +698,6 @@ struct multimin_algorithm choose_algorithm(unsigned int method){
   
 }
 
-
-// compute values of y for initial condition
-void do_initial_data_transform( std::vector<double> x
-                               ,const size_t n
-                               ,gsl_vector *y
-                               ,Rcpp::IntegerVector type
-                               ,Rcpp::NumericVector xmin
-                               ,Rcpp::NumericVector xmax
-                               ){
-
-
-  size_t i;
-  double dtmp1;
-
-
-  Rprintf("DATA TRANSFORMATION\n");
-
-  
-  Rprintf("#    - variables initial value and boundaries\n");
-
-  for(i=0;i<n;i++){
-    if(type[i] == NA_INTEGER){
-      gsl_vector_set(y,i,x[i]);
-      Rprintf("#    x[%d]=%.2f (-inf,+inf)  trans 0 -> %.2f\n",(int) i,x[i],gsl_vector_get(y,i));
-    }
-    else
-      switch(type[i]){
-      case 0:/* (-inf,+inf) */
-        gsl_vector_set(y,i,x[i]);
-        Rprintf("#    x[%d]=%.2f (-inf,+inf)  trans 0 -> %.2f\n",(int) i,x[i],gsl_vector_get(y,i));
-        break;
-      case 1:/* [a,+inf) */
-        gsl_vector_set(y,i,sqrt( x[i]-xmin[i] ));
-        Rprintf("#    x[%d]=%.2f [%.3g,+inf)  trans 1 -> %.2f\n",(int) i,x[i],xmin[i],gsl_vector_get(y,i));
-        break;
-      case 2:/* (-inf,a] */
-        gsl_vector_set(y,i,sqrt( xmax[i]-x[i] ));
-        Rprintf("#    x[%d]=%.2f (-inf,%.3f]        trans 2 -> %.2f\n",(int) i,x[i],xmax[i],gsl_vector_get(y,i));
-        break;
-      case 3:/* [a,b] */
-        dtmp1 = (xmax[i]>xmin[i]?
-                 (2.*x[i]-xmax[i]-xmin[i])/(xmax[i]-xmin[i]) : 0);
-        /*       dtmp1 = (2.*x[i]-xmax[i]-xmin[i])/(xmax[i]-xmin[i]); */
-        gsl_vector_set(y,i,asin( dtmp1 ));
-        Rprintf("#    x[%d]=%.2f [%.3f,%.3f] trans 3 -> %.2f\n",(int) i,x[i],xmin[i],xmax[i],gsl_vector_get(y,i));
-        break;
-      case 4:/* (a,+inf) */
-        gsl_vector_set(y,i,log( x[i]-xmin[i] ));
-        Rprintf("#    x[%d]=%.2f (%.3f,+inf)  trans 4 -> %.2f\n",(int) i,x[i],xmin[i],gsl_vector_get(y,i));
-        break;
-      case 5:/* (-inf,a) */
-        gsl_vector_set(y,i,log( xmax[i]-x[i] ));
-        Rprintf("#    x[%d]=%.2f (-inf,%.3f)  trans 5 -> %.2f\n",(int) i,x[i],xmax[i],gsl_vector_get(y,i));
-        break;
-      case 6:/* (a,b) */
-        dtmp1 = (2.*x[i]-xmax[i]-xmin[i])/(xmax[i]-xmin[i]);
-        gsl_vector_set(y,i,gsl_atanh ( dtmp1 ));
-        Rprintf("#    x[%d]=%.2f (%.3f,%.3f) trans 6 -> %.2f\n",(int) i,x[i],xmin[i],xmax[i],gsl_vector_get(y,i));
-        break;
-      case 7:/* (a,b) second approach */
-        dtmp1 = (2.*x[i]-xmax[i]-xmin[i])/(xmax[i]-xmin[i]);
-        gsl_vector_set(y,i, dtmp1/sqrt(1-dtmp1*dtmp1));
-        Rprintf("#    x[%d]=%.2f (%.3f,%.3f) trans 7 -> %.2f\n",(int) i,x[i],xmin[i],xmax[i],gsl_vector_get(y,i));
-        break;
-      case 8:/* (a,+inf) second approach */
-        dtmp1 = x[i]-xmin[i];
-        gsl_vector_set(y,i, dtmp1-1./(4.*dtmp1));
-        Rprintf("#    x[%d]=%.2f (%.3f,+inf)  trans 8 -> %.2f\n",(int) i,x[i],xmin[i],gsl_vector_get(y,i));
-        break;
-      case 9:/* (-inf,a) second approach */
-        dtmp1 = xmax[i]-x[i];
-        gsl_vector_set(y,i, 1./(4.*dtmp1)-dtmp1);
-        Rprintf("#    x[%d]=%.2f (-inf,%.3f)  trans 9 -> %.2f\n",(int) i,x[i],xmax[i],gsl_vector_get(y,i));
-        break;
-      }
-  }
-
-
-  Rprintf("END OF DATA TRANSFORMATION\n");
-  
-}
 
 
 
