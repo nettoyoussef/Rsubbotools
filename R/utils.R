@@ -2,6 +2,18 @@
   library.dynam.unload("Rsubbotools", libpath)
 }
 
+
+compare_RNG <- function( rng_function, params_list ){
+
+    set.seed(1)
+    x = do.call(rng_function, params_list)
+    set.seed(1)
+    y = do.call(rng_function, params_list)
+
+    return(list(x=x, y=y))
+
+}
+
 newton <- function(x, f, dfdx = NULL, dfdx_h = 1e-4, tol = 1e-4, max_iter = 100){
 
     # numerical derivative
