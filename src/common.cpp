@@ -160,10 +160,9 @@ void check_new_minimum(
                        ,int verb
                        ){
 
-  
-  check_new_minimum_core(fmin, dtmp1, par, xtmp);
-  
   if(dtmp1 < *fmin){/* found new minimum */
+    Rcppdeepcopy(xtmp, par); // set values to the last best value
+    *fmin  = dtmp1;
     *index = i;
 
     // print results - we use arrows to
