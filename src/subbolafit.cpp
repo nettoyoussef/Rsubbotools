@@ -500,8 +500,12 @@ Rcpp::List subbolafit(
                        ,verb
                        );
 
+      // updates log-likelihood
+      fmin = Rcpp::as<double>(g_opt_results["fmin"]);
+
+    }
   }
-      
+
 
   // generate outputs
 
