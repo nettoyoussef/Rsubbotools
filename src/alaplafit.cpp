@@ -35,7 +35,7 @@
 /* Output Functions */
 /*----------------- */
 
-void printcumul(Rcpp::NumericVector data, const double m, const double al, const double ar){
+void alapla_printcumul(Rcpp::NumericVector data, const double m, const double al, const double ar){
 
   int size = data.size();
   int i;
@@ -57,7 +57,7 @@ void printcumul(Rcpp::NumericVector data, const double m, const double al, const
 
 }
 
-void printdensity(Rcpp::NumericVector data, const double m, const double al, const double ar){
+void alapla_printdensity(Rcpp::NumericVector data, const double m, const double al, const double ar){
 
   int size = data.size();
   int i;
