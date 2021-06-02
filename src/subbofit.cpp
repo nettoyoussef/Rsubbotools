@@ -66,7 +66,7 @@ void subbo_printdensity(Rcpp::NumericVector data, double param[]){
    I     the variance-covariance matrix
 */
 // [[Rcpp::export]]
-RcppGSL::Matrix varcovar(const Rcpp::NumericVector par, const size_t N, const size_t dim){
+RcppGSL::Matrix subbo_varcovar(const Rcpp::NumericVector par, const size_t N, const size_t dim){
 
   RcppGSL::Matrix I(dim, dim);
   const double b = par[0];
@@ -803,10 +803,10 @@ Rcpp::List subbofit(
   // The V matrix has on its main diagonal the variance of parameters
   // on the lower diagonal the correlation coefficients
   // on the upper diagonal the covariances
-  RcppGSL::Matrix V =  varcovar(par, Size, dim);
+  RcppGSL::Matrix V =  subbo_varcovar(par, Size, dim);
   // this matrix in its upper diagonal presents the covariances
   // and on its lower diagonal presents the correlation coefficients between the parameters
-  
+
   // vector of standard errors
   Rcpp::NumericVector std_error =
     Rcpp::NumericVector::create(
