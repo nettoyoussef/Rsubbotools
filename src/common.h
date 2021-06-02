@@ -10,6 +10,7 @@
 #include <string.h>
 #include <assert.h>
 #include <getopt.h>
+//#include <config.h> // to check
 
 // R messages
 #include<Rcpp.h>
@@ -67,33 +68,35 @@ void Rcppdeepcopy(Rcpp::NumericVector x_orig, Rcpp::NumericVector x_dest);
 #include "multimin.h"
 
 Rcpp::List interval_optim(
-			  Rcpp::NumericVector data
-			  ,Rcpp::IntegerVector type
-			  ,Rcpp::NumericVector xmin
-			  ,Rcpp::NumericVector xmax
-			  ,Rcpp::NumericVector par
-			  ,double fmin
-			  ,struct multimin_params interv_oparams 
-			  ,int interv_step 
-			  ,unsigned n_param
-			  ,unsigned m_position
-			  ,void (*f)    (Rcpp::NumericVector, const size_t, Rcpp::NumericVector, void *, double *)
-			  ,void (* df)  (Rcpp::NumericVector, const size_t, Rcpp::NumericVector, void *, Rcpp::NumericVector)
-			  ,void (* fdf) (Rcpp::NumericVector, const size_t, Rcpp::NumericVector, void *, double *, Rcpp::NumericVector)
-			  );
+                          Rcpp::NumericVector data
+                          ,Rcpp::IntegerVector type
+                          ,Rcpp::NumericVector xmin
+                          ,Rcpp::NumericVector xmax
+                          ,Rcpp::NumericVector par
+                          ,double fmin
+                          ,struct multimin_params interv_oparams
+                          ,int interv_step
+                          ,unsigned n_param
+                          ,unsigned m_position
+                          ,void (*f)    (Rcpp::NumericVector, const size_t, Rcpp::NumericVector, void *, double *)
+                          ,void (* df)  (Rcpp::NumericVector, const size_t, Rcpp::NumericVector, void *, Rcpp::NumericVector)
+                          ,void (* fdf) (Rcpp::NumericVector, const size_t, Rcpp::NumericVector, void *, double *, Rcpp::NumericVector)
+                          ,int verb
+                          );
 
 Rcpp::List global_optim(
-			Rcpp::NumericVector data
-			,double fmin
-			,struct multimin_params global_oparams
-			,Rcpp::NumericVector par
-			,unsigned n_param
-			,unsigned m_position
-			,void (*f)    (Rcpp::NumericVector, const size_t, Rcpp::NumericVector, void *, double *)
-			,void (* df)  (Rcpp::NumericVector, const size_t, Rcpp::NumericVector, void *, Rcpp::NumericVector)
-			,void (* fdf) (Rcpp::NumericVector, const size_t, Rcpp::NumericVector, void *, double *, Rcpp::NumericVector)
-			,Rcpp::Nullable<Rcpp::NumericVector> provided_m_ 
-			);
+                        Rcpp::NumericVector data
+                        ,double fmin
+                        ,struct multimin_params global_oparams
+                        ,Rcpp::NumericVector par
+                        ,unsigned n_param
+                        ,unsigned m_position
+                        ,void (*f)    (Rcpp::NumericVector, const size_t, Rcpp::NumericVector, void *, double *)
+                        ,void (* df)  (Rcpp::NumericVector, const size_t, Rcpp::NumericVector, void *, Rcpp::NumericVector)
+                        ,void (* fdf) (Rcpp::NumericVector, const size_t, Rcpp::NumericVector, void *, double *, Rcpp::NumericVector)
+                        ,Rcpp::Nullable<Rcpp::NumericVector> provided_m_
+                        ,int verb
+                        );
 
 
 /* functions for the information matrix of asymmetric subbotin  */

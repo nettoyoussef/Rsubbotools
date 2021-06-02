@@ -5,12 +5,12 @@
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
   (version 2) as published by the Free Software Foundation;
-  
+
   This program is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU General Public License for more details.
-  
+
   You should have received a copy of the GNU General Public License
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
@@ -35,7 +35,7 @@ void subboa_printcumul(Rcpp::NumericVector data, double param[]){
 
   int size = data.size();
   int i;
-  double dtmp1; 
+  double dtmp1;
   const double bl=param[0];
   const double br=param[1];
   const double al=param[2];
@@ -84,13 +84,13 @@ void subboa_printdensity(Rcpp::NumericVector data, double param[]){
       Rprintf("%e\n",exp(-pow(-dtmp1/al,bl)/bl)/norm);
     }
   }
-  
+
 }
 /*----------------- */
 
 
 
-/* 
+/*
    par   array of paramaters
    N     number of observations
    dim   dimension of the matrix: 2 m known; 3 m unknown
@@ -106,7 +106,7 @@ RcppGSL::Matrix subboa_varcovar(const Rcpp::NumericVector par, const size_t N, c
   //const double m  = par[4]; // declared but not used in the original
 
   const double A = al*B0(bl)+ar*B0(br);
-  
+
   const double B0l = B0(bl);
   const double B0r = B0(br);
   const double B1l = B1(bl);
@@ -122,81 +122,81 @@ RcppGSL::Matrix subboa_varcovar(const Rcpp::NumericVector par, const size_t N, c
 
   // declare matrix
   RcppGSL::Matrix I(dim, dim);
-  
-  // needed for inversion 
+
+  // needed for inversion
   RcppGSL::Matrix J(dim,dim);
   gsl_permutation *P = gsl_permutation_alloc (dim);
   int signum;
 
 
-  // define the matrix, the order is bl,br,al,ar,m 
+  // define the matrix, the order is bl,br,al,ar,m
 
-  // bl - bl 
-  I(0,0) = al*(dB0ldx2-al*dB0ldx*dB0ldx/A + 
-			    B2l/bl -2*B1l/(bl*bl)+2*B0l/pow(bl,3))/A ;
-  
-  // bl - br 
+  // bl - bl
+  I(0,0) = al*(dB0ldx2-al*dB0ldx*dB0ldx/A +
+                            B2l/bl -2*B1l/(bl*bl)+2*B0l/pow(bl,3))/A ;
+
+  // bl - br
   I(0,1) = I(1,0) = -al*ar*dB0ldx*dB0rdx/(A*A);
-  
-  // bl - al 
+
+  // bl - al
   I(0,2) = I(2,0) = dB0ldx/A-al*B0l*dB0ldx/(A*A)-B1l/A;
-  
-  // bl - ar 
+
+  // bl - ar
   I(0,3) = I(3,0) = -al*B0r*dB0ldx/(A*A);
-  
-  // br - br 
-  I(1,1) = ar*(dB0rdx2-ar*dB0rdx*dB0rdx/A + 
-			    B2r/br -2*B1r/(br*br)+2*B0r/pow(br,3))/A ;
-  
-  // br - al 
+
+  // br - br
+  I(1,1) = ar*(dB0rdx2-ar*dB0rdx*dB0rdx/A +
+                            B2r/br -2*B1r/(br*br)+2*B0r/pow(br,3))/A ;
+
+  // br - al
   I(1,2) = I(2,1) = -ar*B0l*dB0rdx/(A*A);
-  
-  // br - ar 
+
+  // br - ar
   I(1,3) = I(3,1) = dB0rdx/A-ar*B0r*dB0rdx/(A*A)-B1r/A;
 
-  // al - al 
+  // al - al
   I(2,2) = -B0l*B0l/(A*A)+(bl+1)*B0l/(al*A);
-  
-  // al - ar 
+
+  // al - ar
   I(2,3) = I(3,2) = -B0l*B0r/(A*A);
-      
-  // ar - ar 
+
+  // ar - ar
   I(3,3) = -B0r*B0r/(A*A)+(br+1)*B0r/(ar*A);
 
 
   if(dim == 5){
-    
+
     const double dt1l = gsl_sf_gamma (2.-1/bl);
     const double dt1r = gsl_sf_gamma (2.-1/br);
     const double dt2l = pow(bl,1.-1./bl);
     const double dt2r = pow(br,1.-1./br);
 
-    // bl - m 
+    // bl - m
     I(0,4) = I(4,0) = (log(bl)-M_EULER)/(bl*A);
 
-    // br - m 
+    // br - m
     I(1,4) = I(4,1) = -(log(br)-M_EULER)/(br*A);
 
-    // al - m 
+    // al - m
     I(2,4) = I(4,2) = -bl/(al*A);
 
-    // ar - m 
+    // ar - m
     I(3,4) = I(4,3) = br/(ar*A);
 
-    // m - m 
+    // m - m
     I(4,4) = ( dt1l*dt2l/al+dt1r*dt2r/ar)/A ;
 
   }
 
-  // invert I; in J store temporary LU decomp. 
+  // invert I; in J store temporary LU decomp.
   gsl_matrix_memcpy (J,I);
   gsl_linalg_LU_decomp (J,P,&signum);
   gsl_linalg_LU_invert (J,P,I);
 
-  // free allocated memory 
+  // free allocated memory
   gsl_permutation_free(P);
 
-  // set the var-covar matrix 
+  // set the var-covar matrix
   for(i=0;i<dim;i++){
     for(j=0;j<i;j++){
       I(i,j) = I(i,j)/sqrt(I(i,i)*I(j,j));
@@ -212,12 +212,12 @@ RcppGSL::Matrix subboa_varcovar(const Rcpp::NumericVector par, const size_t N, c
   }
 
  return I;
-  
+
 }
 
 
 
-/* Object Function */
+/* Objective Function */
 /*---------------- */
 
 void subboa_objf(Rcpp::NumericVector data, const size_t n, Rcpp::NumericVector x, void *params, double *f){
@@ -241,7 +241,7 @@ void subboa_objf(Rcpp::NumericVector data, const size_t n, Rcpp::NumericVector x
   const double mu=x[4];
 
 /*   fprintf(Fmessages,"#objf bl=%.3e br=%.3e al=%.3e ar=%.3e m=%.3e\n", */
-/* 	  x[0],x[1],x[2],x[3],x[4]); */
+/*        x[0],x[1],x[2],x[3],x[4]); */
 
   for(utmp1=0;utmp1<size;utmp1++){
     if(data[utmp1]<mu){
@@ -298,7 +298,7 @@ void subboa_objdf(Rcpp::NumericVector data, const size_t n, Rcpp::NumericVector 
   double sumLl=0.0;
   double sumRl=0.0;
 /*   fprintf(Fmessages,"#objdf bl=%.3e br=%.3e al=%.3e ar=%.3e m=%.3e\n", */
-/* 	  x[0],x[1],x[2],x[3],x[4]); */
+/*        x[0],x[1],x[2],x[3],x[4]); */
 
 
 
@@ -329,16 +329,16 @@ void subboa_objdf(Rcpp::NumericVector data, const size_t n, Rcpp::NumericVector 
 
   df[0] = (1.-log(bl)-gsl_sf_psi(1./bl+1.))*gsl_sf_gamma(1./bl+1.)*pow(bl,1./bl-2.)*al/dtmp1
     -(1./(bl*bl) + log(al)/bl)*sumL/pow(al,bl) + sumLl/(pow(al,bl)*bl);
-  
+
   df[1] = (1.-log(br)-gsl_sf_psi(1./br+1.))*gsl_sf_gamma(1./br+1.)*pow(br,1./br-2.)*ar/dtmp1
     -(1./(br*br) + log(ar)/br)*sumR/pow(ar,br) + sumRl/(pow(ar,br)*br);
-  
+
   df[2] = pow(bl,1./bl)*gsl_sf_gamma(1./bl+1.)/dtmp1
     - sumL/pow(al,bl+1.);
-  
+
   df[3] = pow(br,1./br)*gsl_sf_gamma(1./br+1.)/dtmp1
     - sumR/pow(ar,br+1.);
-  
+
   df[4] = sumL1/pow(al,bl) - sumR1/pow(ar,br);
 
 
@@ -370,7 +370,7 @@ void subboa_objfdf(Rcpp::NumericVector data, const size_t n, Rcpp::NumericVector
   double sumRl=0.0;
 
 /*   fprintf(Fmessages,"#objfdf bl=%.3e br=%.3e al=%.3e ar=%.3e m=%.3e\n", */
-/* 	  x[0],x[1],x[2],x[3],x[4]); */
+/*        x[0],x[1],x[2],x[3],x[4]); */
 
   for(utmp1=0;utmp1<size;utmp1++){
     if(data[utmp1]<mu){
@@ -402,16 +402,16 @@ void subboa_objfdf(Rcpp::NumericVector data, const size_t n, Rcpp::NumericVector
 
   df[0] = (1.-log(bl)-gsl_sf_psi(1./bl+1.))*gsl_sf_gamma(1./bl+1.)*pow(bl,1./bl-2.)*al/dtmp1
     -(1./(bl*bl) + log(al)/bl)*sumL/pow(al,bl) + sumLl/(pow(al,bl)*bl);
-  
+
   df[1] = (1.-log(br)-gsl_sf_psi(1./br+1.))*gsl_sf_gamma(1./br+1.)*pow(br,1./br-2.)*ar/dtmp1
     -(1./(br*br) + log(ar)/br)*sumR/pow(ar,br) + sumRl/(pow(ar,br)*br);
-  
+
   df[2] = pow(bl,1./bl)*gsl_sf_gamma(1./bl+1.)/dtmp1
     - sumL/pow(al,bl+1.);
-  
+
   df[3] = pow(br,1./br)*gsl_sf_gamma(1./br+1.)/dtmp1
     - sumR/pow(ar,br+1.);
-  
+
   df[4] = sumL1/pow(al,bl) - sumR1/pow(ar,br);
 
 }
@@ -456,16 +456,16 @@ void subboa_objfdf(Rcpp::NumericVector data, const size_t n, Rcpp::NumericVector
 /* par -  par[0]=bl par[1]=br par[2]=al par[3]=ar par[4]=mu */
 // [[Rcpp::export]]
 Rcpp::List subboafit(
-              Rcpp::NumericVector data
-             ,int verb = 0
-             ,int method = 6
-             ,int interv_step = 10 
-             ,int output = 0
-	     ,Rcpp::Nullable<Rcpp::NumericVector> provided_m_ = R_NilValue
-             ,Rcpp::NumericVector par = Rcpp::NumericVector::create(2., 2., 1., 1., 0.) 
-             ,Rcpp::NumericVector g_opt_par = Rcpp::NumericVector::create(.1, 1e-2, 100, 1e-3, 1e-5, 3,0)
-             ,Rcpp::NumericVector itv_opt_par = Rcpp::NumericVector::create(.01, 1e-3, 200, 1e-3, 1e-5, 5,0)
-	     ){
+                     Rcpp::NumericVector data
+                     ,int verb = 0
+                     ,int method = 6
+                     ,int interv_step = 10
+                     ,int output = 0
+                     ,Rcpp::Nullable<Rcpp::NumericVector> provided_m_ = R_NilValue
+                     ,Rcpp::NumericVector par = Rcpp::NumericVector::create(2., 2., 1., 1., 0.)
+                     ,Rcpp::NumericVector g_opt_par = Rcpp::NumericVector::create(.1, 1e-2, 100, 1e-3, 1e-5, 2,0)
+                     ,Rcpp::NumericVector itv_opt_par = Rcpp::NumericVector::create(.01, 1e-3, 200, 1e-3, 1e-5, 5,0)
+                     ){
 
 
   // check arguments
@@ -507,7 +507,7 @@ Rcpp::List subboafit(
   // necessary according to
   // https://gallery.rcpp.org/articles/optional-null-function-arguments/
 
-  // initial value for m parameter 
+  // initial value for m parameter
   if(provided_m_.isNotNull()){
 
     is_m_provided = 1;
@@ -515,22 +515,22 @@ Rcpp::List subboafit(
     // casting the null value
     // necessary according to
     // https://gallery.rcpp.org/articles/optional-null-function-arguments/
-    Rcpp::NumericVector provided_m(provided_m_); 
+    Rcpp::NumericVector provided_m(provided_m_);
     par[4] = provided_m[0];
 
-    
+
   }
 
   /* store data */
   unsigned int Size = data.size();/*the number of data*/
-  
+
   /* store guess */
-  double   fmin=0;  
+  double   fmin=0;
 
   /* customized admin. of errors */
   /* --------------------------- */
   gsl_set_error_handler_off ();
-  
+
   /* sort data */
   /* --------- */
   sortRcpp(data);
@@ -541,30 +541,32 @@ Rcpp::List subboafit(
 
   /* output of initial values */
   /* ------------------------ */
-  Rprintf("INITIAL VALUES\n");
-  Rprintf("#  par    bl    br    al    ar    m     ll\n");
-  Rprintf("#  value  %.2f  %.2f  %.2f  %.2f  %.2f  %.2f\n", par[0], par[1], par[2], par[3], par[4],  fmin);
-  Rprintf("\n");
+  if(verb > 0){
+    Rprintf("INITIAL VALUES\n");
+    Rprintf("#  par    bl    br    al    ar    m     ll\n");
+    Rprintf("#  value  %.2f  %.2f  %.2f  %.2f  %.2f  %.2f\n", par[0], par[1], par[2], par[3], par[4],  fmin);
+    Rprintf("\n");
+  }
 
   /* no minimization */
   /* --------------- */
   if(method == 0){
 
-   // main dataframe with coefficients 
-   Rcpp::DataFrame dt =
-     Rcpp::DataFrame::create( Rcpp::Named("param")     = param_names
-                             ,Rcpp::Named("coef")      = par
-                            ); 
+    // main dataframe with coefficients
+    Rcpp::DataFrame dt =
+      Rcpp::DataFrame::create( Rcpp::Named("param") = param_names
+                               ,Rcpp::Named("coef") = par
+                               );
 
-   Rcpp::List ans = Rcpp::List::create(
-                                        Rcpp::Named("dt") = dt
-                                       ,Rcpp::Named("log-likelihood") = fmin
-                                      );
-   return ans;
+    Rcpp::List ans = Rcpp::List::create(
+                                        Rcpp::Named("dt")              = dt
+                                        ,Rcpp::Named("log-likelihood") = fmin
+                                        );
+    return ans;
 
   }
 
-  
+
   /* global optimization  */
   /* -------------------- */
   if(method >= 2){
@@ -572,41 +574,43 @@ Rcpp::List subboafit(
     // notice: par is updated by reference
     Rcpp::List g_opt_results =
       global_optim(
-		   data
-		   ,fmin
+                   data
+                   ,fmin
                    ,global_oparams
                    ,par
                    ,(unsigned) 5
                    ,(unsigned) 4
-		   ,subboa_objf
-		   ,subboa_objdf
-		   ,subboa_objfdf
+                   ,subboa_objf
+                   ,subboa_objdf
+                   ,subboa_objfdf
                    ,provided_m_
-		   );
+                   ,verb
+                   );
 
     /* interval optimization  */
     /* ---------------------- */
 
     if(method >= 4){
 
-      g_opt_results = 
-	interval_optim(
-		       data
-		       ,g_opt_results["type"]
-		       ,g_opt_results["xmin"]
-		       ,g_opt_results["xmax"]
-		       ,par
-		       ,g_opt_results["fmin"]
-		       ,interv_oparams /* interval optimization parameters */
-		       ,interv_step /* interval optimization step */
-                       ,(unsigned) 5 
+      g_opt_results =
+        interval_optim(
+                       data
+                       ,g_opt_results["type"]
+                       ,g_opt_results["xmin"]
+                       ,g_opt_results["xmax"]
+                       ,par
+                       ,g_opt_results["fmin"]
+                       ,interv_oparams /* interval optimization parameters */
+                       ,interv_step /* interval optimization step */
+                       ,(unsigned) 5
                        ,(unsigned) 4
-		       ,subboa_objf
-		       ,subboa_objdf
-		       ,subboa_objfdf
-		       );
+                       ,subboa_objf
+                       ,subboa_objdf
+                       ,subboa_objfdf
+                       ,verb
+                       );
 
-    } 
+    }
   }
 
   // generate outputs
@@ -632,26 +636,26 @@ Rcpp::List subboafit(
                                 ,sqrt(V(4,4)) // m
                                 );
 
-  // main dataframe with coefficients 
+  // main dataframe with coefficients
   Rcpp::List dt =
     Rcpp::DataFrame::create( Rcpp::Named("param")     = param_names
                             ,Rcpp::Named("coef")      = par
                             ,Rcpp::Named("std_error") = std_error
-                      ); 
+                      );
 
-  // convert matrix 
+  // convert matrix
   Rcpp::NumericMatrix matrix = Rcpp::as<Rcpp::NumericMatrix>(Rcpp::wrap(V));
 
   // add names for the matrices
   colnames(matrix) = param_names;
-  
+
   Rcpp::List ans = Rcpp::List::create(
                                        Rcpp::Named("dt")             = dt
                                       ,Rcpp::Named("log-likelihood") = fmin
                                       ,Rcpp::Named("matrix")         = matrix
                                      );
 
- 
+
   return ans;
 
 }
