@@ -98,6 +98,9 @@ double lapla_nll(Rcpp::NumericVector data, const double m){
 }
 
 
+
+
+
 // Fit Laplace density. Read data from files or from standard input.  \n");
 // With output option '4' prints the log-likelihood as a function of m   \n");
 // Usage: %s [options] [files]\n\n",argv[0]);
@@ -121,20 +124,16 @@ Rcpp::List laplafit(
                     Rcpp::NumericVector data
                     ,int verb = 0
                     ,int method = 7
-                    ,unsigned steps = 10
                     ,int output = 0
                     ,Rcpp::Nullable<Rcpp::NumericVector> provided_m_ = R_NilValue
+                    ,unsigned interv_step = 10
                     ){
-
 
   /* initial values */
   /* -------------- */
 
   /* store possibly provided values for parameters */
   unsigned is_m_provided = 0;
-
-
-
 
   // initial value for m parameter
   if(provided_m_.isNotNull()){
@@ -146,12 +145,18 @@ Rcpp::List laplafit(
   /* store guess */
   double m,a;
 
-  // negative log-likelihood?
+  // negative log-likelihood
   double fmin = 0;
+  double tmp_fmin;
+
+  // indices for pseudo-optimization
+  size_t index, oldindex, max, min;
+
+  // index for general loops
+  size_t i;
 
   /* store data */
-  unsigned int size = data.size();/*the number of data*/
-
+  size_t size = data.size();/*the number of data*/
 
   /* sort data */
   /* --------- */
@@ -163,7 +168,6 @@ Rcpp::List laplafit(
   /* store Fisher sqrt(variance-covariance)*/
   double sigma[3];
 
-  size_t i;
 
   /* decide the value of m  */
   if (is_m_provided){
@@ -175,23 +179,94 @@ Rcpp::List laplafit(
   }
   else{
 
-    size_t minindex;
+    index = calculate_index(size);
 
-    fmin=DBL_MAX;
-    for(i=1;i<size-1;i++){
+    max = min = index;
+    m = median(data, size);
+    fmin = lapla_nll(data, m);
 
-      const double dtmp1 = lapla_nll(data, data[i]);
-
-      if(dtmp1<fmin) {
-        fmin=dtmp1;
-        minindex = i;
-      }
-      /*        printf("%d mll[%e]=%e [%e] ",i,data[i],dtmp1,fmin); */
-      /*        if(minindex == i) */
-      /*          printf("*"); */
-      /*        printf("\n"); */
+    if(verb > 1){
+      Rprintf("# index=%d\n", index);
+      Rprintf("#>>> Initial minimum: m=%e ll=%e\n", m, fmin);
     }
-    m =  data[minindex];
+
+    // explore recursively the intervals on the right side
+    do{
+
+      oldindex = index;
+
+      for(i=max+1; i <= max+interv_step && i < size-1; i++){
+
+        tmp_fmin = lapla_nll(data, data[i]);
+
+        if(tmp_fmin < fmin){/* found new minimum */
+          m    = data[i];
+          fmin = tmp_fmin;
+          index = i;
+
+          // print results - we use arrows to
+          // differentiate the global minimum
+          if(verb > 1){
+            Rprintf("#>>> [%+.3e:%+.3e] m=%e ll=%e\n"
+                    , data[i], data[i+1], m, tmp_fmin);
+          }
+        }else{
+          // print results
+          if(verb > 1){
+            Rprintf("#    [%+.3e:%+.3e] ll=%e\n"
+                    , data[i], data[i+1], tmp_fmin);
+          }
+        }
+      }
+      // counts the number of intervals explored
+      // and adjusts max for the next iteration, if it occurs
+      max = i-1;
+
+    }while(oldindex != index);
+
+    //  // explore recursively the intervals on the left side
+    do{
+
+      oldindex = index;
+
+      for(i=min-1; i >= min-interv_step && i >= 0; i--){
+
+        tmp_fmin = lapla_nll(data, data[i]);
+
+        if(tmp_fmin < fmin){/* found new minimum */
+          m     = data[i];
+          fmin  = tmp_fmin;
+          index = i;
+
+          // print results - we use arrows to
+          // differentiate the global minimum
+          if(verb > 1){
+            Rprintf("#>>> [%+.3e:%+.3e] m=%e ll=%e\n"
+                    , data[i], data[i+1], m, tmp_fmin);
+          }
+        }else{
+          // print results
+          if(verb > 1){
+            Rprintf("#    [%+.3e:%+.3e] ll=%e\n"
+                    , data[i], data[i+1], tmp_fmin);
+          }
+        }
+
+        }
+      // counts the number of intervals explored
+      // and adjusts min for the next iteration, if it occurs
+      min = i+1;
+
+    }while(oldindex != index);
+
+  }
+
+  if(verb > 1){
+    Rprintf("Results of interval optimization: \n");
+    Rprintf("#>>> m=%e ll=%e\n", m, tmp_fmin);
+    Rprintf("\n");
+    Rprintf("#  intervals explored: %d\n",max-min);
+    Rprintf("\n");
   }
 
   /* decide the value of a  */
@@ -211,10 +286,10 @@ Rcpp::List laplafit(
 
   // correlation matrix
   Rcpp::NumericMatrix I(2,2);
-  I(0,0) =1.;
+  I(0,0) = 1.;
   I(0,1) = sigma[2];
   I(1,0) = sigma[2];
-  I(1,1) =1.;
+  I(1,1) = 1.;
 
 
   // Name of parameters
@@ -227,17 +302,17 @@ Rcpp::List laplafit(
     Rcpp::NumericVector::create(sigma[0]/sqrt(size), sigma[1]/sqrt(size));
 
   // main dataframe with coefficients
-    Rcpp::List dt =
-      Rcpp::DataFrame::create( Rcpp::Named("param")     = param_names
-                               ,Rcpp::Named("coef")      = par
-                               ,Rcpp::Named("std_error") = std_error
-                               );
+  Rcpp::List dt =
+    Rcpp::DataFrame::create( Rcpp::Named("param")      = param_names
+                             ,Rcpp::Named("coef")      = par
+                             ,Rcpp::Named("std_error") = std_error
+                             );
 
-    Rcpp::List ans = Rcpp::List::create(
-                                        Rcpp::Named("dt")              = dt
-                                        ,Rcpp::Named("log-likelihood") = fmin
-                                        ,Rcpp::Named("matrix")         = I
-                                        );
+  Rcpp::List ans = Rcpp::List::create(
+                                      Rcpp::Named("dt")              = dt
+                                      ,Rcpp::Named("log-likelihood") = fmin
+                                      ,Rcpp::Named("matrix")         = I
+                                      );
 
-    return ans;
+  return ans;
 }

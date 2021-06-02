@@ -109,3 +109,7 @@ double dB0dx2(double);
 /* long options */
 extern struct option gb_long_options[];
 extern int gb_option_index;
+
+// functions for the Laplace fit
+double median(Rcpp::NumericVector data, size_t size);
+double calculate_index(size_t size);

@@ -19,6 +19,42 @@
 #include "common.h"
 
 
+
+
+double median(Rcpp::NumericVector data, size_t size){
+
+  double median_value;
+
+  // size is even
+  if(size % 2 == 0){
+    median_value = (data[size/2] + data[(size+1)/2])/2;
+  }
+  // size is odd
+  else{
+    median_value = data[(size+1)/2];
+  }
+  return median_value;
+}
+
+double calculate_index(size_t size){
+
+  double index;
+
+  // size is even
+  if(size % 2 == 0){
+    index = size/2;
+  }
+  // size is odd
+  else{
+    index = (size+1)/2;
+  }
+  return index;
+}
+
+
+
+
+
 void *my_alloc(size_t size){
   void *temp;
   if(!(temp = malloc(size))){
