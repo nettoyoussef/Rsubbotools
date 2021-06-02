@@ -1,0 +1,10 @@
+^renv$
+^renv\.lock$
+^README\.Rmd$
+^other_files$
+^original_package$
+^original_c$
+^main\.R$
+^DOCKERFILE$
+^main\.org$
+^src/TAGS$
