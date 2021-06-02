@@ -134,9 +134,9 @@ Rcpp::List alaplafit(
                      Rcpp::NumericVector data
                      ,int verb = 0
                      ,int method = 7
-                     ,unsigned steps = 10
                      ,int output = 0
                      ,Rcpp::Nullable<Rcpp::NumericVector> provided_m_ = R_NilValue
+                     ,unsigned interv_step = 10
                      ){
 
 
@@ -158,9 +158,19 @@ Rcpp::List alaplafit(
 
   /* store loglike */
   double fmin = 0;
+  double tmp_fmin;
+
+  // indices for pseudo-optimization
+  size_t index, oldindex, max, min;
+
+  // index for general loops
+  size_t i;
 
   /* store data */
-  unsigned int size = data.size();/*the number of data*/
+  size_t size = data.size();/*the number of observations*/
+
+  // partial sums for the negative likelihood
+  double sl=0,sr=0;
 
   /* sort data */
   /* --------- */
@@ -169,8 +179,6 @@ Rcpp::List alaplafit(
   /* store Fisher sqrt(variance-covariance)*/
   double sigma[5];
 
-  size_t i;
-  double sl=0,sr=0;
 
   /* decide the value of m  */
   if (is_m_provided){
@@ -181,22 +189,97 @@ Rcpp::List alaplafit(
     m = provided_m[0];
   }
   else{
-    size_t minindex;
 
-    fmin=DBL_MAX;
-    for(i=1;i<size-1;i++){
-      const double dtmp1 = alapla_nll(data, data[i]);
-      if(dtmp1<fmin) {
-        fmin=dtmp1;
-        minindex = i;
-      }
-      /*        printf("%d mll[%e]=%e [%e] ",i,data[i],dtmp1,fmin); */
-      /*        if(minindex == i) */
-      /*          printf("*"); */
-      /*        printf("\n"); */
+    index = calculate_index(size);
+
+    max = min = index;
+    m = median(data, size);
+    fmin = alapla_nll(data, m);
+
+    if(verb > 1){
+      Rprintf("# index=%d\n", index);
+      Rprintf("#>>> Initial minimum: m=%e ll=%e\n", m, fmin);
     }
-    m =  data[minindex];
+
+    // explore recursively the intervals on the right side
+    do{
+
+      oldindex = index;
+
+      for(i=max+1; i <= max+interv_step && i < size-1; i++){
+
+        tmp_fmin = alapla_nll(data, data[i]);
+
+        if(tmp_fmin < fmin){/* found new minimum */
+          m    = data[i];
+          fmin = tmp_fmin;
+          index = i;
+
+          // print results - we use arrows to
+          // differentiate the global minimum
+          if(verb > 1){
+            Rprintf("#>>> [%+.3e:%+.3e] m=%e ll=%e\n"
+                    , data[i], data[i+1], m, tmp_fmin);
+          }
+        }else{
+          // print results
+          if(verb > 1){
+            Rprintf("#    [%+.3e:%+.3e] ll=%e\n"
+                    , data[i], data[i+1], tmp_fmin);
+          }
+        }
+      }
+      // counts the number of intervals explored
+      // and adjusts max for the next iteration, if it occurs
+      max = i-1;
+
+    }while(oldindex != index);
+
+    //  // explore recursively the intervals on the left side
+    do{
+
+      oldindex = index;
+
+      for(i=min-1; i >= min-interv_step && i >= 0; i--){
+
+        tmp_fmin = alapla_nll(data, data[i]);
+
+        if(tmp_fmin < fmin){/* found new minimum */
+          m     = data[i];
+          fmin  = tmp_fmin;
+          index = i;
+
+          // print results - we use arrows to
+          // differentiate the global minimum
+          if(verb > 1){
+            Rprintf("#>>> [%+.3e:%+.3e] m=%e ll=%e\n"
+                    , data[i], data[i+1], m, tmp_fmin);
+          }
+        }else{
+          // print results
+          if(verb > 1){
+            Rprintf("#    [%+.3e:%+.3e] ll=%e\n"
+                    , data[i], data[i+1], tmp_fmin);
+          }
+        }
+
+      }
+      // counts the number of intervals explored
+      // and adjusts min for the next iteration, if it occurs
+      min = i+1;
+
+    }while(oldindex != index);
   }
+
+  if(verb > 1){
+    Rprintf("Results of interval optimization: \n");
+    Rprintf("#>>> m=%e ll=%e\n", m, tmp_fmin);
+    Rprintf("\n");
+    Rprintf("#  intervals explored: %d\n",max-min);
+    Rprintf("\n");
+  }
+
+
 
   /* decide the value of al and ar  */
   for(i=0;i<size;i++){
@@ -247,12 +330,12 @@ Rcpp::List alaplafit(
 
   // main dataframe with coefficients
        Rcpp::List dt =
-       Rcpp::DataFrame::create( Rcpp::Named("param")     = param_names
+       Rcpp::DataFrame::create( Rcpp::Named("param")      = param_names
                                 ,Rcpp::Named("coef")      = par
                                 ,Rcpp::Named("std_error") = std_error
                                 );
 
-  Rcpp::List ans = Rcpp::List::create(
+       Rcpp::List ans = Rcpp::List::create(
                                       Rcpp::Named("dt")              = dt
                                       ,Rcpp::Named("log-likelihood") = fmin
                                       ,Rcpp::Named("matrix")         = I
