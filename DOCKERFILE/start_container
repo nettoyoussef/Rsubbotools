@@ -1,0 +1,17 @@
+#!/bin/bash
+
+# This script is run to allow the container to open new windows, particularly
+# R plots, on the host. It poses a security risk, so only use with trusted
+# images.
+
+# authorise just the user starting the container
+xhost +si:localuser:$USER
+
+# Let docker access the X server
+xhost +local:docker
+
+# get the name of the display
+export DISPLAY=$DISPLAY
+
+# start docker application
+docker-compose up --build

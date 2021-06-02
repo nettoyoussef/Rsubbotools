@@ -1,0 +1,24 @@
+version: '3'
+
+services:
+  r_temp:
+   build:
+     context: ./working_container
+     dockerfile: Dockerfile
+   env_file: .env  
+   container_name: rocker_container
+   volumes:
+      - "${RENV_PATHS_CACHE_HOST}:${RENV_PATHS_CACHE}"
+      - "/home/eliasy/:/home/eliasy"
+      - "/tmp/.X11-unix:/tmp/.X11-unix:ro" # bind mounts the X11 socket residing in /tmp/.X11-unix on your local machine into /tmp/.X11-unix in the container and :ro makes the socket read only.
+   environment:
+        - DISPLAY
+   cap_add:
+        - SYS_PTRACE # otherwise instrumented processes fail to start due to lacking permissions
+   command:  
+     sh -c "R -e 'options(renv.consent = TRUE);renv::restore(lockfile= \"$renv_lock\");' && tail -f /dev/null"
+
+
+
+
+
