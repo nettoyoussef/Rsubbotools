@@ -5,16 +5,16 @@
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
   (version 2) as published by the Free Software Foundation;
-  
+
   This program is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
   GNU General Public License for more details.
-  
+
   You should have received a copy of the GNU General Public License
   along with this program. If not see <http://www.gnu.org/licenses/>.
 
-*/ 
+*/
 
 
 /*
@@ -75,7 +75,7 @@ There are also other UNSUPPORTED transformations used in various test
   8 open right half line        ( xmin,+infty )   x=xmin+.5*(y+sqrt(1+y^2))
   9 open left  half line        ( -infty,xmax )   x=xmax+.5*(y-sqrt(1+y^2))
 --------------------------------------------------------------------
-xmin 
+xmin
 xmax
 
 pointers to arrays of double containing respectively the lower and
@@ -84,7 +84,7 @@ only the values that are implied by the type of constraints, defined
 as in *type, are actually inspected.
 
 --------------------------------------------------------------------
-f                
+f
 
 f calculates the objective function at a specified point x. Its
 specification is
@@ -102,12 +102,12 @@ void (*f) (const size_t n, const double *x,void *fparams,double *fval)
       function. If no external parameter are required it can be set to
       NULL.
 
-      fval 
+      fval
       OUTPUT: the value of the objective function at the current point
       x.
 
 --------------------------------------------------------------------
-df               
+df
 
 df calculates the gradient of the objective function at a specified
 point x. Its specification is
@@ -130,7 +130,7 @@ void (*df) (const size_t n, const double *x,void *fparams,double *grad)
       the current point x are stored in grad[0],...,grad[n-1].
 
 --------------------------------------------------------------------
-fdf              
+fdf
 
 fdf calculates the value and the gradient of the objective function at
 a specified point x. Its specification is
@@ -148,7 +148,7 @@ void (*fdf) (const size_t n, const double *x,void *fparams,double *fval,double *
       function. If no external parameter are required it can be set to
       NULL.
 
-      fval 
+      fval
       OUTPUT: the value of the objective function at the current point
       x.
 
@@ -170,13 +170,13 @@ structure of the type "multimin_params" containing the optimization
 parameters. The members are
 
       double step_size
-          size of the first trial step 
+          size of the first trial step
 
       double tol
           accuracy of the line minimization
 
       unsigned maxiter
-          maximum number of iterations 
+          maximum number of iterations
 
       double epsabs
           accuracy of the minimization
@@ -205,14 +205,14 @@ parameters. The members are
 
 // compute values of y for initial condition
 void do_initial_data_transform(
-			       Rcpp::NumericVector x
-			       ,const size_t n
-			       ,RcppGSL::vector<double> &y
-			       ,Rcpp::IntegerVector type
-			       ,Rcpp::NumericVector xmin
-			       ,Rcpp::NumericVector xmax
-			       ){
+                               Rcpp::NumericVector x
+                               ,const size_t n
+                               ,RcppGSL::vector<double> &y
+                               ,Rcpp::IntegerVector type
+                               ,Rcpp::NumericVector xmin
+                               ,Rcpp::NumericVector xmax
                                ,int verb
+                               ){
 
 
   size_t i;
@@ -321,15 +321,15 @@ void do_initial_data_transform(
 
 
 void do_data_transformation(
-			    Rcpp::NumericVector x
-			    ,const size_t n
-			    ,Rcpp::NumericVector y
-			    ,Rcpp::IntegerVector type
-			    ,Rcpp::NumericVector xmin
-			    ,Rcpp::NumericVector xmax
-			    ){
+                            Rcpp::NumericVector x
+                            ,const size_t n
+                            ,Rcpp::NumericVector y
+                            ,Rcpp::IntegerVector type
+                            ,Rcpp::NumericVector xmin
+                            ,Rcpp::NumericVector xmax
+                            ){
 
-  
+
   size_t i;
   double dtmp1;
 
@@ -340,17 +340,17 @@ void do_data_transformation(
     else
       switch(type[i]){
       case 0:/* (-inf,+inf) */
-        x[i]= y[i]; 
+        x[i]= y[i];
         break;
       case 1:/* [a,+inf) */
-        x[i]= xmin[i]+y[i]*y[i]; 
+        x[i]= xmin[i]+y[i]*y[i];
         break;
       case 2:/* (-inf,a] */
-        x[i]= xmax[i]-y[i]*y[i]; 
+        x[i]= xmax[i]-y[i]*y[i];
         break;
       case 3:/* [a,b] */
         dtmp1 = sin( y[i] );
-        x[i]= .5*(xmin[i]*(1-dtmp1) +xmax[i]*(1+dtmp1)); 
+        x[i]= .5*(xmin[i]*(1-dtmp1) +xmax[i]*(1+dtmp1));
         break;
       case 4:/* (a,+inf) */
         dtmp1 = exp( y[i] );
@@ -379,21 +379,21 @@ void do_data_transformation(
       }
   }
 }
-  
-  
+
+
 void do_data_transformation_df(
-			       Rcpp::NumericVector x
-			       ,const size_t n
-			       ,Rcpp::NumericVector y
-			       ,Rcpp::IntegerVector type
-			       ,Rcpp::NumericVector xmin
-			       ,Rcpp::NumericVector xmax
-			       ,Rcpp::NumericVector dx
-			       ){
+                               Rcpp::NumericVector x
+                               ,const size_t n
+                               ,Rcpp::NumericVector y
+                               ,Rcpp::IntegerVector type
+                               ,Rcpp::NumericVector xmin
+                               ,Rcpp::NumericVector xmax
+                               ,Rcpp::NumericVector dx
+                               ){
 
   size_t i;
   double dtmp1,dtmp2;
-  
+
   for(i=0;i<n;i++){
     if(type[i] == NA_INTEGER){
       dx[i]= 1;
@@ -438,7 +438,7 @@ void do_data_transformation_df(
         break;
       }
   }
- } 
+ }
 
 
 // this function returns the evaluation of f(x_1, x_2, x_n)
@@ -448,9 +448,9 @@ void do_data_transformation_df(
 static double g(const gsl_vector *y, void *gparams){
 
   struct g_params *p= (struct g_params *) gparams;
-  
+
   double res=GSL_NAN;/* the function is forced to return a value */
-  
+
 
   /* dereference useful stuff */
   const size_t n = p->n;
@@ -464,32 +464,32 @@ static double g(const gsl_vector *y, void *gparams){
 
   // converts y to a Rcpp vector
   Rcpp::NumericVector z = Rcpp::NumericVector(y->data, y->data + y->size);
-  
+
   //Rcpp::Rcout << "Print z:" << std::endl;
   //Rcpp::Rcout << z << std::endl;
 
   // variable transformation
-  
+
   // type is used to select the boundary conditions for
   // the values of the different variables/coefficents.
   // the process uses a data transformation to convert a
   // constrained problem in a unconstrained one.
 
-  // Notice: type is also a vector, so for each 
+  // Notice: type is also a vector, so for each
   // variable a different transformation can be selected
 
-  // data transf. for x  
+  // data transf. for x
   do_data_transformation(x, n, z, type, xmin, xmax);
 
   //Rcpp::Rcout << "Print x:" << std::endl;
   //Rcpp::Rcout << x << std::endl;
 
-  
+
   p->f(p->data, n, x, p->fparams,&res);
 
   //Rcpp::Rcout << "Print res:" << std::endl;
   //Rcpp::Rcout << res << std::endl;
-  
+
   //free (x);
   return(res);
 
@@ -506,7 +506,7 @@ static void dg(const gsl_vector *y, void *gparams, gsl_vector *dg){
 
   // converts y to a Rcpp vector
   Rcpp::NumericVector z = Rcpp::NumericVector(y->data, y->data + y->size);
-  
+
   /* dereference useful stuff */
   const size_t n = p->n;
   Rcpp::IntegerVector type = p->type;
@@ -528,25 +528,25 @@ static void dg(const gsl_vector *y, void *gparams, gsl_vector *dg){
   //double *df = (double *) multimin_alloc(sizeof(double)*n);
 
 
-  
+
 
   // variable transformation
-  
+
   // type is used to select the boundary conditions for
   // the values of the different variables/coefficents.
   // the process uses a data transformation to convert a
   // constrained problem in a unconstrained one.
 
-  // Notice: type is also a vector, so for each 
+  // Notice: type is also a vector, so for each
   // variable a different transformation can be selected
-  
-  // data transf. for x  
+
+  // data transf. for x
   do_data_transformation(x, n, z, type, xmin, xmax);
 
   // data transf. for dx
   do_data_transformation_df(x, n, z, type, xmin, xmax, dx);
 
-  // find the gradient at x and update df with it 
+  // find the gradient at x and update df with it
   p->df(p->data, n, x, p->fparams, df);
 
   /* debug output; comment out if necessary */
@@ -560,7 +560,7 @@ static void dg(const gsl_vector *y, void *gparams, gsl_vector *dg){
   /*   for(i=0;i<n;i++) */
   /*     fprintf(stderr,"%f ",gsl_vector_get(dg,i)); */
 
-  // apply the data transformation to gradient df with the dx vector  
+  // apply the data transformation to gradient df with the dx vector
   // and set it to dg
   for(unsigned i=0; i<n;i++){
     gsl_vector_set(dg,i,df[i]*dx[i]);
@@ -583,12 +583,12 @@ static void dg(const gsl_vector *y, void *gparams, gsl_vector *dg){
 static void gdg(const gsl_vector *y, void *gparams, double *g, gsl_vector *dg){
 
   struct g_params *p= (struct g_params *) gparams;
-  
+
   size_t i;
 
   // converts y to a Rcpp vector
   Rcpp::NumericVector z = Rcpp::NumericVector(y->data, y->data + y->size);
-  
+
   /* dereference useful stuff */
   const size_t n = p->n;
   Rcpp::IntegerVector type = p->type;
@@ -609,31 +609,31 @@ static void gdg(const gsl_vector *y, void *gparams, double *g, gsl_vector *dg){
   Rcpp::NumericVector df(n);
   //std::vector<double> df(n);
   //double *df = (double *) multimin_alloc(sizeof(double)*n);
-  
+
   //double *x  = (double *) multimin_alloc(sizeof(double)*n);
   //double *dx = (double *) multimin_alloc(sizeof(double)*n);
   //double *df = (double *) multimin_alloc(sizeof(double)*n);
 
   // variable transformation
-  
+
   // type is used to select the boundary conditions for
   // the values of the different variables/coefficents.
   // the process uses a data transformation to convert a
   // constrained problem in a unconstrained one.
 
-  // Notice: type is also a vector, so for each 
+  // Notice: type is also a vector, so for each
   // variable a different transformation can be selected
 
-  // data transf. for x  
+  // data transf. for x
   do_data_transformation(x, n, z, type, xmin, xmax);
 
   // data transf. for dx
   do_data_transformation_df(x, n, z, type, xmin, xmax, dx);
-  
-  // find the gradient at x and update df with it 
+
+  // find the gradient at x and update df with it
   p->fdf(p->data, n, x, p->fparams, g, df);
 
-  /* debug output; comment out if necessary */    
+  /* debug output; comment out if necessary */
   /*   fprintf(stderr,"#gdg: f=%f x=( ",g); */
   /*   for(i=0;i<n;i++) */
   /*     fprintf(stderr,"%f ",gsl_vector_get(x,i)); */
@@ -644,13 +644,13 @@ static void gdg(const gsl_vector *y, void *gparams, double *g, gsl_vector *dg){
   /*   for(i=0;i<n;i++) */
   /*     fprintf(stderr,"%f ",gsl_vector_get(dg,i)); */
   /*   fprintf(stderr,")\n"); */
-  
-  // apply the data transformation to gradient df with the dx vector  
+
+  // apply the data transformation to gradient df with the dx vector
   // and set it to dg
   for(i=0;i<n;i++){
     gsl_vector_set(dg,i,df[i]*dx[i]);
   }
-  
+
   //free (x);
   //free (dx);
   //free (df);
@@ -741,14 +741,14 @@ struct multimin_algorithm choose_algorithm(unsigned int method
 
 
 
-//' - n - INPUT: dimension of the problem, number of independent variables of the function. 
-//' 
+//' - n - INPUT: dimension of the problem, number of independent variables of the function.
+//'
 //' - x - INPUT: pointer to an array of n values x[0],...x[n-1] containing the initial
 //'       estimate of the minimum point. OUTPUT: contains the final estimation of the
-//'       minimum position 
-//' 
-//' - fmin - OUPUT: return the value of the function at the minimum 
-//' 
+//'       minimum position
+//'
+//' - fmin - OUPUT: return the value of the function at the minimum
+//'
 //' - type - INPUT a pointer to an array of n integers type[1],...,type[n-1] describing the
 //'          boundary conditions for the different variables. The problem is solved as an
 //'          unconstrained one on a suitably transformed variable y. Possible values are:
@@ -760,83 +760,73 @@ struct multimin_algorithm choose_algorithm(unsigned int method
 //'           4:   (a,+inf)      x=a + \exp(y)
 //'           5:   (-inf,a)      x=a - \exp(y)
 //'           6:   (a,b)         x= \frac{ a(1-\tanh(y)) + b(1+\tanh(y)}{2}
-//'           7:   (a,b)         x=\frac{ a(1 - \frac{y}{ (1+y^2)^{1/2}} ) + b( 1 + \frac{y}{ (1+y^2)^{1/2}} )}{2}    second approach 
-//'           8:   (a,+inf)      x= a + \frac{y + (1 + y^2)^{1/2} }{2}   second approach 
-//'           9:   (-inf,a)      x=a + \frac{y - (1 + y^2)^{1/2} }{2}                              second approach 
+//'           7:   (a,b)         x=\frac{ a(1 - \frac{y}{ (1+y^2)^{1/2}} ) + b( 1 + \frac{y}{ (1+y^2)^{1/2}} )}{2}    second approach
+//'           8:   (a,+inf)      x= a + \frac{y + (1 + y^2)^{1/2} }{2}   second approach
+//'           9:   (-inf,a)      x=a + \frac{y - (1 + y^2)^{1/2} }{2}                              second approach
 //'
-//' 
+//'
 //' - xmin xmax - INPUT: pointers to arrays of double containing respectively the lower and upper
 //'               boundaries of the different variables. For a given variable, only the values that are
-//'               implied by the type of constraints, defined as in *type, are actually inspected. 
-//' 
+//'               implied by the type of constraints, defined as in *type, are actually inspected.
+//'
 //' - f - function that calculates the objective function at a specified point x. Its
 //'       specification is
 //'       void (*f) (const size_t n, const double *x,void *fparams,double *fval)
 //'       where
-//'       n       - INPUT: the number of variables 
-//'       x       - INPUT:the point at which the function is required 
+//'       n       - INPUT: the number of variables
+//'       x       - INPUT:the point at which the function is required
 //'       fparams - INPUT: pointer to a structure containing parameters required by the
-//'                 function. If no external parameter are required it can be set to NULL. 
+//'                 function. If no external parameter are required it can be set to NULL.
 
 
-                    //'       fval    - OUTPUT: the value of the objective function at the current point x. 
-//' 
+                    //'       fval    - OUTPUT: the value of the objective function at the current point x.
+//'
 //' - df - function that calculates the gradient of the objective function at a specified
 //'        point x. Its specification is
 //'        void (*df) (const size_t n, const double *x,void *fparams,double *grad)
 //'        where
-//'        n       - INPUT: the number of variables 
-//'        x       - INPUT:the point at which the function is required 
+//'        n       - INPUT: the number of variables
+//'        x       - INPUT:the point at which the function is required
 //'        fparams - INPUT: pointer to a structure containing parameters required by the
-//'                  function. If no external parameter are required it can be set to NULL. 
+//'                  function. If no external parameter are required it can be set to NULL.
 //'        grad    - OUTPUT: the values of the gradient of the objective function at the
-//'                  current point x are stored in grad[0],...,grad[n-1]. 
-//' 
+//'                  current point x are stored in grad[0],...,grad[n-1].
+//'
 //' - fdf - fdf calculates the value and the gradient of the objective function at a
 //'         specified point x. Its specification is
 //'         void (*fdf) (const size_t n, const double *x,void *fparams,double *fval,double *grad)
 //'         where
-//'         n       - INPUT: the number of variables 
-//'         x       - INPUT:the point at which the function is required 
+//'         n       - INPUT: the number of variables
+//'         x       - INPUT:the point at which the function is required
 //'         fparams - INPUT: pointer to a structure containing parameters required by the
-//'                   function. If no external parameter are required it can be set to NULL. 
-//'         fval    - OUTPUT: the value of the objective function at the current point x. 
+//'                   function. If no external parameter are required it can be set to NULL.
+//'         fval    - OUTPUT: the value of the objective function at the current point x.
 //'         grad    - OUTPUT: the values of the gradient of the objective function at the
-//'                   current point x are stored in grad[0],...,grad[n-1]. 
-//' 
+//'                   current point x are stored in grad[0],...,grad[n-1].
+//'
 //' - fparams - pointer to a structure containing parameters required by the function. If no
-//'             external parameter are required it can be set to NULL. 
-//' 
+//'             external parameter are required it can be set to NULL.
+//'
 //' - oparams - structure of the type "multiminparams" containing the optimization
 //'             parameters. The members are
-//' 
-//'             double step_size - size of the first trial step 
-//'             double tol       - accuracy of the line minimization 
-//'             unsigned maxiter - maximum number of iterations 
-//'             double epsabs    - accuracy of the minimization 
-//'             double maxsize   - final size of the simplex 
+//'
+//'             double step_size - size of the first trial step
+//'             double tol       - accuracy of the line minimization
+//'             unsigned maxiter - maximum number of iterations
+//'             double epsabs    - accuracy of the minimization
+//'             double maxsize   - final size of the simplex
 //'             unsigned method  - method to use. Possible values are:
-//' 
+//'
 //'              - Fletcher-Reeves conjugate gradient
 //'              - Polak-Ribiere conjugate gradient
 //'              - Vector Broyden-Fletcher-Goldfarb-Shanno method
 //'              - Steepest descent algorithm
 //'              - Nelder-Mead simplex
 //'              - Vector Broyden-Fletcher-Goldfarb-Shanno ver. 2
-//' 
-//'             unsigned verbosity - if greater then 0 print info on intermediate steps 
+//'
+//'             unsigned verbosity - if greater then 0 print info on intermediate steps
 
 void multimin(
-	      Rcpp::NumericVector data
-	      ,size_t n
-	      ,Rcpp::NumericVector x
-	      ,double *fun
-	      ,Rcpp::IntegerVector type 
-	      ,Rcpp::NumericVector xmin
-	      ,Rcpp::NumericVector xmax
-	      ,void (*f)    (Rcpp::NumericVector, const size_t, Rcpp::NumericVector, void *, double *)
-	      ,void (* df)  (Rcpp::NumericVector, const size_t, Rcpp::NumericVector, void *, Rcpp::NumericVector)
-	      ,void (* fdf) (Rcpp::NumericVector, const size_t, Rcpp::NumericVector, void *, double *, Rcpp::NumericVector)
               Rcpp::NumericVector data
               ,size_t n
               ,Rcpp::NumericVector x
@@ -891,8 +881,8 @@ void multimin(
                             ,type
                             ,xmin
                             ,xmax
-			    );
-
+                            ,verb
+                            );
 
   }
   /* -------------------------------------------- */
