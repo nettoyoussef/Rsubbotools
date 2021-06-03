@@ -3,6 +3,7 @@
 /*in particular, use of NAN extension*/
 
 /* C++ ----------- */
+#include<Rcpp.h>
 #include<RcppGSL.h>
 // [[Rcpp::depends(RcppGSL)]]
 /*- -------------- */
@@ -29,10 +30,10 @@ struct g_params {
 
   // sample to estimate the parameters/variables (rows)
   Rcpp::NumericVector data;
-  
+
   // dimension of the problem (number of parameters/variables) (columns)
-  size_t n;  
-  
+  size_t n;
+
   // which transformation to do for each parameter/variable, if any
   Rcpp::IntegerVector type;
 
@@ -44,7 +45,7 @@ struct g_params {
 
   // depending on the algorithm, one of the following
   // functions is used for the minimization process
-  
+
   // *f - function to be minimized
   // Arguments, on this order, are
   // vector of data
@@ -53,7 +54,7 @@ struct g_params {
   // parameters to the minimization problem
   // solution - minimum value obtained
   void (*f) (Rcpp::NumericVector, const size_t, Rcpp::NumericVector, void *, double *);
-    
+
   // *df - derivative of the function to be minimized
   // Arguments, on this order, are
   // vector of data
@@ -62,7 +63,7 @@ struct g_params {
   // parameters to the minimization problem
   // solution - minimum value obtained
   void (* df) (Rcpp::NumericVector, const size_t, Rcpp::NumericVector, void *, Rcpp::NumericVector);
-    
+
   // combination of f and df
   void (* fdf) (Rcpp::NumericVector, const size_t, Rcpp::NumericVector, void *, double *, Rcpp::NumericVector);
 
@@ -72,24 +73,25 @@ struct g_params {
 
 
 void multimin(
-	      Rcpp::NumericVector data
+              Rcpp::NumericVector data
               ,size_t n
-	      ,Rcpp::NumericVector x
+              ,Rcpp::NumericVector x
               ,double *fun
-              ,Rcpp::IntegerVector type 
-	      ,Rcpp::NumericVector xmin
-	      ,Rcpp::NumericVector xmax
-	      ,void (*f)    (Rcpp::NumericVector, const size_t, Rcpp::NumericVector, void *, double *)
-	      ,void (* df)  (Rcpp::NumericVector, const size_t, Rcpp::NumericVector, void *, Rcpp::NumericVector)
-	      ,void (* fdf) (Rcpp::NumericVector, const size_t, Rcpp::NumericVector, void *, double *, Rcpp::NumericVector)
-	      ,void *fparams
-	      ,const struct multimin_params oparams
+              ,Rcpp::IntegerVector type
+              ,Rcpp::NumericVector xmin
+              ,Rcpp::NumericVector xmax
+              ,void (*f)    (Rcpp::NumericVector, const size_t, Rcpp::NumericVector, void *, double *)
+              ,void (* df)  (Rcpp::NumericVector, const size_t, Rcpp::NumericVector, void *, Rcpp::NumericVector)
+              ,void (* fdf) (Rcpp::NumericVector, const size_t, Rcpp::NumericVector, void *, double *, Rcpp::NumericVector)
+              ,void *fparams
+              ,const struct multimin_params oparams
+              ,int verb
               );
 
 //void multimin(size_t, std::vector<double>, double *,
-//	 const unsigned *,const double *,const double *,
-//	 void (*) (const Rcpp::NumericVector, const size_t,const double *,void *,double *),
-//	 void (*) (const Rcpp::NumericVector, const size_t,const double *, void *,double *),
-//	 void (*) (const Rcpp::NumericVector, const size_t,const double *, void *,double *,double *),
-//	 void *,
-//	 const struct multimin_params);
+//       const unsigned *,const double *,const double *,
+//       void (*) (const Rcpp::NumericVector, const size_t,const double *,void *,double *),
+//       void (*) (const Rcpp::NumericVector, const size_t,const double *, void *,double *),
+//       void (*) (const Rcpp::NumericVector, const size_t,const double *, void *,double *,double *),
+//       void *,
+//       const struct multimin_params);
