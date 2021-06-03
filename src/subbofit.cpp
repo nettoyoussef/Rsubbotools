@@ -65,7 +65,6 @@ void subbo_printdensity(Rcpp::NumericVector data, double param[]){
    dim   dimension of the matrix: 2 m known; 3 m unknown
    I     the variance-covariance matrix
 */
-// [[Rcpp::export]]
 RcppGSL::Matrix subbo_varcovar(const Rcpp::NumericVector par, const size_t N, const size_t dim){
 
   RcppGSL::Matrix I(dim, dim);
