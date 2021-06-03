@@ -30,12 +30,12 @@ RUN apt-get update && apt-get install -y --force-yes --allow-unauthenticated --n
 
 # Install subbotools 
 
-RUN wget -P /tmp/ ftp://cafed.sssup.it/packages/subbotools-1.3.0.tar.gz &&
-    cd /tmp &&
-    tar xvzf subbotools-1.3.0.tar.gz &&
-    cd subbotools-1.3.0 &&
-    ./configure &&
-    make &&
+RUN wget -P /tmp/ ftp://cafed.sssup.it/packages/subbotools-1.3.0.tar.gz && \
+    cd /tmp && \
+    tar xvzf subbotools-1.3.0.tar.gz && \
+    cd subbotools-1.3.0 && \
+    ./configure && \
+    make && \
     make install
 
 ################################
