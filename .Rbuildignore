@@ -8,3 +8,4 @@
 ^DOCKERFILE$
 ^main\.org$
 ^src/TAGS$
+^references$
