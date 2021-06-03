@@ -1,4 +1,14 @@
 
+compare_RNG <- function( rng_function, params_list ){
+
+    set.seed(1)
+    x = do.call(rng_function, params_list)
+    set.seed(1)
+    y = do.call(rng_function, params_list)
+
+    return(list(x=x, y=y))
+}
+
 generate_datasets <- function(b){
     set.seed(1)
     sample  <- data.frame(x=rpower(10^6, 2, b))
@@ -158,3 +168,19 @@ generate_orig_dt <- function(
     return(func_list)
 }
 
+#data_test   <- generate_datasets(.5)
+#subbo_test <- subbolafit(data_test$x)
+#check_subbo(subbo_test, orig_value)
+#
+#items <- c("dt", "log-likelihood", "matrix")
+#
+#expect_identical(subbo_test$dt, orig_value$dt)
+#
+#lapply(items, function(z){
+#    print(z)
+#    expect_identical(
+#        subbo_test[z], orig_value[z]
+#      , label = paste0("parameter ", z, "=", subbo_test[z])
+#      , expected.label = paste0("parameter ", z, "=", orig_value[z])
+#    )
+#})

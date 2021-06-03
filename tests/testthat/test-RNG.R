@@ -6,6 +6,7 @@
 paste0("Random Number Generators")
 
 library(testthat)
+source(paste0(getwd(), "/tests/testthat/test-functions.R"))
 
 paste0("Check if setting seed on RNGs work")
 
