@@ -41,6 +41,8 @@ test_that("SubLaplace:", {
           , distribution   = "sepfit"
         )
     check_fits(orig_value, .5, sepfit)
+    data_test   <- generate_datasets(.5)
+    subbo_test <- sepfit(data_test$x, verb = 3)
 }
 )
 

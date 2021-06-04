@@ -370,7 +370,7 @@ double mm(const double std_over_aad, int verb){
 /* reduced log likelyhood x[0] = b x[1] = mu */
 void subbo_objf(Rcpp::NumericVector data, const size_t n, Rcpp::NumericVector x, void *params, double *f){
 
-  int size = data.size();
+  size_t size = data.size();
   const double b = x[0]; // default to 2
   const double mu = x[1]; // default to 0
 
@@ -397,7 +397,7 @@ void subbo_objf(Rcpp::NumericVector data, const size_t n, Rcpp::NumericVector x,
 /* derivative of the reduced log likelyhood x[0] = b x[1] = mu */
 void subbo_objdf(Rcpp::NumericVector data, const size_t n, Rcpp::NumericVector x, void *params, Rcpp::NumericVector df){
 
-  int size = data.size();
+  size_t size = data.size();
   const double b = x[0];
   const double mu = x[1];
 

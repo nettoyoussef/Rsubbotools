@@ -49,6 +49,11 @@ test_that("SubLaplace:", {
         )
     check_fits(orig_value, .5, subboafit)
 
+
+    # Generate tests for the covariance matrices
+    data_test   <- generate_datasets(.5)
+    subbo_test <- subboafit(data_test$x, verb = 3)
+
 }
 )
 
