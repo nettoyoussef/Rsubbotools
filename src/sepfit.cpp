@@ -158,28 +158,34 @@ RcppGSL::Matrix sep_varcovar(const Rcpp::NumericVector par, const size_t N, cons
   I(0,0) = 1;
 
   /* mu - si */
-  I(0,1) = I(1,0) = 0;
+  I(0,1) = 0;
+  I(1,0) = gsl_matrix_get(I,0,1);
 
   /* mu - la */
-  I(0,2) = I(2,0) = 0;
+  I(0,2) = 0;
+  I(2,0) = gsl_matrix_get(I,0,2);
 
   /* mu - al */
-  I(0,3) = I(3,0) = 0;
+  I(0,3) = 0;
+  I(3,0) = gsl_matrix_get(I,0,3);
 
   /* si - si */
   I(1,1) = 1;
 
   /* si - la */
-  I(1,2) = I(2,1) = 0;
+  I(1,2) = 0;
+  I(2,1) = gsl_matrix_get(I,1,2);
 
   /* si - al */
-  I(1,3) = I(3,1) = 0;
+  I(1,3) = 0;
+  I(3,1) = gsl_matrix_get(I,1,3);
 
   /* la - la */
   I(2,2) = 1;
 
   /* la - al */
-  I(2,3) = I(3,2) = 0;
+  I(2,3) = 0;
+  I(3,2) = gsl_matrix_get(I,2,3);
 
   /* al - al */
   I(3,3) = 1;
