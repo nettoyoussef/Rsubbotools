@@ -213,3 +213,141 @@ subbo_covar_r <- function(subbo_test, N){
     }
     return(I)
 }
+
+# generates Subbotin Matrix of Covariances
+subboa_covar_r <- function(subbo_test, N){
+
+    B0 <- function(x){
+        return(x^(1./x)*gamma(1.+1./x))
+    }
+
+    B1 <- function(x){
+        tmp <- 1.+1./x
+        return(x^(1./x-1.)*gamma(tmp)*(log(x)+digamma(tmp)))
+    }
+
+    B2 <- function(x){
+        dt1 = 1.+1./x;
+        dt2 = log(x);
+        dt3 = digamma(dt1);
+        dt4 = trigamma(dt1);
+
+        return(x^(1./x-2.)*gamma(dt1)*(dt2*dt2+2*dt2*dt3+dt3*dt3+dt4))
+    }
+
+    dB0dx <- function(x){
+
+        return(B0(x)/(x*x)-B1(x)/x)
+    }
+
+    dB0dx2 <- function(x){
+        dt1=x*x;
+
+        return(-B0(x)*(3.*x-1.)/(dt1*dt1) + 2.*B1(x)*(x-1.)/(dt1*x) + B2(x)/dt1)
+    }
+
+    M_EULER <- 0.57721566490153286060651209008
+    bl <- subbo_test$dt[1, "coef"]
+    br <- subbo_test$dt[2, "coef"]
+    al <- subbo_test$dt[3, "coef"]
+    ar <- subbo_test$dt[4, "coef"]
+
+    A       <- al*B0(bl)+ar*B0(br)
+    B0l     <- B0(bl)
+    B0r     <- B0(br)
+    B1l     <- B1(bl)
+    B1r     <- B1(br)
+    B2l     <- B2(bl)
+    B2r     <- B2(br)
+    dB0ldx  <- dB0dx(bl)
+    dB0rdx  <- dB0dx(br)
+    dB0ldx2 <- dB0dx2(bl)
+    dB0rdx2 <- dB0dx2(br)
+
+    dim <- dim(subbo_test$matrix)[[1]]
+    I   <- matrix(rep(0,dim[1]^2), ncol = dim[1])
+
+    # bl - bl
+    I[1,1] = al*(dB0ldx2-al*dB0ldx*dB0ldx/A +
+                 B2l/bl -2*B1l/(bl*bl)+2*B0l/bl^(3))/A ;
+
+    # bl - br
+    I[1,2] = I[2,1] = -al*ar*dB0ldx*dB0rdx/(A*A);
+
+    # bl - al
+    I[1,3] = I[3,1] = dB0ldx/A-al*B0l*dB0ldx/(A*A)-B1l/A;
+
+    # bl - ar
+    I[1,4] = I[4,1] = -al*B0r*dB0ldx/(A*A);
+
+    # br - br
+    I[2,2] = ar*(dB0rdx2-ar*dB0rdx*dB0rdx/A +
+                 B2r/br -2*B1r/(br*br)+2*B0r/br^(3))/A ;
+
+    # br - al
+    I[2,3] = I[3,2] = -ar*B0l*dB0rdx/(A*A);
+
+    # br - ar
+    I[2,4] = I[4,2] = dB0rdx/A-ar*B0r*dB0rdx/(A*A)-B1r/A;
+
+    # al - al
+    I[3,3] = -B0l*B0l/(A*A)+(bl+1)*B0l/(al*A);
+
+    # al - ar
+    I[3,4] = I[4,3] = -B0l*B0r/(A*A);
+
+    # ar - ar
+    I[4,4] = -B0r*B0r/(A*A)+(br+1)*B0r/(ar*A);
+
+    if(dim == 5){
+
+        dt1l = gamma (2.-1/bl)
+        dt1r = gamma (2.-1/br)
+        dt2l = bl^(1.-1./bl)
+        dt2r = br^(1.-1./br)
+
+        # bl - m
+        I[1,5] = I[5,1] = (log(bl)-M_EULER)/(bl*A);
+
+        # br - m
+        I[2,5] = I[5,2] = -(log(br)-M_EULER)/(br*A);
+
+        # al - m
+        I[3,5] = I[5,3] = -bl/(al*A);
+
+        # ar - m
+        I[4,5] = I[5,4] = br/(ar*A);
+
+        # m - m
+        I[5,5] = ( dt1l*dt2l/al+dt1r*dt2r/ar)/A ;
+
+    }
+    print(I)
+    print(paste0(I[1,1]))
+
+    # generates inverse
+    I <- solve(I)
+    print(I)
+    # this is what Bottazzi does with GSL
+    # library("Matrix")
+    # I <- expand(lu(I))
+    # I <- solve(I$U) %*% solve(I$L) %*% I$P
+
+    #* set the var-covar matrix */
+    for(i in 2:dim){
+        for(j in 1:(i-1)){
+            I[i,j] = I[i,j]/sqrt(I[i,i]* I[j,j]);
+        }
+    }
+    print(I)
+
+    for(i in 1:dim){
+        for(j in i:dim){
+            I[i,j] = I[i,j]/N;
+        }
+    }
+    print(I)
+
+    return(I)
+
+}
