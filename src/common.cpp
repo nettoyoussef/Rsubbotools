@@ -168,8 +168,14 @@ void check_new_minimum(
     // print results - we use arrows to
     // differentiate the global minimum
     if(verb > 1){
-      Rprintf("#>>> [%+.3e:%+.3e] b=%e m=%e ll=%e\n"
-              , data[i], data[i+1], par[0], par[1], *fmin);
+
+      int n = data.size();
+
+      Rprintf("#>>> [%+.3e:%+.3e]", data[i], data[i+1]);
+      for(int tmp=0; tmp < n;tmp++){
+        Rprintf(" par[%d]= %e", tmp, par[i]);
+      }
+      Rprintf(" ll= %e\n", *fmin);
     }
   }else{
     // print results
@@ -440,7 +446,7 @@ Rcpp::List interval_optim(
                           ,int verb
                           ){
 
-  // local scope
+  // local
   double dtmp1;
   Rcpp::NumericVector xtmp(n_param); /* store the temporary minimum  */
   unsigned int index;
