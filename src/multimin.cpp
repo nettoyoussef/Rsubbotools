@@ -284,9 +284,9 @@
        return 0;
      }
 
-     ### A full example for a method with derivative, from the docs: ###
+### A full example for a method with derivative, from the docs: ###
 
-     int main(void){
+int main(void){
        double par[5] = {1.0, 2.0, 10.0, 20.0, 30.0};
 
        const gsl_multimin_fminimizer_type *T =
@@ -351,17 +351,16 @@
 #include "multimin.h"
 
 // compute values of y for initial condition
-RcppGSL::vector<double> do_initial_data_transform(
+void do_initial_data_transform(
                                Rcpp::NumericVector x
                                ,const size_t n
+                               ,RcppGSL::vector<double> &y
                                ,Rcpp::IntegerVector type
                                ,Rcpp::NumericVector xmin
                                ,Rcpp::NumericVector xmax
                                ,int verb
                                ){
 
-
-  RcppGSL::vector<double> y(n);
   size_t i;
   double dtmp1;
 
@@ -463,8 +462,6 @@ RcppGSL::vector<double> do_initial_data_transform(
   if(verb > 1){
     Rprintf("END OF DATA TRANSFORMATION\n");
   }
-
-  return y;
 }
 
 
@@ -586,7 +583,7 @@ void do_data_transformation_df(
         break;
       }
   }
- }
+}
 
 
 // this function returns the evaluation of f(x_1, x_2, x_n)
@@ -922,7 +919,7 @@ struct multimin_algorithm choose_algorithm(unsigned int method
 //'                 function. If no external parameter are required it can be set to NULL.
 
 
-                    //'       fval    - OUTPUT: the value of the objective function at the current point x.
+//'       fval    - OUTPUT: the value of the objective function at the current point x.
 //'
 //' - df - function that calculates the gradient of the objective function at a specified
 //'        point x. Its specification is
@@ -1199,7 +1196,7 @@ void multimin(
   }
 
   // make transformation on the x ranges compute values of y for initial condition
-  y  = do_initial_data_transform(x, n, type, xmin, xmax, verb);
+  do_initial_data_transform(x, n, y, type, xmin, xmax, verb);
 
   /* -------------------------------------------- */
 
