@@ -263,10 +263,10 @@ void sep_objdf(
   df[0]=df[1]=df[2]=df[3]=0.0;
 
   for(i=0;i<size;i++){
-    const double z = (data[i]-m)/s;
+    const double z  = (data[i]-m)/s;
     const double sz = (z>0 ? 1 : -1);
     const double az = fabs(z);
-    const double w = sz*pow(az,a/2)*l*sqrt(2/a);
+    const double w  = sz*pow(az,a/2)*l*sqrt(2/a);
 
     const double dwdz = pow(az,a/2-1)*l*sqrt(a/2);
 
@@ -306,10 +306,10 @@ void sep_objfdf(Rcpp::NumericVector data, const size_t n, Rcpp::NumericVector x,
   *f=df[0]=df[1]=df[2]=df[3]=0.0;
 
   for(i=0;i<size;i++){
-    const double z = (data[i]-m)/s;
+    const double z  = (data[i]-m)/s;
     const double sz = (z>0 ? 1 : -1);
     const double az = fabs(z);
-    const double w = sz*pow(az,a/2)*l*sqrt(2/a);
+    const double w  = sz*pow(az,a/2)*l*sqrt(2/a);
 
     const double dwdz = pow(az,a/2-1)*l*sqrt(a/2);
     const double dwdl = sz*pow(az,a/2)*sqrt(2/a);
@@ -486,16 +486,16 @@ Rcpp::List sepfit(
   // on the upper diagonal the covariances
     RcppGSL::Matrix V =  sep_varcovar(par, size, 4);
     // this matrix in its upper diagonal presents the covariances
-  // and on its lower diagonal presents the correlation coefficients between the parameters
+    // and on its lower diagonal presents the correlation coefficients between the parameters
 
-  // vector of standard errors
-  Rcpp::NumericVector std_error =
-     Rcpp::NumericVector::create(
-                                 sqrt(V(0,0))  // mu
-                                 ,sqrt(V(1,1)) // si
-                                 ,sqrt(V(2,2)) // la
-                                 ,sqrt(V(3,3)) // al
-                                 );
+    // vector of standard errors
+    Rcpp::NumericVector std_error =
+      Rcpp::NumericVector::create(
+                                  sqrt(V(0,0))  // mu
+                                  ,sqrt(V(1,1)) // si
+                                  ,sqrt(V(2,2)) // la
+                                  ,sqrt(V(3,3)) // al
+                                  );
 
   // Name of parameters
   Rcpp::CharacterVector param_names = Rcpp::CharacterVector::create("mu", "si", "la", "al");
