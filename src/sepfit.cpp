@@ -135,7 +135,7 @@ void sepfit_printdensity(Rcpp::NumericVector data, double x[]){
    I     the variance-covariance matrix
 */
 
-RcppGSL::Matrix sep_varcovar(const Rcpp::NumericVector par, const size_t N, const size_t dim){
+RcppGSL::Matrix sep_varcovar(const std::vector<double> &par, const size_t N, const size_t dim){
 
   size_t i,j;
 
@@ -217,7 +217,7 @@ RcppGSL::Matrix sep_varcovar(const Rcpp::NumericVector par, const size_t N, cons
 /* Object Function */
 /*---------------- */
 
-void sep_objf(Rcpp::NumericVector data, const size_t n, Rcpp::NumericVector x, void *params, double *f){
+void sep_objf(std::vector<double> &data, const size_t n, std::vector<double> &x, void *params, double *f){
 
   unsigned size = data.size();
   double dtmp1=0;
@@ -243,11 +243,11 @@ void sep_objf(Rcpp::NumericVector data, const size_t n, Rcpp::NumericVector x, v
 
 
 void sep_objdf(
-               Rcpp::NumericVector data
+               std::vector<double> &data
                ,const size_t n
-               ,Rcpp::NumericVector x
+               ,std::vector<double> &x
                ,void *params
-               ,Rcpp::NumericVector df
+               ,std::vector<double> &df
                ){
 
   unsigned size = data.size();
@@ -293,7 +293,7 @@ void sep_objdf(
 
 
 
-void sep_objfdf(Rcpp::NumericVector data, const size_t n, Rcpp::NumericVector x, void *params, double *f, Rcpp::NumericVector df){
+void sep_objfdf(std::vector<double> &data, const size_t n, std::vector<double> &x, void *params, double *f, std::vector<double> &df){
 
   unsigned size = data.size();
   size_t i;
@@ -338,6 +338,22 @@ void sep_objfdf(Rcpp::NumericVector data, const size_t n, Rcpp::NumericVector x,
 
 
 }
+
+std::vector<double> convert_rcpp_std(
+                                     Rcpp::NumericVector data
+                                     ,unsigned int n
+                                     ){
+
+  int i;
+  std::vector<double> data_std(n);
+
+  for(i=0; i < n; i++){
+    data_std[i] = data[i];
+  }
+
+  return data_std;
+}
+
 /*---------------- */
 
 
@@ -401,90 +417,103 @@ Rcpp::List sepfit(
   Rcpp::NumericVector xmax(4);
 
   // define optimization parameters
-   struct multimin_params global_oparams =
-     {(double)       g_opt_par[0]
-      ,(double)       g_opt_par[1]
-      ,(unsigned int) g_opt_par[2]
-      ,(double)       g_opt_par[3]
-      ,(double)       g_opt_par[4]
-      ,(unsigned int) g_opt_par[5]
-     };
+  struct multimin_params global_oparams =
+    {(double)       g_opt_par[0]
+     ,(double)       g_opt_par[1]
+     ,(unsigned int) g_opt_par[2]
+       ,(double)       g_opt_par[3]
+       ,(double)       g_opt_par[4]
+       ,(unsigned int) g_opt_par[5]
+      };
 
-  /* store data */
-   unsigned int size = data.size();/*the number of data*/
+    /* store data */
+    unsigned int size = data.size();/*the number of data*/
 
-   // Fisher Matrix or negative log-likelihood?
-   // log_likelihood
-   double fmin = 0;
+    // Fisher Matrix or negative log-likelihood?
+    // log_likelihood
+    double fmin = 0;
 
-   /* customized admin. of errors */
-   /* --------------------------- */
-   gsl_set_error_handler_off ();
+    /* customized admin. of errors */
+    /* --------------------------- */
+    gsl_set_error_handler_off ();
 
-   /* sort data */
-   /* --------- */
-   sortRcpp(data);
-   //qsort(data, Size, sizeof(double),sort_by_value);
+    /* sort data */
+    /* --------- */
+    sortRcpp(data);
+    //qsort(data, Size, sizeof(double),sort_by_value);
 
-   /* initial values */
-   /* -------------- */
-   sep_objf(data, 4, par, NULL, &fmin);
+    // convert data
+    std::vector<double> data_std(size);
+    std::vector<double> par_std(size);
+    data_std = convert_rcpp_std(data , size);
+    par_std  = convert_rcpp_std(par , 4);
 
-   /* output of initial values */
-   /* ------------------------ */
-   if(verb >0){
-     Rprintf("INITIAL VALUES\n");
-     Rprintf("#  par    mu     sigma     lambda     alpha     ll\n");
-     Rprintf("#  value  %.2f  %.2f  %.2f  %.2f  %.2f  %.2f\n"
-             , par[0], par[1], par[2], par[3], fmin);
-     Rprintf("\n");
-   }
 
-   /* ML global maximization */
-   /* ---------------------------------- */
-   if(verb >0){
-     Rprintf("#--- UNCONSTRAINED OPTIMIZATION\n");
-   }
+    /* initial values */
+    /* -------------- */
+    sep_objf(data_std, 4, par_std, NULL, &fmin);
 
-   /* set initial minimization boundaries */
-   /* ----------------------------------- */
-   xmin.fill(0);
-   xmax.fill(0);
-   type[0] = 0;
-   type[1] = 4;
-   type[2] = 0;
-   type[3] = 4;
+    /* output of initial values */
+    /* ------------------------ */
+    if(verb >0){
+      Rprintf("INITIAL VALUES\n");
+      Rprintf("#  par    mu    sigma lambda alpha  ll\n");
+      Rprintf("#  value  %.2f  %.2f  %.2f   %.2f   %.2f\n"
+                , par_std[0], par_std[1], par_std[2], par_std[3], fmin);
+      Rprintf("\n");
 
-   /* perform global minimization */
-   /* --------------------------- */
-   multimin(data              // sample
-            ,4                // number of parameters
-            ,par              // starting guess / returns parameters value
-            ,&fmin            // pointer to update the minimum likelihood
-            ,type             // type of transformation of the data
-            ,xmin             // minimum values for the parameters
-            ,xmax             // maximum values for the parameters
-            ,sep_objf         // objective function to minimize
-            ,sep_objdf        // df/dx of the objective function
-            ,sep_objfdf       // objf + objdf
-            ,NULL             // fparams
-            ,global_oparams   // parameters for the optmization
-            ,verb             // set verbosity level
-            );
+      Rprintf("DATA - first values\n");
+      Rprintf("#  %.2f\n", data_std[0]);
+      Rprintf("#  %.2f\n", data_std[1]);
+      Rprintf("#  %.2f\n", data_std[2]);
+      Rprintf("#  %.2f\n", data_std[3]);
+    }
 
-   if(verb >0){
-     Rprintf("#>>> mu=%.3e sigma=%.3e lambda=%.3e alpha=%.3e ll=%e\n",
-           par[0],par[1],par[2],par[3],fmin);
-   }
+    /* ML global maximization */
+    /* ---------------------------------- */
+    if(verb >0){
+      Rprintf("#--- UNCONSTRAINED OPTIMIZATION\n");
+    }
 
-   // generate outputs
-  // variables
+    /* set initial minimization boundaries */
+    /* ----------------------------------- */
+    xmin.fill(0);
+    xmax.fill(0);
+    type[0] = 0;
+    type[1] = 4;
+    type[2] = 0;
+    type[3] = 4;
 
-  /* allocate var-covar matrix */
-  // The V matrix has on its main diagonal the variance of parameters
-  // on the lower diagonal the correlation coefficients
-  // on the upper diagonal the covariances
-    RcppGSL::Matrix V =  sep_varcovar(par, size, 4);
+    /* perform global minimization */
+    /* --------------------------- */
+    multimin(data_std          // sample
+             ,4                // number of parameters
+             ,par_std          // starting guess / returns parameters value
+             ,&fmin            // pointer to update the minimum likelihood
+             ,type             // type of transformation of the data
+             ,xmin             // minimum values for the parameters
+             ,xmax             // maximum values for the parameters
+             ,sep_objf         // objective function to minimize
+             ,sep_objdf        // df/dx of the objective function
+             ,sep_objfdf       // objf + objdf
+             ,NULL             // fparams
+             ,global_oparams   // parameters for the optmization
+             ,verb             // set verbosity level
+             );
+
+    if(verb >0){
+       Rprintf("#>>> mu=%.3e sigma=%.3e lambda=%.3e alpha=%.3e ll=%e\n",
+              par_std[0],par_std[1],par_std[2],par_std[3],fmin);
+    }
+
+    // generate outputs
+    // variables
+
+    /* allocate var-covar matrix */
+    // The V matrix has on its main diagonal the variance of parameters
+    // on the lower diagonal the correlation coefficients
+    // on the upper diagonal the covariances
+    RcppGSL::Matrix V =  sep_varcovar(par_std, size, 4);
     // this matrix in its upper diagonal presents the covariances
     // and on its lower diagonal presents the correlation coefficients between the parameters
 
@@ -502,10 +531,10 @@ Rcpp::List sepfit(
 
   // main dataframe with coefficients
   Rcpp::List dt =
-  Rcpp::DataFrame::create(Rcpp::Named("param")      = param_names
-                          ,Rcpp::Named("coef")      = par
-                          ,Rcpp::Named("std_error") = std_error
-                          );
+    Rcpp::DataFrame::create(Rcpp::Named("param")      = param_names
+                            ,Rcpp::Named("coef")      = par_std
+                            ,Rcpp::Named("std_error") = std_error
+                            );
 
   // convert matrix
   Rcpp::NumericMatrix matrix = Rcpp::as<Rcpp::NumericMatrix>(Rcpp::wrap(V));
