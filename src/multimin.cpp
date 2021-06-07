@@ -625,8 +625,8 @@ static double g(const gsl_vector *y, void *gparams){
   //updates the objective function
   // res - variable with this value, passed by reference
   p->f(p->data, n, x, p->fparams,&res);
-  Rprintf("fmin - inside g\n");
-  Rprintf("#  %.2f\n", res);
+  //Rprintf("fmin - inside g\n");
+  //Rprintf("#  %.2f\n", res);
 
   //Rcpp::Rcout << "Print res:" << std::endl;
   //Rcpp::Rcout << res << std::endl;
@@ -679,13 +679,34 @@ static void dg(const gsl_vector *y, void *gparams, gsl_vector *dg){
   // variable a different transformation can be selected
 
   // data transf. for x
+  //Rprintf("z - initial guess - before par transf\n");
+  //for(i=0;i<n;i++){
+  //  Rprintf("# z[%d]= %.2f\n", i,  z[i]);
+  //}
   do_par_transformation(x, n, z, type, xmin, xmax);
+  //Rprintf("x - inside dg - after par transf \n");
+  //for(i=0;i<n;i++){
+  //  Rprintf("# x[%d]= %.2f\n", i,  x[i]);
+  //}
 
   // data transf. for dx
   do_par_transformation_df(dx, n, z, type, xmin, xmax);
+  //Rprintf("dx - inside dg - after par transf\n");
+  //for(i=0;i<n;i++){
+  //  Rprintf("#dx[%d]= %.2f\n", i, dx[i]);
+  //}
 
   // find the gradient at x and update df with it
+  //Rprintf("fmin - inside dg - before update\n");
+  //Rprintf("#g= %.2f\n", g);
   p->df(p->data, n, x, p->fparams, df);
+  //Rprintf("fmin - inside dg - after update\n");
+  //Rprintf("#g= %.2f\n", g);
+  //Rprintf("df - inside gdg - after update\n");
+  //for(i=0;i<n;i++){
+  //  Rprintf("#dx[%d]= %.2f\n", i, df[i]);
+  //}
+
 
   /* debug output; comment out if necessary */
   /*   fprintf(stderr,"#dg: x=( "); */
@@ -700,10 +721,10 @@ static void dg(const gsl_vector *y, void *gparams, gsl_vector *dg){
 
   // apply the data transformation to gradient df with the dx vector
   // and set it to dg
-  Rprintf("gradient - inside dg\n");
+  //Rprintf("gradient - inside dg\n");
   for(unsigned i=0; i<n;i++){
     gsl_vector_set(dg,i,df[i]*dx[i]);
-    Rprintf("#dg[%d]= %.2f\n", i, dg[i]);
+    //Rprintf("#dg[%d]= %.2f\n", i, gsl_vector_get(dg,i));
   }
 
   /* debug output; comment out if necessary */
@@ -761,33 +782,33 @@ static void gdg(const gsl_vector *y, void *gparams, double *g, gsl_vector *dg){
   // variable a different transformation can be selected
 
   // data transf. for x
-  Rprintf("z - initial guess - before par transf \n");
-  for(i=0;i<n;i++){
-    Rprintf("# z[%d]= %.2f\n", i,  z[i]);
-  }
+  //Rprintf("z - initial guess - before par transf \n");
+  //for(i=0;i<n;i++){
+  //  Rprintf("# z[%d]= %.2f\n", i,  z[i]);
+  //}
   do_par_transformation(x, n, z, type, xmin, xmax);
-  Rprintf("x - inside gdg - after par transf \n");
-  for(i=0;i<n;i++){
-    Rprintf("# x[%d]= %.2f\n", i,  x[i]);
-  }
+  //Rprintf("x - inside gdg - after par transf \n");
+  //for(i=0;i<n;i++){
+  //  Rprintf("# x[%d]= %.2f\n", i,  x[i]);
+  //}
 
   // data transf. for dx
   do_par_transformation_df(dx, n, z, type, xmin, xmax);
-  Rprintf("dx - inside gdg - after par transf \n");
-  for(i=0;i<n;i++){
-    Rprintf("#dx[%d]= %.2f\n", i, dx[i]);
-  }
+  //Rprintf("dx - inside gdg - after par transf \n");
+  //for(i=0;i<n;i++){
+  //  Rprintf("#dx[%d]= %.2f\n", i, dx[i]);
+  //}
 
   // find the gradient at x and update df and g with it
-  Rprintf("fmin - inside gdg - before update\n");
-  Rprintf("#  %.2f\n", g);
+  //Rprintf("fmin - inside gdg - before update\n");
+  //Rprintf("#y= %.2f\n", g);
   p->fdf(p->data, n, x, p->fparams, g, df);
-  Rprintf("fmin - inside gdg - after update\n");
-  Rprintf("#  %.2f\n", g);
-  Rprintf("df - inside gdg - after update\n");
-  for(i=0;i<n;i++){
-    Rprintf("#dx[%d]= %.2f\n", i, df[i]);
-  }
+  //Rprintf("fmin - inside gdg - after update\n");
+  //Rprintf("#y= %.2f\n", g);
+  //Rprintf("df - inside gdg - after update\n");
+  //for(i=0;i<n;i++){
+  //  Rprintf("#dx[%d]= %.2f\n", i, df[i]);
+  //}
 
   /* debug output; comment out if necessary */
   /*   fprintf(stderr,"#gdg: f=%f x=( ",g); */
@@ -803,10 +824,10 @@ static void gdg(const gsl_vector *y, void *gparams, double *g, gsl_vector *dg){
 
   // apply the data transformation to gradient df with the dx vector
   // and set it to dg
-  Rprintf("gradient - inside gdg\n");
+  //Rprintf("gradient - inside gdg\n");
   for(i=0;i<n;i++){
     gsl_vector_set(dg,i,df[i]*dx[i]);
-    Rprintf("#dg[%d]= %.2f\n", i, dg[i]);
+    //Rprintf("#dg[%d]= %.2f\n", i, gsl_vector_get(dg,i));
   }
 
   //free (x);
@@ -1148,6 +1169,7 @@ struct multimin_algorithm choose_algorithm(unsigned int method
 //
 //       unsigned verbosity
 //           if greater then 0 print info on intermediate steps
+
 void multimin(
               std::vector<double> &data
               ,size_t n
