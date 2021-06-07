@@ -39,11 +39,11 @@ test_that("SubLaplace:", {
           # we pass the transposed matrix and the code corrects it
           , matrix         =
                 c(
-                   NA, 0.0000, 0.0000, 0.0000, -0.0000
-                 , 0.6440, NA, 0.0000, 0.0000, 0.0000
-                 , 0.2093, 0.5040, NA, 0.0001, 0.0000
-                 , 0.5039, 0.2089, 0.3945, NA, -0.0000
-                 , NA, NA, NA, NA, NA
+                    NA    , 0.0000, 0.0000, 0.0000, -0.0000
+                  , 0.6440, NA    , 0.0000, 0.0000, 0.0000
+                  , 0.2093, 0.5040, NA    , 0.0001, 0.0000
+                  , 0.5039, 0.2089, 0.3945, NA    , -0.0000
+                  , NaN   , NaN   , NaN   , NaN   , NA
                 )
           , distribution   = "subboafit"
         )
@@ -162,7 +162,7 @@ test_that("Normal:", {
 
     orig_value <-
         generate_orig_dt(
-            coef           = c(2.0121e+00, 1.9968e+00, 1.4214e+00, 1.4099e+00, 8.7232e-0)
+            coef           = c(2.0121e+00, 1.9968e+00, 1.4214e+00, 1.4099e+00, 8.7232e-03)
           , log_likelihood = 1.7657e+00
           , std_error      = c(0.01143, 0.01138, 0.007773, 0.007741, 0.01156)
           , matrix         =
