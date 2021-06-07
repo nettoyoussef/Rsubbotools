@@ -38,7 +38,7 @@ struct g_params {
   // initial guess pointer - is substituted by the final solution's position
   // parameters to the minimization problem
   // solution - minimum value obtained
-  void (*f) (std::vector<double>&, const size_t, std::vector<double>&, void *, double *);
+  void (*f) (std::vector<double>, const size_t, std::vector<double>, void *, double *);
 
   // *df - derivative of the function to be minimized
   // Arguments, on this order, are
@@ -47,10 +47,10 @@ struct g_params {
   // initial guess pointer - is substituted by the final solution's position
   // parameters to the minimization problem
   // solution - minimum value obtained
-  void (* df) (std::vector<double>&, const size_t, std::vector<double>&, void *, std::vector<double>&);
+  void (* df) (std::vector<double>, const size_t, std::vector<double>, void *, std::vector<double>);
 
   // combination of f and df
-  void (* fdf) (std::vector<double>&, const size_t, std::vector<double>&, void *, double *, std::vector<double>&);
+  void (* fdf) (std::vector<double>, const size_t, std::vector<double>, void *, double *, std::vector<double>);
 
   // parameters for the functions
   void *fparams;

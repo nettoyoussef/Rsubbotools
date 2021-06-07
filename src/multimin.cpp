@@ -347,9 +347,9 @@
 
 // compute values of y for initial condition
 void do_initial_par_transform(
-                              std::vector<double> &x
+                              std::vector<double> x
                               ,const size_t n
-                              ,RcppGSL::vector<double> &y
+                              ,RcppGSL::vector<double> y
                               ,Rcpp::IntegerVector type
                               ,Rcpp::NumericVector xmin
                               ,Rcpp::NumericVector xmax
@@ -461,7 +461,7 @@ void do_initial_par_transform(
 
 
 void do_par_transformation(
-                           std::vector<double> &x
+                           std::vector<double> x
                            ,const size_t n
                            ,Rcpp::NumericVector y
                            ,Rcpp::IntegerVector type
@@ -522,7 +522,7 @@ void do_par_transformation(
 
 
 void do_par_transformation_df(
-                              std::vector<double> &dx
+                              std::vector<double> dx
                               ,const size_t n
                               ,Rcpp::NumericVector y
                               ,Rcpp::IntegerVector type
@@ -1149,16 +1149,16 @@ struct multimin_algorithm choose_algorithm(unsigned int method
 //       unsigned verbosity
 //           if greater then 0 print info on intermediate steps
 void multimin(
-              std::vector<double> &data
+              std::vector<double> data
               ,size_t n
-              ,std::vector<double> &x
+              ,std::vector<double> x
               ,double *fun
               ,Rcpp::IntegerVector type
               ,Rcpp::NumericVector xmin
               ,Rcpp::NumericVector xmax
-              ,void (*f)    (std::vector<double>&, const size_t, std::vector<double>&, void *, double *)
-              ,void (* df)  (std::vector<double>&, const size_t, std::vector<double>&, void *, std::vector<double> &)
-              ,void (* fdf) (std::vector<double>&, const size_t, std::vector<double>&, void *, double *, std::vector<double> &)
+              ,void (*f)    (std::vector<double>, const size_t, std::vector<double>, void *, double *)
+              ,void (* df)  (std::vector<double>, const size_t, std::vector<double>, void *, std::vector<double> )
+              ,void (* fdf) (std::vector<double>, const size_t, std::vector<double>, void *, double *, std::vector<double> )
               ,void *fparams
               ,const struct multimin_params oparams
               ,int verb

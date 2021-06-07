@@ -135,7 +135,7 @@ void sepfit_printdensity(Rcpp::NumericVector data, double x[]){
    I     the variance-covariance matrix
 */
 
-RcppGSL::Matrix sep_varcovar(const std::vector<double> &par, const size_t N, const size_t dim){
+RcppGSL::Matrix sep_varcovar(const std::vector<double> par, const size_t N, const size_t dim){
 
   size_t i,j;
 
@@ -217,7 +217,7 @@ RcppGSL::Matrix sep_varcovar(const std::vector<double> &par, const size_t N, con
 /* Object Function */
 /*---------------- */
 
-void sep_objf(std::vector<double> &data, const size_t n, std::vector<double> &x, void *params, double *f){
+void sep_objf(std::vector<double> data, const size_t n, std::vector<double> x, void *params, double *f){
 
   unsigned size = data.size();
   double dtmp1=0;
@@ -243,11 +243,11 @@ void sep_objf(std::vector<double> &data, const size_t n, std::vector<double> &x,
 
 
 void sep_objdf(
-               std::vector<double> &data
+               std::vector<double> data
                ,const size_t n
-               ,std::vector<double> &x
+               ,std::vector<double> x
                ,void *params
-               ,std::vector<double> &df
+               ,std::vector<double> df
                ){
 
   unsigned size = data.size();
@@ -293,7 +293,7 @@ void sep_objdf(
 
 
 
-void sep_objfdf(std::vector<double> &data, const size_t n, std::vector<double> &x, void *params, double *f, std::vector<double> &df){
+void sep_objfdf(std::vector<double> data, const size_t n, std::vector<double> x, void *params, double *f, std::vector<double> df){
 
   unsigned size = data.size();
   size_t i;

@@ -27,9 +27,9 @@ void multimin(
               ,Rcpp::IntegerVector type
               ,Rcpp::NumericVector xmin
               ,Rcpp::NumericVector xmax
-              ,void (*f)    (std::vector<double> &, const size_t, std::vector<double> &, void *, double *)
-              ,void (* df)  (std::vector<double> &, const size_t, std::vector<double> &, void *, std::vector<double> &)
-              ,void (* fdf) (std::vector<double> &, const size_t, std::vector<double> &, void *, double *, std::vector<double> &)
+              ,void (*f)    (std::vector<double>, const size_t, std::vector<double>, void *, double *)
+              ,void (* df)  (std::vector<double>, const size_t, std::vector<double>, void *, std::vector<double> )
+              ,void (* fdf) (std::vector<double>, const size_t, std::vector<double>, void *, double *, std::vector<double> )
               ,void *fparams
               ,const struct multimin_params oparams
               ,int verb
