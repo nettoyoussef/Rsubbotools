@@ -346,15 +346,15 @@
 #include "multimin.h"
 
 // compute values of y for initial condition
-void do_initial_data_transform(
-                               Rcpp::NumericVector x
-                               ,const size_t n
-                               ,RcppGSL::vector<double> &y
-                               ,Rcpp::IntegerVector type
-                               ,Rcpp::NumericVector xmin
-                               ,Rcpp::NumericVector xmax
-                               ,int verb
-                               ){
+void do_initial_par_transform(
+                              std::vector<double> &x
+                              ,const size_t n
+                              ,RcppGSL::vector<double> &y
+                              ,Rcpp::IntegerVector type
+                              ,Rcpp::NumericVector xmin
+                              ,Rcpp::NumericVector xmax
+                              ,int verb
+                              ){
 
   size_t i;
   double dtmp1;
@@ -460,14 +460,14 @@ void do_initial_data_transform(
 }
 
 
-void do_data_transformation(
-                            Rcpp::NumericVector x
-                            ,const size_t n
-                            ,Rcpp::NumericVector y
-                            ,Rcpp::IntegerVector type
-                            ,Rcpp::NumericVector xmin
-                            ,Rcpp::NumericVector xmax
-                            ){
+void do_par_transformation(
+                           std::vector<double> &x
+                           ,const size_t n
+                           ,Rcpp::NumericVector y
+                           ,Rcpp::IntegerVector type
+                           ,Rcpp::NumericVector xmin
+                           ,Rcpp::NumericVector xmax
+                           ){
 
 
   size_t i;
@@ -521,14 +521,14 @@ void do_data_transformation(
 }
 
 
-void do_data_transformation_df(
-                               Rcpp::NumericVector dx
-                               ,const size_t n
-                               ,Rcpp::NumericVector y
-                               ,Rcpp::IntegerVector type
-                               ,Rcpp::NumericVector xmin
-                               ,Rcpp::NumericVector xmax
-                               ){
+void do_par_transformation_df(
+                              std::vector<double> &dx
+                              ,const size_t n
+                              ,Rcpp::NumericVector y
+                              ,Rcpp::IntegerVector type
+                              ,Rcpp::NumericVector xmin
+                              ,Rcpp::NumericVector xmax
+                              ){
 
   //Rcpp::NumericVector x
   size_t i;
@@ -598,8 +598,8 @@ static double g(const gsl_vector *y, void *gparams){
   Rcpp::NumericVector xmax = p->xmax;
 
   //double *x = (double *) multimin_alloc(sizeof(double)*n);
-  Rcpp::NumericVector x(n);
-  //std::vector<double> x(n);
+  //Rcpp::NumericVector x(n);
+  std::vector<double> x(n);
 
   // converts y from a gls_vector to a Rcpp vector
   Rcpp::NumericVector z = Rcpp::NumericVector(y->data, y->data + y->size);
@@ -617,7 +617,7 @@ static double g(const gsl_vector *y, void *gparams){
   // variable a different transformation can be selected
 
   // data transf. for x
-  do_data_transformation(x, n, z, type, xmin, xmax);
+  do_par_transformation(x, n, z, type, xmin, xmax);
 
   //Rcpp::Rcout << "Print x:" << std::endl;
   //Rcpp::Rcout << x << std::endl;
@@ -655,21 +655,18 @@ static void dg(const gsl_vector *y, void *gparams, gsl_vector *dg){
   Rcpp::NumericVector xmax = p->xmax;
 
   // x is the guess after the variable transformation
-  Rcpp::NumericVector x(n);
-  //std::vector<double> x(n);
+  //Rcpp::NumericVector x(n);
+  std::vector<double> x(n);
   //double *x = (double *) multimin_alloc(sizeof(double)*n);
 
   // dx is the gradient after the variable transformation
-  Rcpp::NumericVector dx(n);
-  //std::vector<double> dx(n);
+  //Rcpp::NumericVector dx(n);
+  std::vector<double> dx(n);
   //double *dx = (double *) multimin_alloc(sizeof(double)*n);
 
-  Rcpp::NumericVector df(n);
-  //std::vector<double> df(n);
+  //Rcpp::NumericVector df(n);
+  std::vector<double> df(n);
   //double *df = (double *) multimin_alloc(sizeof(double)*n);
-
-
-
 
   // variable transformation
 
@@ -682,10 +679,10 @@ static void dg(const gsl_vector *y, void *gparams, gsl_vector *dg){
   // variable a different transformation can be selected
 
   // data transf. for x
-  do_data_transformation(x, n, z, type, xmin, xmax);
+  do_par_transformation(x, n, z, type, xmin, xmax);
 
   // data transf. for dx
-  do_data_transformation_df(dx, n, z, type, xmin, xmax);
+  do_par_transformation_df(dx, n, z, type, xmin, xmax);
 
   // find the gradient at x and update df with it
   p->df(p->data, n, x, p->fparams, df);
@@ -740,17 +737,17 @@ static void gdg(const gsl_vector *y, void *gparams, double *g, gsl_vector *dg){
 
 
   // x is the guess after the variable transformation
-  Rcpp::NumericVector x(n);
-  //std::vector<double> x(n);
+  //Rcpp::NumericVector x(n);
+  std::vector<double> x(n);
   //double *x = (double *) multimin_alloc(sizeof(double)*n);
 
   // dx is the gradient after the variable transformation
-  Rcpp::NumericVector dx(n);
-  //std::vector<double> dx(n);
+  //Rcpp::NumericVector dx(n);
+  std::vector<double> dx(n);
   //double *dx = (double *) multimin_alloc(sizeof(double)*n);
 
-  Rcpp::NumericVector df(n);
-  //std::vector<double> df(n);
+  //Rcpp::NumericVector df(n);
+  std::vector<double> df(n);
   //double *df = (double *) multimin_alloc(sizeof(double)*n);
 
   // variable transformation
@@ -764,18 +761,18 @@ static void gdg(const gsl_vector *y, void *gparams, double *g, gsl_vector *dg){
   // variable a different transformation can be selected
 
   // data transf. for x
-  do_data_transformation(x, n, z, type, xmin, xmax);
   Rprintf("z - initial guess - before par transf \n");
   for(i=0;i<n;i++){
     Rprintf("# z[%d]= %.2f\n", i,  z[i]);
   }
+  do_par_transformation(x, n, z, type, xmin, xmax);
   Rprintf("x - inside gdg - after par transf \n");
   for(i=0;i<n;i++){
     Rprintf("# x[%d]= %.2f\n", i,  x[i]);
   }
 
   // data transf. for dx
-  do_data_transformation_df(dx, n, z, type, xmin, xmax);
+  do_par_transformation_df(dx, n, z, type, xmin, xmax);
   Rprintf("dx - inside gdg - after par transf \n");
   for(i=0;i<n;i++){
     Rprintf("#dx[%d]= %.2f\n", i, dx[i]);
@@ -1152,16 +1149,16 @@ struct multimin_algorithm choose_algorithm(unsigned int method
 //       unsigned verbosity
 //           if greater then 0 print info on intermediate steps
 void multimin(
-              Rcpp::NumericVector data
+              std::vector<double> &data
               ,size_t n
-              ,Rcpp::NumericVector x
+              ,std::vector<double> &x
               ,double *fun
               ,Rcpp::IntegerVector type
               ,Rcpp::NumericVector xmin
               ,Rcpp::NumericVector xmax
-              ,void (*f)    (Rcpp::NumericVector, const size_t, Rcpp::NumericVector, void *, double *)
-              ,void (* df)  (Rcpp::NumericVector, const size_t, Rcpp::NumericVector, void *, Rcpp::NumericVector)
-              ,void (* fdf) (Rcpp::NumericVector, const size_t, Rcpp::NumericVector, void *, double *, Rcpp::NumericVector)
+              ,void (*f)    (std::vector<double>&, const size_t, std::vector<double>&, void *, double *)
+              ,void (* df)  (std::vector<double>&, const size_t, std::vector<double>&, void *, std::vector<double> &)
+              ,void (* fdf) (std::vector<double>&, const size_t, std::vector<double>&, void *, double *, std::vector<double> &)
               ,void *fparams
               ,const struct multimin_params oparams
               ,int verb
@@ -1213,8 +1210,9 @@ void multimin(
     }
   }
 
-  // make transformation on the x ranges compute values of y for initial condition
-  do_initial_data_transform(x, n, y, type, xmin, xmax, verb);
+  // make transformation to the x initial values to the ranges allowed,
+  // store those on y
+  do_initial_par_transform(x, n, y, type, xmin, xmax, verb);
 
   /* -------------------------------------------- */
 
@@ -1417,11 +1415,13 @@ void multimin(
     }
     /* +++++++++++++++++++++++++++++++++++++++++++++++ */
 
-    }
+  }
 
   // convert values from RcppGSL y to NumericVector z
   Rcpp::NumericVector z = Rcpp::NumericVector(y->data, y->data + y->size);
-  do_data_transformation(x, n, z, type, xmin, xmax);
+
+  // inverse transform the z values to x original values
+  do_par_transformation(x, n, z, type, xmin, xmax);
 
 
   /* --- OUPUT ---------------------------------- */

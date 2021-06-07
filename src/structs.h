@@ -14,7 +14,7 @@ struct multimin_params {
 struct g_params {
 
   // sample to estimate the parameters/variables (rows)
-  Rcpp::NumericVector data;
+  std::vector<double> data;
 
   // dimension of the problem (number of parameters/variables) (columns)
   size_t n;
@@ -38,7 +38,7 @@ struct g_params {
   // initial guess pointer - is substituted by the final solution's position
   // parameters to the minimization problem
   // solution - minimum value obtained
-  void (*f) (Rcpp::NumericVector, const size_t, Rcpp::NumericVector, void *, double *);
+  void (*f) (std::vector<double>&, const size_t, std::vector<double>&, void *, double *);
 
   // *df - derivative of the function to be minimized
   // Arguments, on this order, are
@@ -47,10 +47,10 @@ struct g_params {
   // initial guess pointer - is substituted by the final solution's position
   // parameters to the minimization problem
   // solution - minimum value obtained
-  void (* df) (Rcpp::NumericVector, const size_t, Rcpp::NumericVector, void *, Rcpp::NumericVector);
+  void (* df) (std::vector<double>&, const size_t, std::vector<double>&, void *, std::vector<double>&);
 
   // combination of f and df
-  void (* fdf) (Rcpp::NumericVector, const size_t, Rcpp::NumericVector, void *, double *, Rcpp::NumericVector);
+  void (* fdf) (std::vector<double>&, const size_t, std::vector<double>&, void *, double *, std::vector<double>&);
 
   // parameters for the functions
   void *fparams;

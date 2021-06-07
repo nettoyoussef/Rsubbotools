@@ -20,16 +20,16 @@
 #include "structs.h"
 
 void multimin(
-              Rcpp::NumericVector data
+              std::vector<double> data
               ,size_t n
-              ,Rcpp::NumericVector x
+              ,std::vector<double> x
               ,double *fun
               ,Rcpp::IntegerVector type
               ,Rcpp::NumericVector xmin
               ,Rcpp::NumericVector xmax
-              ,void (*f)    (Rcpp::NumericVector, const size_t, Rcpp::NumericVector, void *, double *)
-              ,void (* df)  (Rcpp::NumericVector, const size_t, Rcpp::NumericVector, void *, Rcpp::NumericVector)
-              ,void (* fdf) (Rcpp::NumericVector, const size_t, Rcpp::NumericVector, void *, double *, Rcpp::NumericVector)
+              ,void (*f)    (std::vector<double> &, const size_t, std::vector<double> &, void *, double *)
+              ,void (* df)  (std::vector<double> &, const size_t, std::vector<double> &, void *, std::vector<double> &)
+              ,void (* fdf) (std::vector<double> &, const size_t, std::vector<double> &, void *, double *, std::vector<double> &)
               ,void *fparams
               ,const struct multimin_params oparams
               ,int verb
