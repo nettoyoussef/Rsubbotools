@@ -20,9 +20,9 @@
 #include "structs.h"
 
 void multimin(
-              std::vector<double> data
+              std::vector<double> &data
               ,size_t n
-              ,std::vector<double> x
+              ,std::vector<double> &x
               ,double *fun
               ,Rcpp::IntegerVector type
               ,Rcpp::NumericVector xmin
