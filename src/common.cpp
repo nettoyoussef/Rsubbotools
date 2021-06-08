@@ -169,13 +169,13 @@ void check_new_minimum(
     // differentiate the global minimum
     if(verb > 1){
 
-      int n = data.size();
+      int n = par.size();
 
       Rprintf("#>>> [%+.3e:%+.3e]", data[i], data[i+1]);
       for(int tmp=0; tmp < n;tmp++){
         Rprintf(" par[%d]= %e", tmp, par[i]);
       }
-      Rprintf(" ll= %e\n", *fmin);
+      Rprintf(" ll= %e\n\n", *fmin);
     }
   }else{
     // print results
