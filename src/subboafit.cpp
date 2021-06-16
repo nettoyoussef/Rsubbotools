@@ -231,7 +231,8 @@ RcppGSL::Matrix subboa_varcovar(const Rcpp::NumericVector par, const size_t N, c
   // set the var-covar matrix
   for(i=0;i<dim;i++){
     for(j=0;j<i;j++){
-      I(i,j) = I(i,j)/sqrt(I(i,i)*I(j,j));
+      I(i,j) =
+        gsl_matrix_get(I,i,j)/sqrt(gsl_matrix_get(I,i,i)*gsl_matrix_get(I,j,j));
     }
 
   }
@@ -247,7 +248,7 @@ RcppGSL::Matrix subboa_varcovar(const Rcpp::NumericVector par, const size_t N, c
 
   for(i=0;i<dim;i++){
     for(j=i;j<dim;j++){
-      I(i,j) = I(i,j)/N;
+      I(i,j) = gsl_matrix_get(I,i,j)/N;
     }
 
   }

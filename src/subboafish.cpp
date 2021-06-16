@@ -57,16 +57,15 @@ Rcpp::List subboafish(
   int signum;
 
   // the order is bl,br,al,ar,m
-  const double A = al*B0(bl)+ar*B0(br);
-
-  const double B0l = B0(bl);
-  const double B0r = B0(br);
-  const double B1l = B1(bl);
-  const double B1r = B1(br);
-  const double B2l = B2(bl);
-  const double B2r = B2(br);
-  const double dB0ldx = dB0dx(bl);
-  const double dB0rdx = dB0dx(br);
+  const double A       = al*B0(bl)+ar*B0(br);
+  const double B0l     = B0(bl);
+  const double B0r     = B0(br);
+  const double B1l     = B1(bl);
+  const double B1r     = B1(br);
+  const double B2l     = B2(bl);
+  const double B2r     = B2(br);
+  const double dB0ldx  = dB0dx(bl);
+  const double dB0rdx  = dB0dx(br);
   const double dB0ldx2 = dB0dx2(bl);
   const double dB0rdx2 = dB0dx2(br);
 
@@ -75,30 +74,36 @@ Rcpp::List subboafish(
                             B2l/bl -2*B1l/(bl*bl)+2*B0l/pow(bl,3))/A;
 
   // bl - br
-  I(0,1) = I(1,0) = -al*ar*dB0ldx*dB0rdx/(A*A);
+  I(0,1) = -al*ar*dB0ldx*dB0rdx/(A*A);
+  I(1,0) = gsl_matrix_get(I,0,1);
 
   // bl - al
-  I(0,2) = I(2,0) = dB0ldx/A-al*B0l*dB0ldx/(A*A)-B1l/A;
+  I(0,2) = dB0ldx/A-al*B0l*dB0ldx/(A*A)-B1l/A;
+  I(2,0) = gsl_matrix_get(I,0,2);
 
   // bl - ar
-  I(0,3) = I(3,0) = -al*B0r*dB0ldx/(A*A);
+  I(0,3) = -al*B0r*dB0ldx/(A*A);
+  I(3,0) = gsl_matrix_get(I,0,3);
 
   // br - br
   I(1,1) = ar*(dB0rdx2-ar*dB0rdx*dB0rdx/A +
                             B2r/br -2*B1r/(br*br)+2*B0r/pow(br,3))/A ;
 
   // br - al
-  I(1,2) = I(2,1) = -ar*B0l*dB0rdx/(A*A);
+  I(1,2) = -ar*B0l*dB0rdx/(A*A);
+  I(2,1) = gsl_matrix_get(I,1,2);
 
   // br - ar
-  I(1,3) = I(3,1) = dB0rdx/A-ar*B0r*dB0rdx/(A*A)-B1r/A;
+  I(1,3) = dB0rdx/A-ar*B0r*dB0rdx/(A*A)-B1r/A;
+  I(3,1) = gsl_matrix_get(I,1,3);
 
   // al parameter
   // al - al
   I(2,2) = -B0l*B0l/(A*A)+(bl+1)*B0l/(al*A);
 
   // al - ar
-  I(2,3) = I(3,2) = -B0l*B0r/(A*A);
+  I(2,3) = -B0l*B0r/(A*A);
+  I(3,2) = gsl_matrix_get(I,2,3);
 
   // ar parameter
   // ar - ar
@@ -107,16 +112,20 @@ Rcpp::List subboafish(
   if(!O_munknown){
 
     // bl - m
-    I(0,4) = I(4,0) = (log(bl)-M_EULER)/(bl*A);
+    I(0,4) = (log(bl)-M_EULER)/(bl*A);
+    I(4,0) = gsl_matrix_get(I,0,4);
 
     // br - m
-    I(1,4) = I(4,1) = -(log(br)-M_EULER)/(br*A);
+    I(1,4) = -(log(br)-M_EULER)/(br*A);
+    I(4,1) = gsl_matrix_get(I,1,4);
 
     // al - m
-    I(2,4) = I(4,2) = -bl/(al*A);
+    I(2,4) = -bl/(al*A);
+    I(4,2) = gsl_matrix_get(I,2,4);
 
     // ar - m
-    I(3,4) = I(4,3) = br/(ar*A);
+    I(3,4) = br/(ar*A);
+    I(4,3) = gsl_matrix_get(I,3,4);
 
     const double dt1l = gsl_sf_gamma (2.-1/bl);
     const double dt1r = gsl_sf_gamma (2.-1/br);
@@ -132,8 +141,6 @@ Rcpp::List subboafish(
     par = Rcpp::CharacterVector::create("bl", "br", "al", "ar");
   }
 
-
-
   // invert I; in J store temporary LU decomp.
   gsl_matrix_memcpy (J,I);
   gsl_linalg_LU_decomp (J,P,&signum);
@@ -147,7 +154,7 @@ Rcpp::List subboafish(
 
   // add name of parameters
   Rcpp::DataFrame dt =
-    Rcpp::DataFrame::create( Rcpp::Named("par") = par
+    Rcpp::DataFrame::create( Rcpp::Named("par")     = par
                             ,Rcpp::Named("std_err") = std_err
                             );
 
@@ -160,13 +167,13 @@ Rcpp::List subboafish(
     Rcpp::as<Rcpp::NumericMatrix>(Rcpp::wrap(invI));
 
   // add names for the matrices
-  colnames(infmatrix) = par;
+  colnames(infmatrix)     = par;
   colnames(inv_infmatrix) = par;
 
   Rcpp::List ans =
     Rcpp::List::create(
-                       Rcpp::Named("std_error") = dt
-                       ,Rcpp::Named("infmatrix") = infmatrix
+                       Rcpp::Named("std_error")      = dt
+                       ,Rcpp::Named("infmatrix")     = infmatrix
                        ,Rcpp::Named("inv_infmatrix") = inv_infmatrix
                        );
 
