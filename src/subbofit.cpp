@@ -1,3 +1,24 @@
+/*
+  subbofit (ver. 1.2.1) -- Fit a power exponential density via maximum likelihood
+
+  Copyright (C) 2007-2014 Giulio Bottazzi
+  Copyright (C) 2020-2021 Elias Youssef Haddad Netto
+
+  This program is free software; you can redistribute it and/or
+  modify it under the terms of the GNU General Public License
+  (version 2) as published by the Free Software Foundation;
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+*/
+
+
 
 //Main headers
 
@@ -547,78 +568,98 @@ Rcpp::List optim_method_moments(
   return ans;
 }
 
-//' subbofit
+
+
 //' Fit a power exponential density via maximum likelihood
 //'
-//'   Verbosity levels:
-//'   0 just the final ouput
-//'   1 the results of intermediate steps
-//'   2 internal information on intermediate steps
-//'   3 gory details on intermediate steps
+//' \code{subbofit} returns the parameters, standard errors. negative
+//' log-likelihood and covariance matrix of the Subbotin Distribution for a
+//' sample. The process can execute three steps, dependending on the level of
+//' accuracy required. See details below.
 //'
-//' Fit symmetric power exponential density. Read from files of from standard input
-//' Usage: %s [options] [files]
-//' Options:
-//'  -O  output type (default 0)
-//'       0  parameter b a m and log-likelihood
-//'       1  the estimated distribution function computed on the provided points
-//'       2  the estimated density function computed on the provided points
-//'       3  parameters b a m and their standard errors
-//'  -x  set initial conditions b, a,m  (default 2, 1,0)
-//'  -m  the mode is not estimated but is set to the value provided
-//'  -s  number of intervals to explore at each iteration (default 10)
-//'  -V  verbosity level (default 0)
-//'       0  just the final result
-//'       1  headings and summary table
-//'       2  intermediate steps results
-//'       3  intermediate steps internals
-//'       4+  details of optim. routine
-//'  -M  active estimation steps. The value is the sum of (default 7)
-//'       1  initial estimation based on method of moments
-//'       2  global optimization not considering lack of smoothness in m
-//'       4  local optimization taking non-smoothness in m into consideration
-//'  -G  set global optimization options. Fields are step, tol, iter, eps, msize, algo.
-//'      Empty field implies default (default .1, 1e-2, 100, 1e-3, 1e-5, 3)
-//'  -I  set local optimization options. Fields are step, tol, iter, eps, msize, algo.
-//'      Empty field implies default (default .01, 1e-4, 200, 1e-4, 1e-5, 5)
-//' The optimization parameters are
-//'  step  initial step size of the searching algorithm
-//'  tol  line search tolerance iter: maximum number of iterations
-//'  eps  gradient tolerance : stopping criteria ||gradient||<eps
-//'  msize  simplex max size : stopping criteria ||max edge||<msize
-//'  algo  optimization methods:
-//'          0 Fletcher-Reeves
-//'          1 Polak-Ribiere
-//'          2 Broyden-Fletcher-Goldfarb-Shanno
-//'          3 Steepest descent
-//'          4 Nelder-Mead simplex
-//'          5 Broyden-Fletcher-Goldfarb-Shanno ver.2
 //'
-//' Examples:
-//'  'subbofit -m 1 -M 6 <file'  estimate a and b with m = 1 and skipping initial
-//'                              method of moments estimation
+//' The Subbotin distribution is a exponential power distribution controlled
+//' by three parameters, with formula:
+//' \deqn{f(x;a,b,m) = \frac{1}{A} e^{-\frac{1}{b} |\frac{x-m}{a}|^b}}
+//' with:
+//' \deqn{A = 2ab^{1/b}\Gamma(1+1/b)}
+//' where \eqn{a} is a scale parameter, \eqn{b} controls the tails (lower values
+//' represent fatter tails), and \eqn{m} is a location parameter. Due to its
+//' simmetry, the equations are simple enough to be estimated by the method of
+//' moments, which produce rough estimations that should be used only for first
+//' explorations. The maximum likelihood global estimation improves on this
+//' initial guess by using a optimization routine, defaulting to the
+//' Broyden-Fletcher-Goldfarb-Shanno method. However, due to the lack of
+//' smoothness of this function on the \eqn{m} parameter (derivatives are zero
+//' whenever \eqn{m} equals a sample observation), an exhaustive search must be
+//' done by redoing the previous step in all intervals between two observations.
+//' For a sample of \eqn{n} observations, this would lead to \eqn{n-1}
+//' optimization problems. Given the computational cost of such procedure,
+//' an interval search is used, where the optimization is repeated in the
+//' intervals at most the value of the \emph{interv_step} from the last
+//' minimum found. Details on this method are available on the package vignette.
 //'
-//' methods of estimation
-//' 0 - no minimization
-//' 1 - method of moments
-//' 2 - global optimization
-//' 4 - interval optimization
-//' interv_step number of intervals to expose
-//' interv_step number of intervals to expose
-//' par - par[0] = b par[1] = a par[2] = m */
-//' itv_opt_par - interval optimization parameters */
+//' @param data (NumericVector) - the sample used to fit the distribution.
+//' @param verb (int) - the level of verbosity. Select one of:
+//' * 0  just the final result
+//' * 1  headings and summary table
+//' * 2  intermediate steps results
+//' * 3  intermediate steps internals
+//' * 4+  details of optim. routine
+//' @param method int - the steps that should be used to estimate the
+//' parameters.
+//' * 0 no optimization perform - just return the log-likelihood from initial guess.
+//' * 1 initial estimation based on method of moments
+//' * 2 global optimization not considering lack of smoothness in m
+//' * 3 interval optimization taking non-smoothness in m into consideration
+//' @param interv_step  int - the number of intervals to be explored after
+//' the last minimum was found in the interval optimization. Default is 10.
+//' @param provided_m_ NumericVector - if NULL, the m parameter is estimated
+//' by the routine. If numeric, the estimation fixes m to the given value.
+//' @param par NumericVector - vector containing the initial guess for
+//' parameters b, a and m, respectively. Default values of are c(2, 1, 0).
+//' @param g_opt_par NumericVector - vector containing the global optimization
+//' parameters.
+//' The optimization parameters are:
+//' * step  - (num) initial step size of the searching algorithm.
+//' * tol   - (num) line search tolerance.
+//' * iter  - (int) maximum number of iterations.
+//' * eps   - (num) gradient tolerance. The stopping criteria is \eqn{||\text{gradient}||<\text{eps}}.
+//' * msize - (num) simplex max size. stopping criteria given by \eqn{||\text{max edge}||<\text{msize}}
+//' * algo  - (int) algorithm. the optimization method used:
+//'   * 0 Fletcher-Reeves
+//'   * 1 Polak-Ribiere
+//'   * 2 Broyden-Fletcher-Goldfarb-Shanno
+//'   * 3 Steepest descent
+//'   * 4 Nelder-Mead simplex
+//'   * 5 Broyden-Fletcher-Goldfarb-Shanno ver.2
+//'
+//' Details for each algorithm are available on the [GSL Manual](https://www.gnu.org/software/gsl/doc/html/multimin.html).
+//' Default values are c(.1, 1e-2, 100, 1e-3, 1e-5, 3,0).
+//' @param itv_opt_par NumericVector - interval optimization parameters. Fields
+//' are the same as the ones for the global optimization. Default values
+//' are c(.01, 1e-3, 200, 1e-3, 1e-5, 5, 0).
+//' @return a list containing the following items:
+//' * "dt" - dataset containing parameters estimations and standard deviations.
+//' * "log-likelihood" - negative log-likelihood value.
+//' * "matrix" - the covariance matrix for the parameters.
+//'
+//' @examples
+//' sample_subbo <- rpower(1000, 1, 2)
+//' subbofit(sample_subbo)
+//' @export
+//' @md
 // [[Rcpp::export]]
 Rcpp::List subbofit(
               Rcpp::NumericVector data
              ,int verb = 0
-             ,int method = 7
+             ,int method = 3
              ,int interv_step = 10
-             ,int output = 0
              ,Rcpp::Nullable<Rcpp::NumericVector> provided_m_ = R_NilValue
              ,Rcpp::NumericVector par = Rcpp::NumericVector::create(2.,1.,0.)
-             ,Rcpp::NumericVector g_opt_par = Rcpp::NumericVector::create(.1, 1e-2, 100, 1e-3, 1e-5, 3,0)
-             ,Rcpp::NumericVector itv_opt_par = Rcpp::NumericVector::create(.01, 1e-3, 200, 1e-3, 1e-5, 5,0)
-             ){
+             ,Rcpp::NumericVector g_opt_par = Rcpp::NumericVector::create(.1, 1e-2, 100, 1e-3, 1e-5, 3)
+             ,Rcpp::NumericVector itv_opt_par = Rcpp::NumericVector::create(.01, 1e-3, 200, 1e-3, 1e-5, 5)
+                    ){
 
   // check arguments
   int check_par_size = par.size();
@@ -763,7 +804,7 @@ Rcpp::List subbofit(
     /* interval optimization  */
     /* ---------------------- */
 
-    if(method >= 4){
+    if(method >= 3){
 
       g_opt_results =
         interval_optim(

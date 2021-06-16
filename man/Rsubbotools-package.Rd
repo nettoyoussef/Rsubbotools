@@ -13,7 +13,7 @@ estimation of the symmetric and asymmetric power exponential,
     exponential distributions.
 }
 \author{
-\strong{Maintainer}: Elias Haddad \email{eliasyhnetto@gmail.com} (\href{https://orcid.org/0000-0003-1863-1022}{ORCID})
+\strong{Maintainer}: Elias Haddad \email{eliasynetto@gmail.com} (\href{https://orcid.org/0000-0003-1863-1022}{ORCID})
 
 Authors:
 \itemize{

@@ -8,7 +8,6 @@ struct multimin_params {
   double epsabs;
   double maxsize;
   unsigned method;
-  unsigned verbosity;
 };
 
 struct g_params {

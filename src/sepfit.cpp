@@ -3,6 +3,7 @@
   likelihood maximization
 
   Copyright (C) 2007-2014 Giulio Bottazzi
+  Copyright (C) 2020-2021 Elias Youssef Haddad Netto
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -341,44 +342,69 @@ void sep_objfdf(Rcpp::NumericVector data, const size_t n, Rcpp::NumericVector x,
 /*---------------- */
 
 
-// short help*/
-// Fit skewed power exponential density. Read data from files or from standard input\n");
-// Usage: %s [options] [files]\n\n",argv[0]);
-//  Options:                                                            \n");
-//  -O  output type (default 0)                \n");
-//       0  parameter estimates and log-likelihood   \n");
-//       1  the estimated distribution function computed on the provided points     \n");
-//       2  the estimated density function computed on the provided points \n");
-//       3  parameters estimates and their standard errors \n");
-//  -x  set initial conditions mu,sigma.lambda,alpha  (default 0,1,0,2)\n");
-//  -V  verbosity level (default 0)           \n");
-//       0  just the final result        \n");
-//       1  headings and summary table   \n");
-//       2  intermediate steps results   \n");
-//       3  intermediate steps internals \n");
-//       4+  details of optim. routine   \n");
-//  -G  set global optimization options. Fields are step,tol,iter,eps,msize,algo.\n");
-//      Empty field implies default (default .1,1e-2,100,1e-3,1e-5,2)\n");
-// The optimization parameters are");
-// step  initial step size of the searching algorithm                  \n");
-//  tol  line search tolerance iter: maximum number of iterations      \n");
-// eps  gradient tolerance : stopping criteria ||gradient||<eps       \n");
-//  msize  simplex max size : stopping criteria ||max edge||<msize     \n");
-// algo  optimization methods: 0 Fletcher-Reeves, 1 Polak-Ribiere,     \n");
-//        2 Broyden-Fletcher-Goldfarb-Shanno, 3 Steepest descent,           \n");
-// 4 Nelder-Mead simplex, 5 Broyden-Fletcher-Goldfarb-Shanno ver.2   \n");
-// Examples:\n");
-// 'sepfit -O 4 < file'  point estimates with standard errors  \n");
+//' Fit a Skewed Exponential Power density via maximum likelihood
+//'
+//' \code{sepfit} returns the parameters, standard errors. negative
+//' log-likelihood and covariance matrix of the skewed power exponential
+//' for a sample. The process performs a global minimization over the negative
+//' log-likelihood function. See details below.
+//'
+//' The  SEP is a exponential power distribution controlled
+//' by four parameters, with formula:
+//' \deqn{ f(x; \mu, \alpha, \lambda, \sigma) =
+//' 2 \Phi(w) e^{-|z|^\alpha/\alpha}/ ( \sigma C)}
+//' where:
+//' \deqn{z = (x-\mu)/\sigma}
+//' \deqn{w = sign(z) |z|^{(\alpha/2)} \lambda \sqrt{2/\alpha}}
+//' \deqn{C = 2 \alpha^{(1/\alpha-1)} \Gamma(1/\alpha)}
+//' with \eqn{\Phi} the cumulative normal distribution with mean zero and variance
+//' one.
+//' Details on this method are available on the package vignette.
+//'
+//' @param data (NumericVector) - the sample used to fit the distribution.
+//' @param verb (int) - the level of verbosity. Select one of:
+//' * 0  just the final result
+//' * 1  headings and summary table
+//' * 2  intermediate steps results
+//' * 3  intermediate steps internals
+//' * 4+  details of optim. routine
+//' @param par NumericVector - vector containing the initial guess for
+//' parameters mu, sigma, lambda and alpha, respectively. Default values of are
+//' c(0, 1, 0, 2).
+//' @param g_opt_par NumericVector - vector containing the global optimization
+//' parameters.
+//' The optimization parameters are:
+//' * step  - (num) initial step size of the searching algorithm.
+//' * tol   - (num) line search tolerance.
+//' * iter  - (int) maximum number of iterations.
+//' * eps   - (num) gradient tolerance. The stopping criteria is \eqn{||\text{gradient}||<\text{eps}}.
+//' * msize - (num) simplex max size. stopping criteria given by \eqn{||\text{max edge}||<\text{msize}}
+//' * algo  - (int) algorithm. the optimization method used:
+//'   * 0 Fletcher-Reeves
+//'   * 1 Polak-Ribiere
+//'   * 2 Broyden-Fletcher-Goldfarb-Shanno
+//'   * 3 Steepest descent
+//'   * 4 Nelder-Mead simplex
+//'   * 5 Broyden-Fletcher-Goldfarb-Shanno ver.2
+//'
+//' Details for each algorithm are available on the [GSL Manual](https://www.gnu.org/software/gsl/doc/html/multimin.html).
+//' Default values are c(.1, 1e-2, 100, 1e-3, 1e-5, 2).
+//' @return a list containing the following items:
+//' * "dt" - dataset containing parameters estimations and standard deviations.
+//' * "log-likelihood" - negative log-likelihood value.
+//' * "matrix" - the covariance matrix for the parameters.
+//'
+//' @examples
+//' sample_subbo <- rpower(1000, 1, 2)
+//' sepfit(sample_subbo)
+//' @export
+//' @md
 // [[Rcpp::export]]
 Rcpp::List sepfit(
                   Rcpp::NumericVector data
                   ,int verb = 0
-                  ,int method = 7
-                  ,int interv_step = 10
-                  ,int output = 0
-                  ,Rcpp::Nullable<Rcpp::NumericVector> provided_m_ = R_NilValue
                   ,Rcpp::NumericVector par = Rcpp::NumericVector::create(0., 1., 0., 2.)
-                  ,Rcpp::NumericVector g_opt_par = Rcpp::NumericVector::create(.1, 1e-2, 100, 1e-3, 1e-5, 2,0)
+                  ,Rcpp::NumericVector g_opt_par = Rcpp::NumericVector::create(.1, 1e-2, 100, 1e-3, 1e-5, 2)
                   ){
 
 
@@ -390,7 +416,8 @@ Rcpp::List sepfit(
 
   if(par[1]<=0 || par[3]<=0){
     Rcpp::stop("initial values for sigma and alpha should be positive\n");
-  }
+
+}
 
   /* initial values */
   /* -------------- */

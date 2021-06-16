@@ -1,4 +1,22 @@
+/*
+  subbolafit (ver. 1.2.1) -- Fit a (less) asymmetric power exponential distribution
 
+  Copyright (C) 2003 Giulio Bottazzi
+  Copyright (C) 2020-2021 Elias Youssef Haddad Netto
+
+  This program is free software; you can redistribute it and/or
+  modify it under the terms of the GNU General Public License
+  (version 2) as published by the Free Software Foundation;
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+*/
 
 
 #include "common.h"
@@ -296,64 +314,102 @@ void subbola_objfdf(Rcpp::NumericVector data, const size_t n, Rcpp::NumericVecto
 /*---------------- */
 
 
-// subbolafit (ver. 1.2.1) -- Fit a (less) asymmetric power exponential distribution
-// Copyright (C) 2003 Giulio Bottazzi
-//
-//
-//
-// Verbosity levels:
-// 0 just the final ouput
-// 1 the results of intermediate steps
-// 2 internal information on intermediate steps
-// 3 gory details on intermediate steps
-//
 
-//' short help*/
-//' Fit skewed power exponential density. Read from files or from standard input    \n\n");
-//' Usage: %s [options] [files]\n\n",argv[0]);
-//'  Options:                                                            \n");
-//'  -O  output type (default 0)                \n");
-//'       0  parameter bl br a m and log-likelihood   \n");
-//'       1  the estimated distribution function computed on the provided points     \n");
-//'       2  the estimated density function computed on the provided points \n");
-//'  -x  set initial conditions bl,br,a,m  (default 2,2,1,1,0)\n");
-//'  -m  the mode is not estimated but is set to the value provided\n");
-//'  -s  number of intervals to explore at each iteration (default 10)\n");
-//'  -V  verbosity level (default 0)           \n");
-//'       0  just the final result        \n");
-//'       1  intermediate steps results   \n");
-//'       2  intermediate steps internals \n");
-//'       3+  details of optim. routine   \n");
-//'  -M  active estimation steps. The value is the sum of (default 1)\n");
-//'       0  no optimization\n");
-//'       1  global and local optimization \n");
-//'  -G  set global optimization options. Fields are step,tol,iter,eps,msize,algo.\n");
-//'      Empty field implies default (default .1,1e-2,100,1e-3,1e-5,2)\n");
-//'  -I  set local optimization options. Fields are step,tol,iter,eps,msize,algo.\n");
-//'      Empty field implies default (default .01,1e-3,200,1e-3,1e-5,2)\n");
-//' The optimization parameters are");
-//'  step  initial step size of the searching algorithm                  \n");
-//'  tol  line search tolerance iter: maximum number of iterations      \n");
-//'  eps  gradient tolerance : stopping criteria ||gradient||<eps       \n");
-//'  msize  simplex max size : stopping criteria ||max edge||<msize     \n");
-//'  algo  optimization methods: 0 Fletcher-Reeves, 1 Polak-Ribiere,     \n");
-//'        2 Broyden-Fletcher-Goldfarb-Shanno, 3 Steepest descent,           \n");
-//'        4 Nelder-Mead simplex, 5 Broyden-Fletcher-Goldfarb-Shanno ver.2   \n");
-//' Examples:\n");
-//'  'subbolafit -m 1 <file'  estimate bl,br,a with m=1\n");
+//' Fit a (Less) Asymmetric Power Exponential density via maximum likelihood
+//'
+//' \code{subbolafit} returns the parameters, standard errors. negative
+//' log-likelihood and covariance matrix of the (less) asymmetric power exponential
+//' for a sample. The main difference from \code{subboafit} is that
+//' \eqn{a_l = a_r = a}. The process can execute two steps, dependending on the
+//' level of accuracy required. See details below.
+//'
+//' The  LAPE is a exponential power distribution controlled
+//' by four parameters, with formula:
+//' \deqn{ f(x;a,b_l,b_r,m) =
+//' \begin{cases}
+//' \frac{1}{A} e^{- \frac{1}{b_l} |\frac{x-m}{a}|^{b_l} }, & x < m \\
+//' \frac{1}{A} e^{- \frac{1}{b_r} |\frac{x-m}{a}|^{b_r} }, & x > m
+//' \end{cases} }
+//' with:
+//' \deqn{A = ab_l^{1/b_l}\Gamma(1+1/b_l) + ab_r^{1/b_r}\Gamma(1+1/b_r)}
+//' where \eqn{l} and \eqn{r} represent left and right tails, \eqn{a} is a
+//' scale parameter, \eqn{b*} control the tails (lower values represent
+//' fatter tails), and \eqn{m} is a location parameter. Due to its lack of
+//' simmetry, and differently from the Subbotin, there is no simple equations
+//' available to use the method of moments, so we start directly by minimizing
+//' the negative log-likelihood. This global optimization is executed without
+//' restricting any parameters. If required (default), after the global
+//' optimization is finished, the method proceeds to iterate over the intervals
+//' between several two observations, iterating the same algorithm of the
+//' global optimization. The last method happens because of the lack of
+//' smoothness on the \eqn{m} parameter, and intervals must be used since the
+//' likelihood function doesn't have a derivative whenever \eqn{m} equals a
+//' sample observation. Due to the cost, these iterations are capped at most
+//' \emph{interv_step} (default 10) from the last minimum observed.
+//' Details on this method are available on the package vignette.
+//'
+//' @param data (NumericVector) - the sample used to fit the distribution.
+//' @param verb (int) - the level of verbosity. Select one of:
+//' * 0  just the final result
+//' * 1  headings and summary table
+//' * 2  intermediate steps results
+//' * 3  intermediate steps internals
+//' * 4+  details of optim. routine
+//' @param method int - the steps that should be used to estimate the
+//' parameters.
+//' * 0 no optimization perform - just return the log-likelihood from initial guess.
+//' * 1 global optimization not considering lack of smoothness in m
+//' * 2 interval optimization taking non-smoothness in m into consideration
+//' @param interv_step  int - the number of intervals to be explored after
+//' the last minimum was found in the interval optimization. Default is 10.
+//' @param provided_m_ NumericVector - if NULL, the m parameter is estimated
+//' by the routine. If numeric, the estimation fixes m to the given value.
+//' @param par NumericVector - vector containing the initial guess for
+//' parameters bl, br, a and m, respectively. Default values of are
+//' c(2, 2, 1, 0).
+//' @param g_opt_par NumericVector - vector containing the global optimization
+//' parameters.
+//' The optimization parameters are:
+//' * step  - (num) initial step size of the searching algorithm.
+//' * tol   - (num) line search tolerance.
+//' * iter  - (int) maximum number of iterations.
+//' * eps   - (num) gradient tolerance. The stopping criteria is \eqn{||\text{gradient}||<\text{eps}}.
+//' * msize - (num) simplex max size. stopping criteria given by \eqn{||\text{max edge}||<\text{msize}}
+//' * algo  - (int) algorithm. the optimization method used:
+//'   * 0 Fletcher-Reeves
+//'   * 1 Polak-Ribiere
+//'   * 2 Broyden-Fletcher-Goldfarb-Shanno
+//'   * 3 Steepest descent
+//'   * 4 Nelder-Mead simplex
+//'   * 5 Broyden-Fletcher-Goldfarb-Shanno ver.2
+//'
+//' Details for each algorithm are available on the [GSL Manual](https://www.gnu.org/software/gsl/doc/html/multimin.html).
+//' Default values are c(.1, 1e-2, 100, 1e-3, 1e-5, 2).
+//' @param itv_opt_par NumericVector - interval optimization parameters. Fields
+//' are the same as the ones for the global optimization. Default values
+//' are c(.01, 1e-3, 200, 1e-3, 1e-5, 2).
+//' @return a list containing the following items:
+//' * "dt" - dataset containing parameters estimations and standard deviations.
+//' * "log-likelihood" - negative log-likelihood value.
+//' * "matrix" - the covariance matrix for the parameters.
+//'
+//' @examples
+//' sample_subbo <- rpower(1000, 1, 2)
+//' subbolafit(sample_subbo)
+//' @export
+//' @md
 // [[Rcpp::export]]
 Rcpp::List subbolafit(
                       Rcpp::NumericVector data
-                     ,int verb = 0
-                     ,int method = 7
-                     ,int interv_step = 10
-                     ,int output = 0
-                     ,Rcpp::Nullable<Rcpp::NumericVector> provided_m_ = R_NilValue
-                     ,Rcpp::NumericVector par = Rcpp::NumericVector::create(2., 2., 1., 0.)
-                     ,Rcpp::NumericVector g_opt_par = Rcpp::NumericVector::create(.1, 1e-2, 100, 1e-3, 1e-5, 3,0)
-                     ,Rcpp::NumericVector itv_opt_par = Rcpp::NumericVector::create(.01, 1e-3, 200, 1e-3, 1e-5, 5,0)
-                     ){
-
+                      ,int verb = 0
+                      ,int method = 2
+                      ,int interv_step = 10
+                      ,int output = 0
+                      ,Rcpp::Nullable<Rcpp::NumericVector> provided_m_ = R_NilValue
+                      ,Rcpp::NumericVector par = Rcpp::NumericVector::create(2., 2., 1., 0.)
+                      ,Rcpp::NumericVector g_opt_par = Rcpp::NumericVector::create(.1, 1e-2, 100, 1e-3, 1e-5, 2)
+                      ,Rcpp::NumericVector itv_opt_par = Rcpp::NumericVector::create(.01, 1e-3, 200, 1e-3, 1e-5, 2)
+                      ){
 
   // check arguments
   int check_par_size = par.size();
@@ -364,8 +420,8 @@ Rcpp::List subbolafit(
   /* initial values */
   /* -------------- */
 
-   // Name of parameters
-   Rcpp::CharacterVector param_names = Rcpp::CharacterVector::create("bl", "br", "a", "m");
+  // Name of parameters
+  Rcpp::CharacterVector param_names = Rcpp::CharacterVector::create("bl", "br", "a", "m");
 
   /* store possibly provided values for parameters */
   unsigned is_m_provided = 0;
@@ -373,21 +429,21 @@ Rcpp::List subbolafit(
   // define optimization parameters
   struct multimin_params global_oparams =
     { (double)       g_opt_par[0]
-     ,(double)       g_opt_par[1]
-     ,(unsigned int) g_opt_par[2]
-     ,(double)       g_opt_par[3]
-     ,(double)       g_opt_par[4]
-     ,(unsigned int) g_opt_par[5]
-  };
+      ,(double)       g_opt_par[1]
+      ,(unsigned int) g_opt_par[2]
+      ,(double)       g_opt_par[3]
+      ,(double)       g_opt_par[4]
+      ,(unsigned int) g_opt_par[5]
+    };
 
   struct multimin_params interv_oparams =
     { (double)       itv_opt_par[0]
-     ,(double)       itv_opt_par[1]
-     ,(unsigned int) itv_opt_par[2]
-     ,(double)       itv_opt_par[3]
-     ,(double)       itv_opt_par[4]
-     ,(unsigned int) itv_opt_par[5]
-  };
+      ,(double)       itv_opt_par[1]
+      ,(unsigned int) itv_opt_par[2]
+      ,(double)       itv_opt_par[3]
+      ,(double)       itv_opt_par[4]
+      ,(unsigned int) itv_opt_par[5]
+    };
 
 
   // casting the null value
@@ -445,7 +501,7 @@ Rcpp::List subbolafit(
     Rcpp::DataFrame dt =
       Rcpp::DataFrame::create(Rcpp::Named("param") = param_names
                               ,Rcpp::Named("coef") = par
-                             );
+                              );
 
     Rcpp::List ans =
       Rcpp::List::create(
@@ -459,7 +515,7 @@ Rcpp::List subbolafit(
 
   /* global optimization  */
   /* -------------------- */
-  if(method >= 2){
+  if(method >= 1){
 
     // notice: par is updated by reference
     Rcpp::List g_opt_results =
@@ -480,7 +536,7 @@ Rcpp::List subbolafit(
     /* interval optimization  */
     /* ---------------------- */
 
-    if(method >= 4){
+    if(method >= 2){
 
       g_opt_results =
         interval_optim(
