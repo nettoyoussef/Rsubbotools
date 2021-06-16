@@ -6,29 +6,43 @@
 
 using namespace Rcpp;
 
-// rgamma_mt
-Rcpp::NumericVector rgamma_mt(unsigned n, const double a, const double b);
-RcppExport SEXP _Rsubbotools_rgamma_mt(SEXP nSEXP, SEXP aSEXP, SEXP bSEXP) {
+// rgamma
+Rcpp::NumericVector rgamma(unsigned n, const double a, const double b);
+RcppExport SEXP _Rsubbotools_rgamma(SEXP nSEXP, SEXP aSEXP, SEXP bSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< unsigned >::type n(nSEXP);
     Rcpp::traits::input_parameter< const double >::type a(aSEXP);
     Rcpp::traits::input_parameter< const double >::type b(bSEXP);
-    rcpp_result_gen = Rcpp::wrap(rgamma_mt(n, a, b));
+    rcpp_result_gen = Rcpp::wrap(rgamma(n, a, b));
     return rcpp_result_gen;
 END_RCPP
 }
 // rlaplace
-Rcpp::NumericVector rlaplace(unsigned n, const double m, const double b);
-RcppExport SEXP _Rsubbotools_rlaplace(SEXP nSEXP, SEXP mSEXP, SEXP bSEXP) {
+Rcpp::NumericVector rlaplace(unsigned n, const double m, const double a);
+RcppExport SEXP _Rsubbotools_rlaplace(SEXP nSEXP, SEXP mSEXP, SEXP aSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< unsigned >::type n(nSEXP);
     Rcpp::traits::input_parameter< const double >::type m(mSEXP);
-    Rcpp::traits::input_parameter< const double >::type b(bSEXP);
-    rcpp_result_gen = Rcpp::wrap(rlaplace(n, m, b));
+    Rcpp::traits::input_parameter< const double >::type a(aSEXP);
+    rcpp_result_gen = Rcpp::wrap(rlaplace(n, m, a));
+    return rcpp_result_gen;
+END_RCPP
+}
+// ralaplace
+Rcpp::NumericVector ralaplace(unsigned n, const double m, const double al, const double ar);
+RcppExport SEXP _Rsubbotools_ralaplace(SEXP nSEXP, SEXP mSEXP, SEXP alSEXP, SEXP arSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< unsigned >::type n(nSEXP);
+    Rcpp::traits::input_parameter< const double >::type m(mSEXP);
+    Rcpp::traits::input_parameter< const double >::type al(alSEXP);
+    Rcpp::traits::input_parameter< const double >::type ar(arSEXP);
+    rcpp_result_gen = Rcpp::wrap(ralaplace(n, m, al, ar));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -76,18 +90,16 @@ BEGIN_RCPP
 END_RCPP
 }
 // alaplafit
-Rcpp::List alaplafit(Rcpp::NumericVector data, int verb, int method, int output, Rcpp::Nullable<Rcpp::NumericVector> provided_m_, unsigned interv_step);
-RcppExport SEXP _Rsubbotools_alaplafit(SEXP dataSEXP, SEXP verbSEXP, SEXP methodSEXP, SEXP outputSEXP, SEXP provided_m_SEXP, SEXP interv_stepSEXP) {
+Rcpp::List alaplafit(Rcpp::NumericVector data, int verb, unsigned interv_step, Rcpp::Nullable<Rcpp::NumericVector> provided_m_);
+RcppExport SEXP _Rsubbotools_alaplafit(SEXP dataSEXP, SEXP verbSEXP, SEXP interv_stepSEXP, SEXP provided_m_SEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< Rcpp::NumericVector >::type data(dataSEXP);
     Rcpp::traits::input_parameter< int >::type verb(verbSEXP);
-    Rcpp::traits::input_parameter< int >::type method(methodSEXP);
-    Rcpp::traits::input_parameter< int >::type output(outputSEXP);
-    Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::NumericVector> >::type provided_m_(provided_m_SEXP);
     Rcpp::traits::input_parameter< unsigned >::type interv_step(interv_stepSEXP);
-    rcpp_result_gen = Rcpp::wrap(alaplafit(data, verb, method, output, provided_m_, interv_step));
+    Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::NumericVector> >::type provided_m_(provided_m_SEXP);
+    rcpp_result_gen = Rcpp::wrap(alaplafit(data, verb, interv_step, provided_m_));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -102,36 +114,30 @@ BEGIN_RCPP
 END_RCPP
 }
 // laplafit
-Rcpp::List laplafit(Rcpp::NumericVector data, int verb, int method, int output, Rcpp::Nullable<Rcpp::NumericVector> provided_m_, unsigned interv_step);
-RcppExport SEXP _Rsubbotools_laplafit(SEXP dataSEXP, SEXP verbSEXP, SEXP methodSEXP, SEXP outputSEXP, SEXP provided_m_SEXP, SEXP interv_stepSEXP) {
+Rcpp::List laplafit(Rcpp::NumericVector data, int verb, unsigned interv_step, Rcpp::Nullable<Rcpp::NumericVector> provided_m_);
+RcppExport SEXP _Rsubbotools_laplafit(SEXP dataSEXP, SEXP verbSEXP, SEXP interv_stepSEXP, SEXP provided_m_SEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< Rcpp::NumericVector >::type data(dataSEXP);
     Rcpp::traits::input_parameter< int >::type verb(verbSEXP);
-    Rcpp::traits::input_parameter< int >::type method(methodSEXP);
-    Rcpp::traits::input_parameter< int >::type output(outputSEXP);
-    Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::NumericVector> >::type provided_m_(provided_m_SEXP);
     Rcpp::traits::input_parameter< unsigned >::type interv_step(interv_stepSEXP);
-    rcpp_result_gen = Rcpp::wrap(laplafit(data, verb, method, output, provided_m_, interv_step));
+    Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::NumericVector> >::type provided_m_(provided_m_SEXP);
+    rcpp_result_gen = Rcpp::wrap(laplafit(data, verb, interv_step, provided_m_));
     return rcpp_result_gen;
 END_RCPP
 }
 // sepfit
-Rcpp::List sepfit(Rcpp::NumericVector data, int verb, int method, int interv_step, int output, Rcpp::Nullable<Rcpp::NumericVector> provided_m_, Rcpp::NumericVector par, Rcpp::NumericVector g_opt_par);
-RcppExport SEXP _Rsubbotools_sepfit(SEXP dataSEXP, SEXP verbSEXP, SEXP methodSEXP, SEXP interv_stepSEXP, SEXP outputSEXP, SEXP provided_m_SEXP, SEXP parSEXP, SEXP g_opt_parSEXP) {
+Rcpp::List sepfit(Rcpp::NumericVector data, int verb, Rcpp::NumericVector par, Rcpp::NumericVector g_opt_par);
+RcppExport SEXP _Rsubbotools_sepfit(SEXP dataSEXP, SEXP verbSEXP, SEXP parSEXP, SEXP g_opt_parSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< Rcpp::NumericVector >::type data(dataSEXP);
     Rcpp::traits::input_parameter< int >::type verb(verbSEXP);
-    Rcpp::traits::input_parameter< int >::type method(methodSEXP);
-    Rcpp::traits::input_parameter< int >::type interv_step(interv_stepSEXP);
-    Rcpp::traits::input_parameter< int >::type output(outputSEXP);
-    Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::NumericVector> >::type provided_m_(provided_m_SEXP);
     Rcpp::traits::input_parameter< Rcpp::NumericVector >::type par(parSEXP);
     Rcpp::traits::input_parameter< Rcpp::NumericVector >::type g_opt_par(g_opt_parSEXP);
-    rcpp_result_gen = Rcpp::wrap(sepfit(data, verb, method, interv_step, output, provided_m_, par, g_opt_par));
+    rcpp_result_gen = Rcpp::wrap(sepfit(data, verb, par, g_opt_par));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -153,8 +159,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // subboafit
-Rcpp::List subboafit(Rcpp::NumericVector data, int verb, int method, int interv_step, int output, Rcpp::Nullable<Rcpp::NumericVector> provided_m_, Rcpp::NumericVector par, Rcpp::NumericVector g_opt_par, Rcpp::NumericVector itv_opt_par);
-RcppExport SEXP _Rsubbotools_subboafit(SEXP dataSEXP, SEXP verbSEXP, SEXP methodSEXP, SEXP interv_stepSEXP, SEXP outputSEXP, SEXP provided_m_SEXP, SEXP parSEXP, SEXP g_opt_parSEXP, SEXP itv_opt_parSEXP) {
+Rcpp::List subboafit(Rcpp::NumericVector data, int verb, int method, int interv_step, Rcpp::Nullable<Rcpp::NumericVector> provided_m_, Rcpp::NumericVector par, Rcpp::NumericVector g_opt_par, Rcpp::NumericVector itv_opt_par);
+RcppExport SEXP _Rsubbotools_subboafit(SEXP dataSEXP, SEXP verbSEXP, SEXP methodSEXP, SEXP interv_stepSEXP, SEXP provided_m_SEXP, SEXP parSEXP, SEXP g_opt_parSEXP, SEXP itv_opt_parSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -162,12 +168,11 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type verb(verbSEXP);
     Rcpp::traits::input_parameter< int >::type method(methodSEXP);
     Rcpp::traits::input_parameter< int >::type interv_step(interv_stepSEXP);
-    Rcpp::traits::input_parameter< int >::type output(outputSEXP);
     Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::NumericVector> >::type provided_m_(provided_m_SEXP);
     Rcpp::traits::input_parameter< Rcpp::NumericVector >::type par(parSEXP);
     Rcpp::traits::input_parameter< Rcpp::NumericVector >::type g_opt_par(g_opt_parSEXP);
     Rcpp::traits::input_parameter< Rcpp::NumericVector >::type itv_opt_par(itv_opt_parSEXP);
-    rcpp_result_gen = Rcpp::wrap(subboafit(data, verb, method, interv_step, output, provided_m_, par, g_opt_par, itv_opt_par));
+    rcpp_result_gen = Rcpp::wrap(subboafit(data, verb, method, interv_step, provided_m_, par, g_opt_par, itv_opt_par));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -213,8 +218,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // subbofit
-Rcpp::List subbofit(Rcpp::NumericVector data, int verb, int method, int interv_step, int output, Rcpp::Nullable<Rcpp::NumericVector> provided_m_, Rcpp::NumericVector par, Rcpp::NumericVector g_opt_par, Rcpp::NumericVector itv_opt_par);
-RcppExport SEXP _Rsubbotools_subbofit(SEXP dataSEXP, SEXP verbSEXP, SEXP methodSEXP, SEXP interv_stepSEXP, SEXP outputSEXP, SEXP provided_m_SEXP, SEXP parSEXP, SEXP g_opt_parSEXP, SEXP itv_opt_parSEXP) {
+Rcpp::List subbofit(Rcpp::NumericVector data, int verb, int method, int interv_step, Rcpp::Nullable<Rcpp::NumericVector> provided_m_, Rcpp::NumericVector par, Rcpp::NumericVector g_opt_par, Rcpp::NumericVector itv_opt_par);
+RcppExport SEXP _Rsubbotools_subbofit(SEXP dataSEXP, SEXP verbSEXP, SEXP methodSEXP, SEXP interv_stepSEXP, SEXP provided_m_SEXP, SEXP parSEXP, SEXP g_opt_parSEXP, SEXP itv_opt_parSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -222,12 +227,11 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type verb(verbSEXP);
     Rcpp::traits::input_parameter< int >::type method(methodSEXP);
     Rcpp::traits::input_parameter< int >::type interv_step(interv_stepSEXP);
-    Rcpp::traits::input_parameter< int >::type output(outputSEXP);
     Rcpp::traits::input_parameter< Rcpp::Nullable<Rcpp::NumericVector> >::type provided_m_(provided_m_SEXP);
     Rcpp::traits::input_parameter< Rcpp::NumericVector >::type par(parSEXP);
     Rcpp::traits::input_parameter< Rcpp::NumericVector >::type g_opt_par(g_opt_parSEXP);
     Rcpp::traits::input_parameter< Rcpp::NumericVector >::type itv_opt_par(itv_opt_parSEXP);
-    rcpp_result_gen = Rcpp::wrap(subbofit(data, verb, method, interv_step, output, provided_m_, par, g_opt_par, itv_opt_par));
+    rcpp_result_gen = Rcpp::wrap(subbofit(data, verb, method, interv_step, provided_m_, par, g_opt_par, itv_opt_par));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -252,21 +256,22 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_Rsubbotools_rgamma_mt", (DL_FUNC) &_Rsubbotools_rgamma_mt, 3},
+    {"_Rsubbotools_rgamma", (DL_FUNC) &_Rsubbotools_rgamma, 3},
     {"_Rsubbotools_rlaplace", (DL_FUNC) &_Rsubbotools_rlaplace, 3},
+    {"_Rsubbotools_ralaplace", (DL_FUNC) &_Rsubbotools_ralaplace, 4},
     {"_Rsubbotools_rpower", (DL_FUNC) &_Rsubbotools_rpower, 3},
     {"_Rsubbotools_rsubbo", (DL_FUNC) &_Rsubbotools_rsubbo, 4},
     {"_Rsubbotools_rasubbo", (DL_FUNC) &_Rsubbotools_rasubbo, 6},
-    {"_Rsubbotools_alaplafit", (DL_FUNC) &_Rsubbotools_alaplafit, 6},
+    {"_Rsubbotools_alaplafit", (DL_FUNC) &_Rsubbotools_alaplafit, 4},
     {"_Rsubbotools_sortRcpp", (DL_FUNC) &_Rsubbotools_sortRcpp, 1},
-    {"_Rsubbotools_laplafit", (DL_FUNC) &_Rsubbotools_laplafit, 6},
-    {"_Rsubbotools_sepfit", (DL_FUNC) &_Rsubbotools_sepfit, 8},
+    {"_Rsubbotools_laplafit", (DL_FUNC) &_Rsubbotools_laplafit, 4},
+    {"_Rsubbotools_sepfit", (DL_FUNC) &_Rsubbotools_sepfit, 4},
     {"_Rsubbotools_subboafish", (DL_FUNC) &_Rsubbotools_subboafish, 7},
-    {"_Rsubbotools_subboafit", (DL_FUNC) &_Rsubbotools_subboafit, 9},
+    {"_Rsubbotools_subboafit", (DL_FUNC) &_Rsubbotools_subboafit, 8},
     {"_Rsubbotools_subbofish", (DL_FUNC) &_Rsubbotools_subbofish, 5},
     {"_Rsubbotools_mm", (DL_FUNC) &_Rsubbotools_mm, 2},
     {"_Rsubbotools_optim_method_moments", (DL_FUNC) &_Rsubbotools_optim_method_moments, 4},
-    {"_Rsubbotools_subbofit", (DL_FUNC) &_Rsubbotools_subbofit, 9},
+    {"_Rsubbotools_subbofit", (DL_FUNC) &_Rsubbotools_subbofit, 8},
     {"_Rsubbotools_subbolafit", (DL_FUNC) &_Rsubbotools_subbolafit, 9},
     {NULL, NULL, 0}
 };

@@ -1,7 +1,8 @@
 /*
-  alaplafit (ver. 1.2.1) -- Fit an asymmetric exponential density
+  alaplafit (ver. 1.2.1) -- Fit an Asymmetric Laplace Distribution
 
   Copyright (C) 2004-2014 Giulio Bottazzi
+  Copyright (C) 2020-2021 Elias Youssef Haddad Netto
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -17,20 +18,7 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-
-/*
-  Verbosity levels:
-  0 just the final ouput
-  1 the results of intermediate steps
-  2 internal information on intermediate steps
-  3 gory details on intermediate steps
-*/
-
-
 #include "common.h"
-
-
-
 
 /* Output Functions */
 /*----------------- */
@@ -77,9 +65,9 @@ void alapla_printdensity(Rcpp::NumericVector data, const double m, const double 
   }
 
 }
+
+
 /*----------------- */
-
-
 /* Object Function */
 /*---------------- */
 
@@ -110,33 +98,55 @@ double alapla_nll(Rcpp::NumericVector data, const double m){
 
 }
 
-
-// Fit asymmetric Laplace density. Read data from files or from standard input  \n");
-// With output option '4' prints the log-likelihood as a function of m   \n");
-// Usage: %s [options] [files]\n\n",argv[0]);
-// input.                                                             \n\n");
-//  Options:                                                            \n");
-//  -O  output type (default 0)                \n");
-//       0  parameters m al ar and negative log-likelihood\n");
-//       1  the estimated distribution function computed on the provided points     \n");
-//       2  the estimated density function computed on the provided points \n");
-// 3  parameters m,al,ar their standard errors and correlations \n");
-//       4  log-likelihood profile \n");
-//  -m  the mode is not estimated but is set to the value provided\n");
-//  -x  initial value of m or plot range if output type is '4' (default 0)\n");
-//  -n  number of plotted points if output type is '4' (default 10)\n");
-// Examples:\n");
-//  'alaplafit -m 1 <file'  estimate al and ar with m=1\n");
-//  'alaplafit -O 4 -x -1,1 <file'  print the log-likelihood on a regular grid\n");
-// from -1 to 1. The grid has 10 points. \n");
+//' Fit an Asymmetric Laplace Distribution via maximum likelihood
+//'
+//' \code{alaplafit} returns the parameters, standard errors. negative
+//' log-likelihood and covariance matrix of the Asymmetric Laplace Distribution
+//' for a sample. See details below.
+//'
+//' The Asymmetric Laplace distribution is a distribution controlled
+//' by three parameters, with formula:
+//' \deqn{f(x;a_l,a_r,m) =
+//' \begin{cases}
+//' \frac{1}{A} e^{-|\frac{x-m}{a_l}| }, & x < m \\
+//' \frac{1}{A} e^{-|\frac{x-m}{a_r}| }, & x > m
+//' \end{cases}}
+//' with:
+//' \deqn{A = a_l + a_r}
+//' where \eqn{a*} are scale parameters, and \eqn{m} is a location parameter.
+//' It is basically derived from the Asymmetric Exponential Power distribution
+//' by setting \eqn{b_l = b_r = b}.
+//' The estimations are produced by maximum likelihood, where
+//' analytical formulas are available for the \eqn{a*} parameters.
+//' The \eqn{m} parameter is found by an iterative method, using the median as
+//' the initial guess. The method explore intervals around the last minimum
+//' found, similar to the \code{subboafit} routine.
+//' Details on this method can be found on the package vignette.
+//'
+//' @param data (NumericVector) - the sample used to fit the distribution.
+//' @param verb (int) - the level of verbosity. Select one of:
+//' * 0  just the final result
+//' * 1  details of optim. routine
+//' @param interv_step  int - the number of intervals to be explored after
+//' the last minimum was found in the interval optimization. Default is 10.
+//' @param provided_m_ NumericVector - if NULL, the m parameter is estimated
+//' by the routine. If numeric, the estimation fixes m to the given value.
+//' @return a list containing the following items:
+//' * "dt" - dataset containing parameters estimations and standard deviations.
+//' * "log-likelihood" - negative log-likelihood value.
+//' * "matrix" - the covariance matrix for the parameters.
+//'
+//' @examples
+//' sample_subbo <- rpower(1000, 1, 1)
+//' alaplafit(sample_subbo)
+//' @export
+//' @md
 // [[Rcpp::export]]
 Rcpp::List alaplafit(
                      Rcpp::NumericVector data
                      ,int verb = 0
-                     ,int method = 7
-                     ,int output = 0
-                     ,Rcpp::Nullable<Rcpp::NumericVector> provided_m_ = R_NilValue
                      ,unsigned interv_step = 10
+                     ,Rcpp::Nullable<Rcpp::NumericVector> provided_m_ = R_NilValue
                      ){
 
 
@@ -196,7 +206,7 @@ Rcpp::List alaplafit(
     m = median(data, size);
     fmin = alapla_nll(data, m);
 
-    if(verb > 1){
+    if(verb > 0){
       Rprintf("# index=%d\n", index);
       Rprintf("#>>> Initial minimum: m=%e ll=%e\n", m, fmin);
     }
@@ -217,13 +227,13 @@ Rcpp::List alaplafit(
 
           // print results - we use arrows to
           // differentiate the global minimum
-          if(verb > 1){
+          if(verb > 0){
             Rprintf("#>>> [%+.3e:%+.3e] m=%e ll=%e\n"
                     , data[i], data[i+1], m, tmp_fmin);
           }
         }else{
           // print results
-          if(verb > 1){
+          if(verb > 0){
             Rprintf("#    [%+.3e:%+.3e] ll=%e\n"
                     , data[i], data[i+1], tmp_fmin);
           }
@@ -251,13 +261,13 @@ Rcpp::List alaplafit(
 
           // print results - we use arrows to
           // differentiate the global minimum
-          if(verb > 1){
+          if(verb > 0){
             Rprintf("#>>> [%+.3e:%+.3e] m=%e ll=%e\n"
                     , data[i], data[i+1], m, tmp_fmin);
           }
         }else{
           // print results
-          if(verb > 1){
+          if(verb > 0){
             Rprintf("#    [%+.3e:%+.3e] ll=%e\n"
                     , data[i], data[i+1], tmp_fmin);
           }
@@ -271,7 +281,7 @@ Rcpp::List alaplafit(
     }while(oldindex != index);
   }
 
-  if(verb > 1){
+  if(verb > 0){
     Rprintf("Results of interval optimization: \n");
     Rprintf("#>>> m=%e ll=%e\n", m, tmp_fmin);
     Rprintf("\n");

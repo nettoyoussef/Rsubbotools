@@ -2,7 +2,7 @@
 #include "common.h"
 
 
-/* tabulated values for the heigt of the Ziggurat levels */
+// tabulated values for the heigt of the Ziggurat levels
 static const double ytab[128] = {
   1              , 0.963598623011  , 0.936280813353  , 0.913041104253 ,
   0.892278506696 , 0.873239356919  , 0.855496407634  , 0.838778928349 ,
@@ -38,8 +38,8 @@ static const double ytab[128] = {
   0.0118216532614, 0.00860719483079, 0.00553245272614, 0.00265435214565
 };
 
-/* tabulated values for 2^24 times x[i]/x[i+1],
- * used to accept for U*x[i+1]<=x[i] without any floating point operations */
+// tabulated values for 2^24 times x[i]/x[i+1],
+// used to accept for U*x[i+1]<=x[i] without any floating point operations
 static const unsigned long ktab[128] = {
   0       , 12590644, 14272653, 14988939,
   15384584, 15635009, 15807561, 15933577,
@@ -75,7 +75,7 @@ static const unsigned long ktab[128] = {
   16207738, 16047994, 15704248, 15472926
 };
 
-/* tabulated values of 2^{-24}*x[i] */
+// tabulated values of 2^{-24}*x[i]
 static const double wtab[128] = {
   1.62318314817e-08, 2.16291505214e-08, 2.54246305087e-08, 2.84579525938e-08,
   3.10340022482e-08, 3.33011726243e-08, 3.53439060345e-08, 3.72152672658e-08,
@@ -112,12 +112,12 @@ static const double wtab[128] = {
 };
 
 
-/* The Gamma distribution of order a>0 is defined by:
-   p(x) dx = {1 / \Gamma(a) b^a } x^{a-1} e^{-x/b} dx
-   for x>0.  If X and Y are independent gamma-distributed random
-   variables of order a1 and a2 with the same scale parameter b, then
-   X+Y has gamma distribution of order a1+a2.
-   The algorithms below are from Knuth, vol 2, 2nd ed, p. 129. */
+// The Gamma distribution of order a>0 is defined by:
+// p(x) dx = {1 / \Gamma(a) b^a } x^{a-1} e^{-x/b} dx
+// for x>0.  If X and Y are independent gamma-distributed random
+// variables of order a1 and a2 with the same scale parameter b, then
+// X+Y has gamma distribution of order a1+a2.
+// The algorithms below are from Knuth, vol 2, 2nd ed, p. 129.
 
 
 //double gsl_ran_gaussian_ziggurat(const gsl_rng * r, double sigma)
@@ -127,46 +127,46 @@ static const double wtab[128] = {
 
 //double gsl_ran_gaussian_ziggurat(
 
-//' Normal random numbers, using the Ziggurat method
-//' This routine is based on the following article, with a couple of
-//' modifications which simplify the implementation.
-//'
-//'     George Marsaglia, Wai Wan Tsang
-//'     The Ziggurat Method for Generating Random Variables
-//'     Journal of Statistical Software, vol. 5 (2000), no. 8
-//'     http://www.jstatsoft.org/v05/i08/
-//'
-//' The modifications are:
-//'
-//' 1) use 128 steps instead of 256 to decrease the amount of static
-//' data necessary.  
-//'
-//' 2) use an acceptance sampling from an exponential wedge
-//' exp(-R*(x-R/2)) for the tail of the base strip to simplify the
-//' implementation.  The area of exponential wedge is used in
-//' calculating 'v' and the coefficients in ziggurat table, so the
-//' coefficients differ slightly from those in the Marsaglia and Tsang
-//' paper.
-//'
-//' See also Leong et al, "A Comment on the Implementation of the
-//' Ziggurat Method", Journal of Statistical Software, vol 5 (2005), no 7.
-//'
-//' This function is based on the original GSL version, adapted to
-//' use R's system of RNGs. All credits to the original authors.
-//' Copyright (C) 2005  Jochen Voss.
-//' Copyright (C) 2020  Elias Haddad.
-//' License: GPL 3+
-//' GSL file: randist/gausszig.c
-//' [[Rcpp::export]]
-//Rcpp::NumericVector rnorm_zig(
-//		               const gsl_rng * r
-//		              ,const double sigma
-//		             ){
+// Normal random numbers, using the Ziggurat method
+// This routine is based on the following article, with a couple of
+// modifications which simplify the implementation.
+//
+//     George Marsaglia, Wai Wan Tsang
+//     The Ziggurat Method for Generating Random Variables
+//     Journal of Statistical Software, vol. 5 (2000), no. 8
+//     http://www.jstatsoft.org/v05/i08/
+//
+// The modifications are:
+//
+// 1) use 128 steps instead of 256 to decrease the amount of static
+// data necessary.
+//
+// 2) use an acceptance sampling from an exponential wedge
+// exp(-R*(x-R/2)) for the tail of the base strip to simplify the
+// implementation.  The area of exponential wedge is used in
+// calculating 'v' and the coefficients in ziggurat table, so the
+// coefficients differ slightly from those in the Marsaglia and Tsang
+// paper.
+//
+// See also Leong et al, "A Comment on the Implementation of the
+// Ziggurat Method", Journal of Statistical Software, vol 5 (2005), no 7.
+//
+// This function is based on the original GSL version, adapted to
+// use R's system of RNGs. All credits to the original authors.
+// Copyright (C) 2005  Jochen Voss.
+// Copyright (C) 2020  Elias Haddad.
+// License: GPL 3+
+// GSL file: randist/gausszig.c
+/// [[Rcpp::export]]
+// Rcpp::NumericVector rnorm_zig(
+//                             const gsl_rng * r
+//                            ,const double sigma
+//                           ){
 //
 //
 //  /* position of right-most step */
 //  #define PARAM_R 3.44428647676
-//  
+//
 //  unsigned long int i, j;
 //  int sign;
 //  double x, y;
@@ -230,31 +230,43 @@ static const double wtab[128] = {
 
 
 
-
-// double v = gsl_ran_gamma (r, 1 / b, 1.0);
-//gsl_ran_gamma 
-
+//' Generates a Gamma-distributed sample
+//'
+//' This function returns a sample from a gamma distributed random variable.
+//' The method used to generate this sample is the Marsaglia-Tsang fast gamma
+//' method. See more details below.
+//'
+//' The gamma distribution is given by the function:
+//' \dqn{f(x) = /frac{1}{\Gamma(a)b^a}x^{a-1}e^{-x/b}}, x > 0}
 //' Based on Marsaglia and Tsang, "A Simple Method for
 //' generating gamma variables", ACM Transactions on Mathematical
 //' Software, Vol 26, No 3 (2000), p363-372.
 //' Available at:
 //' https://doi.org/10.1145/358407.358414
-//' 
 //' This function is based on the original GSL version, adapted to
 //' use R's system of RNGs. All credits to the original authors.
 //' Implemented by J.D.Lamb@btinternet.com, minor modifications for GSL
 //' by Brian Gough. Adapted to R by Elias Haddad.
 //' Copyright (C) J.D.Lamb, Brian Gough.
-/// Copyright (C) 2020 Elias Haddad 
+/// Copyright (C) 2020-2021 Elias Haddad
 //' License: GPL 3+
 //' GSL file: randist/gamma.c
+//'
+//' @param n (int)
+//' @param a (numeric)
+//' @param b (numeric)
+//' @return a numeric vector containing a random sample with above parameters.
+//'
+//' @examples
+//' sample_gamma <- rgamma(1000, 1, 1)
+//' @export
+//' @md
 // [[Rcpp::export]]
-Rcpp::NumericVector rgamma_mt(
-			       unsigned n
-			      ,const double a
-			      ,const double b
-			      ){
-
+Rcpp::NumericVector rgamma(
+                           unsigned n
+                           ,const double a
+                           ,const double b
+                           ){
 
   // use R's RNG
   Rcpp::RNGScope scope;
@@ -264,16 +276,14 @@ Rcpp::NumericVector rgamma_mt(
 
   /* assume a > 0 */
   if(a < 0){
+    Rcpp::stop("The parameter 'a' must be greater than zero.");
+  }
 
-   Rcpp::stop("The parameter 'a' must be greater than zero.");
-  } 
   if( (a >= 0) & (a < 1) ){
-
-      sample = Rcpp::runif(n); // identical to r
-      return rgamma_mt(n, 1.0 + a, b) * pow (sample, 1.0 / a);
-
+    sample = Rcpp::runif(n); // identical to r
+    return rgamma(n, 1.0 + a, b) * pow (sample, 1.0 / a);
   }else{
-    
+
     double x, v;
     double d = a - 1.0 / 3.0;
     double c = (1.0 / 3.0) / sqrt (d);
@@ -282,15 +292,15 @@ Rcpp::NumericVector rgamma_mt(
 
       while(1){
         do{
-              //x = gsl_ran_gaussian_ziggurat(r, 1.0);
-              x = Rcpp::rnorm(1, 0, 1.0)[0];
-              v = 1.0 + c * x;
+          //x = gsl_ran_gaussian_ziggurat(r, 1.0);
+          x = Rcpp::rnorm(1, 0, 1.0)[0];
+          v = 1.0 + c * x;
         }while (v <= 0);
 
         v = v * v * v;
         sample[i] = Rcpp::runif(1)[0];
 
-        if (sample[i] < 1 - 0.0331 * x * x * x * x) 
+        if (sample[i] < 1 - 0.0331 * x * x * x * x)
           break;
 
         if (log (sample[i]) < 0.5 * x * x + d * (1 - v + log (v)))
@@ -301,7 +311,7 @@ Rcpp::NumericVector rgamma_mt(
     }
 
     return sample;
-  }
+    }
 }
 
 // source
@@ -311,80 +321,156 @@ template <typename T> int sgn(T val) {
 }
 
 
-//double gsl_ran_laplace (const gsl_rng * r, const double a){
-//' The two-sided exponential probability distribution is  
-//' p(x) dx = (1/(2 a)) * exp(-|x/a|) dx
-//' for -infty < x < infty. It is also known as the Laplace distribution. 
-//' This function is based on the original GSL version, adapted to
-//' use R's system of RNGs. All credits to the original authors.
-//' randist/laplace.c
+
+//' Generates a Laplace-distributed sample
 //'
-//' 
-//' Copyright (C) 1996, 1997, 1998, 1999, 2000, 2007 James Theiler, Brian Gough
-//' Copyright (C) 2020 Elias Haddad 
+//' This function returns a sample from a Laplace-distributed random variable.
+//'
+//' The Laplace distribution is given by the two-sided exponential distribution
+//' given by the function:
+//' \dqn{f(x;a,m) = \frac{1}{2a} e^{- \left| \frac{x-m}{a} \right| }}
+//' The random sampling is done by inverse transform sampling.
+//'
+//' Copyright (C) 2020-2021 Elias Haddad
 //' License: GPL 3+
+//'
+//' @param n (int) - the size of the sample
+//' @param m (numeric) - the location parameter
+//' @param a (numeric) - the scale parameter
+//' @return a numeric vector containing a random sample with above parameters.
+//'
+//' @examples
+//' sample_gamma <- rlaplace(1000, 0, 1)
+//' @export
+//' @md
 // [[Rcpp::export]]
-Rcpp::NumericVector rlaplace(unsigned n, const double m, const double b){
+Rcpp::NumericVector rlaplace( unsigned n
+                             ,const double m = 0
+                             ,const double a = 1
+                            ){
 
   // use R's RNG
   Rcpp::RNGScope scope;
 
-  //Rcpp::NumericVector sample(n); 
-  Rcpp::NumericVector sample = Rcpp::runif(n); 
+  //Rcpp::NumericVector sample(n);
+  Rcpp::NumericVector sample = Rcpp::runif(n);
 
   for(int i=0; i<n; ++i){
 
     // this recovers the sign of the random draw
     double signal = sgn(sample[i]-0.5);
-    
+
     // this calculates the inverse (quantile function)
-    double value = m - signal*b*log(1 + signal*(1 - 2*sample[i]));
-    
+    double value = m - signal*a*log(1 + signal*(1 - 2*sample[i]));
+
     sample[i] = value;
   }
 
   return sample;
 }
 
+//' Generates an Asymmetric Laplace-distributed sample
+//'
+//' This function returns a sample from an Asymetric Laplace distribution.
+//'
+//' The Asymmetric Laplace distribution is given by the two-sided exponential
+//' distribution given by the function:
+//' \deqn{f(x;a_l,a_r,m) =
+//' \begin{cases}
+//' \frac{1}{A} e^{-|\frac{x-m}{a_l}| }, & x < m \\
+//' \frac{1}{A} e^{-|\frac{x-m}{a_r}| }, & x > m
+//' \end{cases}}
+//' with:
+//' \deqn{A = a_l + a_r}
+//' The random sampling is done by inverse transform sampling.
+//'
+//' Copyright (C) 2020-2021 Elias Haddad
+//' License: GPL 3+
+//'
+//' @param n (int) - the size of the sample
+//' @param m (numeric) - the location parameter
+//' @param al,ar (numeric) - left and right scale parameters, respectively.
+//' @return a numeric vector containing a random sample.
+//'
+//' @examples
+//' sample_gamma <- ralaplace(1000, 0, 1)
+//' @export
+//' @md
+// [[Rcpp::export]]
+Rcpp::NumericVector ralaplace( unsigned n
+                             ,const double m = 0
+                             ,const double al = 1
+                             ,const double ar = 1
+                            ){
 
-//double gsl_ran_laplace_pdf (const double x, const double a){
-double plaplace(const double x, const double a){
+  // use R's RNG
+  Rcpp::RNGScope scope;
 
-  // This function is based on the original GSL version, adapted to
-  // use R's system of RNGs. All credits to the original authors.
-  // randist/laplace.c
+  //Rcpp::NumericVector sample(n);
+  Rcpp::NumericVector sample = Rcpp::runif(n);
+  double value;
+  double signal;
+  for(int i=0; i<n; ++i){
 
-  // Copyright (C) 1996, 1997, 1998, 1999, 2000, 2007 James Theiler, Brian Gough
-  // License: GPL 3+
-  
-  double p = (1/(2*a)) * exp (-fabs (x)/a);
-  return p;
+    // this recovers the sign of the random draw
+    signal = sgn(sample[i]-0.5);
+
+    // this calculates the inverse (quantile function)
+    //Rprintf("signal:%f", signal);
+    if(signal < 0){
+      value = m - signal*al*log(1 + signal*(1 - 2*sample[i]));
+    }else{
+      value = m - signal*ar*log(1 + signal*(1 - 2*sample[i]));
+    }
+    sample[i] = value;
+  }
+  return sample;
 }
 
 
 
-//'  The exponential power probability distribution is  
-//'  p(x) dx = (1/(2 a Gamma(1+1/b))) * exp(-|x/a|^b) dx
-//'  for -infty < x < infty. For b = 1 it reduces to the Laplace
-//'  distribution. 
-//'  The exponential power distribution is related to the gamma
-//'  distribution by E = a * pow(G(1/b),1/b), where E is an exponential
-//'  power variate and G is a gamma variate.
-//'  We use this relation for b < 1. For b >=1 we use rejection methods
-//'  based on the laplace and gaussian distributions which should be
-//'  faster.  For b>4 we revert to the gamma method.
-//'  See P. R. Tadikamalla, "Random Sampling from the Exponential Power
-//'  Distribution", Journal of the American Statistical Association,
-//'  September 1980, Volume 75, Number 371, pages 683-686.
-//' 
-//'  This function is based on the original GSL version, adapted to
-//'  use R's system of RNGs. All credits to the original authors.
-//'  GSL file: randist/exppow.c
-//'  
-//'  Copyright (C) 1996, 1997, 1998, 1999, 2000, 2006, 2007 James Theiler, Brian Gough
-//'  Copyright (C) 2006 Giulio Bottazzi 
-//'  Copyright (C) 2020 Elias Haddad 
-//'  License: GPL 3+
+
+
+
+
+//' Generates a random sample from a Exponential Power distribution
+//'
+//' This function returns a sample from a gamma distributed random variable.
+//'
+//' The exponential power distribution (EP) is given by the function:
+//' \dqn{ f(a,b) = \frac{1}{2a\Gamma(1+1/b)}e^{-|x/a|^b}, -\infty < x < \infty }.
+//' where \eqn{b} is a shape parameter, \eqn{a} is a scale parameter and \Gamma
+//' representes the gamma function. While not done here, this distribution can
+//' be adapted to have non-zero location parameter.
+//' The Exponential Power distribution is related to the gamma distribution by
+//' the equation:
+//' E = a*G(1/b)^{1/b}
+//' where E and G are respectively EP and gamma random variables. This property
+//' is used for cases where \eqn{b<1} and \eqn{b>4}. For \eqn{1 \leq b \leq 4}
+//' rejection methods based on the Laplace and normal distributions are used,
+//' which should be faster.
+//' Technical details about this algorithm are available on:
+//' P. R. Tadikamalla, "Random Sampling from the Exponential Power
+//' Distribution", Journal of the American Statistical Association,
+//' September 1980, Volume 75, Number 371, pages 683-686.
+//' This function is based on the original GSL version, adapted to
+//' use R's system of RNGs by Elias Haddad. All credits to the original authors.
+//' Copyright (C) 1996, 1997, 1998, 1999, 2000, 2006, 2007 James Theiler, Brian Gough
+//' Copyright (C) 2006 Giulio Bottazzi
+//' Copyright (C) 2020-2021 Elias Haddad
+//' License: GPL 3+
+//  GSL file: randist/exppow.c
+//' GSL function: gsl_ran_exppow
+//'
+//' @param n (int) - size of the sample
+//' @param a (numeric) - scale parameter
+//' @param b (numeric) - shape parameter
+//' @return a numeric vector containing a random sample with above parameters.
+//'
+//' @examples
+//' sample_gamma <- rpower(1000, 1, 1)
+//' @export
+//' @md
 // [[Rcpp::export]]
 Rcpp::NumericVector rpower(
                             unsigned n
@@ -403,8 +489,8 @@ Rcpp::NumericVector rpower(
       // original implementation uses gsl_rng_uniform, which
       // allows for zero, while R's runif does not.
       // Does this impact the RNG in any meaningful way?
-      Rcpp::NumericVector u = Rcpp::runif(n); 
-      Rcpp::NumericVector v = rgamma_mt(n, 1 / b, 1.0);
+      Rcpp::NumericVector u = Rcpp::runif(n);
+      Rcpp::NumericVector v = rgamma(n, 1 / b, 1.0);
       Rcpp::NumericVector z = a * pow (v, 1 / b);
 
      result = Rcpp::ifelse(u > 0.5, z, -z);
@@ -413,18 +499,18 @@ Rcpp::NumericVector rpower(
 
   }
   else if (b == 1){
-      // Laplace distribution 
+      // Laplace distribution
       return rlaplace(n, 0, a);
   }
   else if ( (b>1) && (b < 2) ){
-      // Use laplace distribution for rejection method, from Tadikamalla 
+      // Use laplace distribution for rejection method, from Tadikamalla
 
       double x, h, u;
       double B = pow (1 / b, 1 / b);
 
       for(i = 0; i<n; ++i){
 
-	// rejection sampling
+        // rejection sampling
         do
           {
             x = rlaplace(1, 0, B)[0];
@@ -433,26 +519,26 @@ Rcpp::NumericVector rpower(
           }
         while (log (u) > h);
 
-	// stores result in array
+        // stores result in array
         result[i] = a*x;
       }
 
       return result;
-      
+
   }
   else if (b == 2){
-      // Gaussian distribution 
+      // Gaussian distribution
      return Rcpp::rnorm(n, 0, a/sqrt(2.0)); // to do: check if sd is correct
   }
   else if ( (b > 2) && (b < 4) ){
-      // Use gaussian for rejection method, from Tadikamalla 
+      // Use gaussian for rejection method, from Tadikamalla
 
       double x, h, u;
       double B = pow (1 / b, 1 / b);
 
       for(i = 0; i<n; ++i){
 
-	// rejection sampling
+        // rejection sampling
         do
           {
             x = Rcpp::rnorm(1, 0, B)[0];
@@ -461,7 +547,7 @@ Rcpp::NumericVector rpower(
           }
         while (log (u) > h);
 
-	// stores result in array
+        // stores result in array
         result[i] = a*x;
       }
 
@@ -470,45 +556,48 @@ Rcpp::NumericVector rpower(
 }
 
 
-//double gsl_ran_exppow_pdf (const double x, const double a, const double b)
-double ppower(const double x, const double a, const double b)
-{
-  double p;
-  double lngamma = gsl_sf_lngamma (1 + 1 / b);
-  p = (1 / (2 * a)) * exp (-pow (fabs (x / a), b) - lngamma);
-  return p;
-}
-
-
-
-//' Produce data distributed according to the power exponential
+//' Produces a random sample from a Subbotin distribution
 //'
-//' Generate pseudo random-number from a power exponential distribution
+//' Generate pseudo random-number from a Subbotin distribution using the
+//' Tadikamalla method.
 //'
+//' The Subbotin distribution is given by the function:
+//' \deqn{ f(x;a,b,m) = \frac{1}{A} e^{- \frac{1}{b} \left|\frac{x-m}{a}\right|^b} }
+//' where \eqn{m} is a location parameter, \eqn{b} is a shape parameter, \eqn{a}
+//' is a scale parameter and \Gamma representes the gamma function.
+//' Since the Subbotin distribution is basically the exponential distribution
+//' with scale parameter \eqn{a = ab^{1/b}} and \eqn{m=0}, we use the same
+//' method of the exponential power RNG and add the location parameter.
+//' Details can be found on the documentation of the \code{rpower} function.
+//' Copyright (C) 2002-2014 Giulio Bottazzi
+//' Copyright (C) 2020-2021 Elias Haddad
+//' License: GPL 3+
 //'
-//' 
-//' @param N number of element
-//' @param m the mean 
-//' @param a the scale parameter 
-//' @param b the exponents 
-//' Examples:
-//' subbogen -m 1 -b 1 -N 30  sample 30 points from a power exponential with mode
-//' in 1, a=1 and b=1 (Laplace)\n");
+//' @param n (int) - the size of the sample.
+//' @param m (numeric) - the location parameter.
+//' @param a (numeric) - the scale parameter.
+//' @param b (numeric) - the shape parameter.
+//' @return a numeric vector containing a random sample.
+//'
+//' @examples
+//' sample_gamma <- rsubbo(1000, 1, 1)
+//' @export
+//' @md
 // [[Rcpp::export]]
 Rcpp::NumericVector rsubbo(
-                            unsigned n=100
+                            unsigned n
                            ,double m=0.0
                            ,double a=1.0
                            ,double b=2.0
-			   ){
+                           ){
 
   // use R's RNG
   Rcpp::RNGScope scope;
 
- // calculate inverse distribution 
+ // calculate inverse distribution
   const double dtmp1 = a * pow(b, 1./b);
   Rcpp::NumericVector sample = m + rpower(n, dtmp1, b);
-  
+
   return sample;
 }
 
@@ -516,24 +605,47 @@ Rcpp::NumericVector rsubbo(
 
 
 
-//' Produce data distributed according to Asymmetric Power Exponential
+//' Produces a random sample from a Asymmetric Power Exponential distribution
 //'
-//' 
+//'
 //' Generate pseudo random-number from an asymmetric power exponential distribution
+//' using the Tadikamalla method.
 //'
+//' The AEP distribution is expressed by the function:
+//' \deqn{f(x;a_l,a_r,b_l,b_r,m) =
+//' \begin{cases}
+//' \frac{1}{A} e^{- \frac{1}{b_l} |\frac{x-m}{a_l}|^{b_l} }, & x < m \\
+//' \frac{1}{A} e^{- \frac{1}{b_r} |\frac{x-m}{a_r}|^{b_r} }, & x > m
+//' \end{cases} }
+//' with:
+//' \deqn{A = a_lb_l^{1/b_l}\Gamma(1+1/b_l) + a_rb_r^{1/b_r}\Gamma(1+1/b_r)}
+//' where \eqn{m} is a location parameter, \eqn{b*} are shape parameters, \eqn{a*}
+//' are scale parameters and \Gamma representes the gamma function.
+//' By a suitably transformation, it is possible to use the EP distribution with
+//' the Tadikamalla method to sample from this distribution. We basically take
+//' the absolute values of the numbers sampled from the \code{rpower} function,
+//' which is equivalent from sampling from a half Exponential Power distribution.
+//' This values are then weighted by a constant expressed in the parameters.
+//' More details are available on the package vignette and on the
+//' function \code{rpower}.
+//' Copyright (C) 2003-2014 Giulio Bottazzi
+//' Copyright (C) 2020-2021 Elias Haddad
+//' License: GPL 3+
 //'
-//' @param N number of element
-//' @param m the mean 
-//' @param a the scale parameter 
-//' @param b the exponents
-//' 
-//' Examples:\n");
-//' subboagen -a 1,2 -N 30  sample 30 points from a asymmetric power exponential   \n");
-//' with mode 0, b=2 (Gaussian), al=1 and ar=2;\n");
+//' @param n (int) - size of the sample
+//' @param m (numeric) - location parameter.
+//' @param bl,br (numeric) - shape parameters.
+//' @param al,ar (numeric) - scale parameters.
+//' @return a numeric vector containing a random sample.
+//'
+//' @examples
+//' sample_gamma <- rasubbo(1000, 0, 0.5, 0.5,  1, 1)
+//' @export
+//' @md
 // [[Rcpp::export]]
 Rcpp::NumericVector rasubbo(
-                             unsigned n  = 100 
-                            ,double   m  = 0.0 
+                            unsigned n
+                            ,double   m  = 0.0
                             ,double   bl = 2
                             ,double   br = 2
                             ,double   al = 1
@@ -546,7 +658,7 @@ Rcpp::NumericVector rasubbo(
 
   // variables
   Rcpp::NumericVector sample(n);
-  
+
   // generate variate
   const double Aleft  = al*pow(bl, 1./bl);
   const double Aright = ar*pow(br, 1./br);
@@ -567,7 +679,7 @@ Rcpp::NumericVector rasubbo(
     }
 
   }
-    
+
   return sample;
 
 }

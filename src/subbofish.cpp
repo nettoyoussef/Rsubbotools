@@ -10,7 +10,7 @@
 #include <gsl/gsl_sf_psi.h>
 
 
-//' Fit a symmetric exponential density
+//' Return the Fisher Information Matrix for the Subbotin Distribution 
 //' 
 //' Calculate the standard errors, the correlation, the
 //' Fisher Information matrix and its inverse for a power exponential density
@@ -21,13 +21,13 @@
 //' @param m numeric - the location parameter (Default: 0.0)
 //' @param a numeric - the scale parameter (Default: 1.0)
 //' @param O_munknown numeric - if true assumes m known
-//' @return a list containing three elements:
-//'         - std_error - the standard error for the parameters
-//'         - cor_ab    - the correlation between parameters a and b 
-//'         - infmatrix - the Fisher Information Matrix 
-//'         - inv_infmatrix - the Inverse Fisher Information Matrix 
-//'
-//' 
+//' @return a list containing four elements:
+//' * std_error - the standard error for the parameters
+//' * cor_ab    - the correlation between parameters a and b 
+//' * infmatrix - the Fisher Information Matrix 
+//' * inv_infmatrix - the Inverse Fisher Information Matrix 
+//' @export
+//' @md
 // [[Rcpp::export]]
 Rcpp::List subbofish(
                        unsigned size = 1

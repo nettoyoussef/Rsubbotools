@@ -1,6 +1,8 @@
 /*
   subboafit (ver. 1.2.1) -- Fit an asymmetric power exp. density via likelihood maximization
+
   Copyright (C) 2007 Giulio Bottazzi
+  Copyright (C) 2020-2021 Elias Youssef Haddad Netto
 
   This program is free software; you can redistribute it and/or
   modify it under the terms of the GNU General Public License
@@ -104,16 +106,15 @@ RcppGSL::Matrix subboa_varcovar(const Rcpp::NumericVector par, const size_t N, c
   const double ar = par[3];
   //const double m  = par[4]; // declared but not used in the original
 
-  const double A = al*B0(bl)+ar*B0(br);
-
-  const double B0l = B0(bl);
-  const double B0r = B0(br);
-  const double B1l = B1(bl);
-  const double B1r = B1(br);
-  const double B2l = B2(bl);
-  const double B2r = B2(br);
-  const double dB0ldx = dB0dx(bl);
-  const double dB0rdx = dB0dx(br);
+  const double A       = al*B0(bl)+ar*B0(br);
+  const double B0l     = B0(bl);
+  const double B0r     = B0(br);
+  const double B1l     = B1(bl);
+  const double B1r     = B1(br);
+  const double B2l     = B2(bl);
+  const double B2r     = B2(br);
+  const double dB0ldx  = dB0dx(bl);
+  const double dB0rdx  = dB0dx(br);
   const double dB0ldx2 = dB0dx2(bl);
   const double dB0rdx2 = dB0dx2(br);
 
@@ -202,6 +203,15 @@ RcppGSL::Matrix subboa_varcovar(const Rcpp::NumericVector par, const size_t N, c
     }
 
   }
+
+  // print matrix
+  //for(i = 0;i<dim;i++){
+  //  for(j = 0;j<dim;j++){
+  //    Rprintf("%10.10f ", gsl_matrix_get(I,i,j));
+  //  }
+  //  Rprintf("\n");
+  //}
+  //Rprintf("-------------\n");
 
   for(i=0;i<dim;i++){
     for(j=i;j<dim;j++){
@@ -417,55 +427,99 @@ void subboa_objfdf(Rcpp::NumericVector data, const size_t n, Rcpp::NumericVector
 /*---------------- */
 
 
-
-// Fit asymmetric power exponential density. Read from files of from standard input\n\n");
-// Usage: %s [options] [files]\n\n",argv[0]);
-//  -O  output type (default 0)                \n");
-//       0  parameter bl br al ar m and log-likelihood   \n");
-//       1  the estimated distribution function computed on the provided points     \n");
-//       2  the estimated density function computed on the provided points \n");
-//       3  parameters bl br al ar m and their standard errors \n");
-//  -x  set initial conditions bl,br,al,ar,m  (default 2,2,1,1,0)\n");
-//  -m  the mode is not estimated but is set to the value provided\n");
-//  -s  number of intervals to explore at each iteration (default 10)\n");
-//  -V  verbosity level (default 0)           \n");
-//       0  just the final result        \n");
-//       1  headings and summary table   \n");
-//       2  intermediate steps results   \n");
-//       3  intermediate steps internals \n");
-//       4+  details of optim. routine   \n");
-//  -M  active estimation steps. The value is the sum of (default 6)\n");
-//       2  global optimization not considering lack of smoothness in m\n");
-//       4  local optimization taking non-smoothness in m into consideration \n");
-//  -G  set global optimization options. Fields are step,tol,iter,eps,msize,algo.\n");
-//      Empty field implies default (default .1,1e-2,100,1e-3,1e-5,2,0)\n");
-//  -I  set local optimization options. Fields are step,tol,iter,eps,msize,algo.\n");
-//      Empty field implies default (default .01,1e-3,200,1e-3,1e-5,5,0)\n");
-// The optimization parameters are");
-//  step  initial step size of the searching algorithm                  \n");
-//  tol  line search tolerance iter: maximum number of iterations      \n");
-//  eps  gradient tolerance : stopping criteria ||gradient||<eps       \n");
-//  msize  simplex max size : stopping criteria ||max edge||<msize     \n");
-//  algo  optimization methods: 0 Fletcher-Reeves, 1 Polak-Ribiere,     \n");
-//        2 Broyden-Fletcher-Goldfarb-Shanno, 3 Steepest descent,           \n");
-//        4 Nelder-Mead simplex, 5 Broyden-Fletcher-Goldfarb-Shanno ver.2   \n");
-// Examples:\n");
-//  'subboafit -m 1 -M 4 <file'  estimate bl,br,al,ar with m=1 and skipping initial  \n");
-//                                    global optimization\n");
-/* par -  par[0]=bl par[1]=br par[2]=al par[3]=ar par[4]=mu */
+//' Fit an Asymmetric Power Exponential density via maximum likelihood
+//'
+//' \code{subboafit} returns the parameters, standard errors. negative
+//' log-likelihood and covariance matrix of the asymmetric power exponential for
+//' a sample. The process can execute two steps, dependending on the level of
+//' accuracy required. See details below.
+//'
+//' The AEP is a exponential power distribution controlled
+//' by five parameters, with formula:
+//' \deqn{ f(x;a_l,a_r,b_l,b_r,m) =
+//' \begin{cases}
+//' \frac{1}{A} e^{- \frac{1}{b_l} |\frac{x-m}{a_l}|^{b_l} }, & x < m \\
+//' \frac{1}{A} e^{- \frac{1}{b_r} |\frac{x-m}{a_r}|^{b_r} }, & x > m
+//' \end{cases} }
+//' with:
+//' \deqn{A = a_lb_l^{1/b_l}\Gamma(1+1/b_l) + a_rb_r^{1/b_r}\Gamma(1+1/b_r)}
+//' where \eqn{l} and \eqn{r} represent left and right tails, \eqn{a*} are
+//' scale parameters, \eqn{b*} control the tails (lower values represent
+//' fatter tails), and \eqn{m} is a location parameter. Due to its lack of
+//' simmetry, and differently from the Subbotin, there is no simple equations
+//' available to use the method of moments, so we start directly by minimizing
+//' the negative log-likelihood. This global optimization is executed without
+//' restricting any parameters. If required (default), after the global
+//' optimization is finished, the method proceeds to iterate over the intervals
+//' between several two observations, iterating the same algorithm of the
+//' global optimization. The last method happens because of the lack of
+//' smoothness on the \eqn{m} parameter, and intervals must be used since the
+//' likelihood function doesn't have a derivative whenever \eqn{m} equals a
+//' sample observation. Due to the cost, these iterations are capped at most
+//' \emph{interv_step} (default 10) from the last minimum observed.
+//' Details on this method are available on the package vignette.
+//'
+//' @param data (NumericVector) - the sample used to fit the distribution.
+//' @param verb (int) - the level of verbosity. Select one of:
+//' * 0  just the final result
+//' * 1  headings and summary table
+//' * 2  intermediate steps results
+//' * 3  intermediate steps internals
+//' * 4+  details of optim. routine
+//' @param method int - the steps that should be used to estimate the
+//' parameters.
+//' * 0 no optimization perform - just return the log-likelihood from initial guess.
+//' * 1 global optimization not considering lack of smoothness in m
+//' * 2 interval optimization taking non-smoothness in m into consideration
+//' @param interv_step  int - the number of intervals to be explored after
+//' the last minimum was found in the interval optimization. Default is 10.
+//' @param provided_m_ NumericVector - if NULL, the m parameter is estimated
+//' by the routine. If numeric, the estimation fixes m to the given value.
+//' @param par NumericVector - vector containing the initial guess for
+//' parameters bl, br, al, ar and m, respectively. Default values of are
+//' c(2, 2, 1, 1, 0).
+//' @param g_opt_par NumericVector - vector containing the global optimization
+//' parameters.
+//' The optimization parameters are:
+//' * step  - (num) initial step size of the searching algorithm.
+//' * tol   - (num) line search tolerance.
+//' * iter  - (int) maximum number of iterations.
+//' * eps   - (num) gradient tolerance. The stopping criteria is \eqn{||\text{gradient}||<\text{eps}}.
+//' * msize - (num) simplex max size. stopping criteria given by \eqn{||\text{max edge}||<\text{msize}}
+//' * algo  - (int) algorithm. the optimization method used:
+//'   * 0 Fletcher-Reeves
+//'   * 1 Polak-Ribiere
+//'   * 2 Broyden-Fletcher-Goldfarb-Shanno
+//'   * 3 Steepest descent
+//'   * 4 Nelder-Mead simplex
+//'   * 5 Broyden-Fletcher-Goldfarb-Shanno ver.2
+//'
+//' Details for each algorithm are available on the [GSL Manual](https://www.gnu.org/software/gsl/doc/html/multimin.html).
+//' Default values are c(.1, 1e-2, 100, 1e-3, 1e-5, 2).
+//' @param itv_opt_par NumericVector - interval optimization parameters. Fields
+//' are the same as the ones for the global optimization. Default values
+//' are c(.01, 1e-3, 200, 1e-3, 1e-5, 5).
+//' @return a list containing the following items:
+//' * "dt" - dataset containing parameters estimations and standard deviations.
+//' * "log-likelihood" - negative log-likelihood value.
+//' * "matrix" - the covariance matrix for the parameters.
+//'
+//' @examples
+//' sample_subbo <- rpower(1000, 1, 2)
+//' subboafit(sample_subbo)
+//' @export
+//' @md
 // [[Rcpp::export]]
 Rcpp::List subboafit(
                      Rcpp::NumericVector data
                      ,int verb = 0
                      ,int method = 6
                      ,int interv_step = 10
-                     ,int output = 0
                      ,Rcpp::Nullable<Rcpp::NumericVector> provided_m_ = R_NilValue
                      ,Rcpp::NumericVector par = Rcpp::NumericVector::create(2., 2., 1., 1., 0.)
-                     ,Rcpp::NumericVector g_opt_par = Rcpp::NumericVector::create(.1, 1e-2, 100, 1e-3, 1e-5, 2,0)
-                     ,Rcpp::NumericVector itv_opt_par = Rcpp::NumericVector::create(.01, 1e-3, 200, 1e-3, 1e-5, 5,0)
+                     ,Rcpp::NumericVector g_opt_par = Rcpp::NumericVector::create(.1, 1e-2, 100, 1e-3, 1e-5, 2)
+                     ,Rcpp::NumericVector itv_opt_par = Rcpp::NumericVector::create(.01, 1e-3, 200, 1e-3, 1e-5, 5)
                      ){
-
 
   // check arguments
   int check_par_size = par.size();
@@ -568,7 +622,7 @@ Rcpp::List subboafit(
 
   /* global optimization  */
   /* -------------------- */
-  if(method >= 2){
+  if(method >= 1){
 
     // notice: par is updated by reference
     Rcpp::List g_opt_results =
@@ -589,7 +643,7 @@ Rcpp::List subboafit(
     /* interval optimization  */
     /* ---------------------- */
 
-    if(method >= 4){
+    if(method >= 2){
 
       g_opt_results =
         interval_optim(
