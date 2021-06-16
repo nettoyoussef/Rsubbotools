@@ -299,6 +299,9 @@ Rcpp::List global_optim(
   /* ML estimation: global maximization */
   /* ---------------------------------- */
 
+  // this function checks if the user requested the interruption of the
+  // computation
+  Rcpp::checkUserInterrupt();
 
   // declare variables
   Rcpp::IntegerVector type(n_param);
@@ -558,6 +561,10 @@ Rcpp::List interval_optim(
   do{
     oldindex = index;
 
+    // this function checks if the user requested the interruption of the
+    // computation
+    Rcpp::checkUserInterrupt();
+
     // the algorithm moves interv_step (default:10) steps to the right to see
     // if it finds a new minimum
     // a step is a position on the vector of data
@@ -615,6 +622,10 @@ Rcpp::List interval_optim(
   // best local minimum
   do{
     oldindex = index;
+
+    // this function checks if the user requested the interruption of the
+    // computation
+    Rcpp::checkUserInterrupt();
 
     for(i = min-1; (int) i >= (int) min-interv_step && (int) i >= 0; i--){
 
