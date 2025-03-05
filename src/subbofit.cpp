@@ -240,7 +240,7 @@ Rcpp::List moment(Rcpp::NumericVector& data){
 /* determination of b parameter from the ratio stdev/ave */
 /* returns the parameter b */
 // [[Rcpp::export]]
-double mm(const double std_over_aad, int verb){
+double mm_subbotin(const double std_over_aad, int verb = 0){
 
   /* default initial value for -log(b)*/
   double mlogb = 0.0;
@@ -505,7 +505,7 @@ Rcpp::List optim_method_moments(
 
   /* method of moments estimation for b */
   // this finds the root of
-  par[0] = mm(sdev/adev, verb);
+  par[0] = mm_subbotin(sdev/adev, verb);
 
   /*  method of moment estimation for a */
   par[1] = sdev*pow(par[0],-1./par[0])*

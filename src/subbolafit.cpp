@@ -404,7 +404,6 @@ Rcpp::List subbolafit(
                       ,int verb = 0
                       ,int method = 2
                       ,int interv_step = 10
-                      ,int output = 0
                       ,Rcpp::Nullable<Rcpp::NumericVector> provided_m_ = R_NilValue
                       ,Rcpp::NumericVector par = Rcpp::NumericVector::create(2., 2., 1., 0.)
                       ,Rcpp::NumericVector g_opt_par = Rcpp::NumericVector::create(.1, 1e-2, 100, 1e-3, 1e-5, 2)

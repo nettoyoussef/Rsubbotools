@@ -261,11 +261,11 @@ static const double wtab[128] = {
 //' @export
 //' @md
 // [[Rcpp::export]]
-Rcpp::NumericVector rgamma(
-                           unsigned n
-                           ,const double a
-                           ,const double b
-                           ){
+Rcpp::NumericVector rgamma_c(
+                             unsigned n
+                             ,double  b = 2.
+                             ,double  a = 1/2
+                             ){
 
   // use R's RNG
   Rcpp::RNGScope scope;
@@ -273,18 +273,18 @@ Rcpp::NumericVector rgamma(
   unsigned i=0;
   Rcpp::NumericVector sample(n);
 
-  /* assume a > 0 */
-  if(a < 0){
-    Rcpp::stop("The parameter 'a' must be greater than zero.");
+  // assume a,b > 0
+  if(b < 0 || a < 0){
+    Rcpp::stop("The parameters a and b must be greater than zero.");
   }
 
-  if( (a >= 0) & (a < 1) ){
+  if( (b >= 0) & (b < 1) ){
     sample = Rcpp::runif(n); // identical to r
-    return rgamma(n, 1.0 + a, b) * pow (sample, 1.0 / a);
+    return rgamma_c(n, 1.0 + b, a) * pow (sample, 1.0 / b);
   }else{
 
     double x, v;
-    double d = a - 1.0 / 3.0;
+    double d = b - 1.0 / 3.0;
     double c = (1.0 / 3.0) / sqrt (d);
 
     for(i=0; i<n; ++i){
@@ -344,8 +344,8 @@ template <typename T> int sgn(T val) {
 //' @md
 // [[Rcpp::export]]
 Rcpp::NumericVector rlaplace( unsigned n
-                             ,const double m = 0
-                             ,const double a = 1
+                             ,const double m = 0.
+                             ,const double a = 1.
                             ){
 
   // use R's RNG
@@ -396,10 +396,11 @@ Rcpp::NumericVector rlaplace( unsigned n
 //' @export
 //' @md
 // [[Rcpp::export]]
-Rcpp::NumericVector ralaplace( unsigned n
-                             ,const double m = 0
-                             ,const double al = 1
-                             ,const double ar = 1
+Rcpp::NumericVector ralaplace(
+                              unsigned n
+                             ,double   m  = 0.
+                             ,double   al = 1.
+                             ,double   ar = 1.
                             ){
 
   // use R's RNG
@@ -469,8 +470,9 @@ Rcpp::NumericVector ralaplace( unsigned n
 // [[Rcpp::export]]
 Rcpp::NumericVector rpower(
                             unsigned n
-                           ,const double a
-                           ,const double b
+                           ,double   m = 0.
+                           ,double   a = 1.
+                           ,double   b = 2.
                            ){
 
   // use R's RNG
@@ -581,9 +583,9 @@ Rcpp::NumericVector rpower(
 // [[Rcpp::export]]
 Rcpp::NumericVector rsubbo(
                             unsigned n
-                           ,double m=0.0
-                           ,double a=1.0
-                           ,double b=2.0
+                           ,double   m = 0.
+                           ,double   a = 1.
+                           ,double   b = 2.
                            ){
 
   // use R's RNG
@@ -639,14 +641,13 @@ Rcpp::NumericVector rsubbo(
 //' @md
 // [[Rcpp::export]]
 Rcpp::NumericVector rasubbo(
-                            unsigned n
-                            ,double   m  = 0.0
-                            ,double   bl = 2
-                            ,double   br = 2
-                            ,double   al = 1
-                            ,double   ar = 1
+                             unsigned n
+                            ,double   m  = 0.
+                            ,double   al = 1.
+                            ,double   ar = 1.
+                            ,double   bl = 2.
+                            ,double   br = 2.
                             ){
-
 
   // use R's RNG
   Rcpp::RNGScope scope;

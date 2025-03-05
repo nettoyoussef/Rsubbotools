@@ -19,7 +19,25 @@
 #include "common.h"
 
 
+double inc_lower_gamma(double b, double p){
+  // double pgamma(double x, double shape, double scale, int lower_tail, int log_p)
+  return gsl_sf_gamma(b)*R::pgamma(p, b, 1, 1, 0);
+}
 
+double inv_inc_lower_gamma(double b, double p){
+  // double qgamma(double p, double shape, double scale, int lower_tail, int log_p)
+  return R::qgamma(p/gsl_sf_gamma(b), b, 1, 1, 0);
+}
+
+double inc_upper_gamma(double b, double p){
+  // double pgamma(double x, double shape, double scale, int lower_tail, int log_p)
+  return gsl_sf_gamma(b)*R::pgamma(p, b, 1, 0, 0);
+}
+
+double inv_inc_upper_gamma(double b, double p){
+  // double qgamma(double p, double shape, double scale, int lower_tail, int log_p)
+  return R::qgamma(p/gsl_sf_gamma(b), b, 1, 0, 0);
+}
 
 double median(Rcpp::NumericVector data, size_t size){
 
@@ -198,7 +216,7 @@ void Rcppdeepcopy(Rcpp::NumericVector x_orig, Rcpp::NumericVector x_dest){
     Rcpp::stop("Vectors must have the same size!");
   }
 
-  for(int i =0; i<xo_size; ++i){
+  for(unsigned i =0; i<xo_size; ++i){
     x_dest[i] = x_orig[i];
   }
 }
@@ -692,6 +710,166 @@ Rcpp::List interval_optim(
 
 
 
+
+// numerical derivative
+double num_derivative(newton_args x){
+
+  double (*f)(newton_args) = x.f;
+  double step_size;
+
+  newton_args y;
+  y         = x;
+  step_size = x.step_size;
+  y.x_guess = x.x_guess + step_size;
+
+  //Rprintf("y.step_size %.4f; x.step_size: %.4f\n", y.step_size, x.step_size);
+  //Rprintf("y.x_guess %.4f; x.x_guess: %.4f\n", y.x_guess, x.x_guess);
+  //Rprintf("f(y): %.4f; f(x): %.4f\n", x.f(y), x.f(x));
+  return (f(y) - f(x))/step_size;
+}
+
+/* Optimization methods */
+// used for the quantile of the SEP function
+double newton_c(newton_args x){
+
+  double f_x;
+  int iter;
+  double check_convergence, count_warning;
+  double (*f)(newton_args) = x.f;
+  double (*dfdx)(newton_args) = x.dfdx;
+
+  if(dfdx == NULL){
+    // if analitical derivative is not provided,
+    // calculates one numerically with step
+    // dfdx_h
+    dfdx = num_derivative;
+  }
+
+  // initial value of the function
+  iter      = 0;
+  f_x       = f(x);
+  if(x.verb > 0){
+    Rprintf("iteration: 0; x value: %.4f; f(x) value: %.4f\n", x, f_x);
+  }
+
+  // checks convergence of the algorithm
+  // (receives value after first iteration)
+  check_convergence = f_x;
+  count_warning     = 0;
+
+  while(abs(f_x)>x.tol && iter < x.max_iter){
+    x.x_guess = x.x_guess - f_x/dfdx(x);
+    f_x       = f(x);
+    iter++;
+    if(x.verb > 0){
+      Rprintf("iteration: %d; x value: %.4f; f(x) value: %.4f\n"
+              , iter, x.x_guess, f_x);
+    }
+
+    // saves value from 5 interactions behind, to check convergence
+    if(iter%5 == 0){
+      check_convergence = f_x;
+    }
+
+    if(abs(f_x) > abs(check_convergence)){
+      Rcpp::warning("Algorithm is not converging.\n");
+      count_warning = count_warning + 1;
+    }
+
+    if(count_warning == 3){
+      Rcpp::stop("Algorithm is not converging.\n");
+    }
+
+  }
+  return x.x_guess;
+}
+
+double steffensen_c(newton_args x){
+
+  int iter;
+  double f_x, xlag_1, xlag_2, denom;
+  double check_convergence, count_warning;
+  Rcpp::NumericVector x_vec(x.max_iter);
+  double (*f)(newton_args) = x.f;
+  double (*dfdx)(newton_args) = x.dfdx;
+
+
+  if(dfdx == NULL){
+    // if analitical derivative is not provided,
+    // calculates one numerically with step
+    // dfdx_h
+    dfdx = num_derivative;
+  }
+
+  // initial value of the function
+  iter      = 0;
+  f_x       = f(x);
+  x_vec[0] = x.x_guess;
+  if(x.verb > 0){
+    Rprintf("iteration: 0; x value: %.4f; f(x) value: %.4f\n", x, f_x);
+  }
+
+  // checks convergence of the algorithm
+  // (receives value after first iteration)
+  check_convergence = f_x;
+  count_warning     = 0;
+
+  while(abs(f_x)>x.tol && iter < x.max_iter){
+    iter++;
+    // calculates Newton value
+    x.x_guess = x.x_guess - f_x/dfdx(x);
+
+    if(iter<2){
+      // starts with Newton's method
+      x_vec[iter] = x.x_guess;
+
+    }else{
+
+      // This is Steffensen's Method
+
+      // some useful dereference
+      xlag_1 = x_vec[iter-1];
+      xlag_2 = x_vec[iter-2];
+      denom  = x.x_guess - 2*xlag_1 + xlag_2;
+
+      // if denominator is null, uses Newton method
+      if(denom == 0){
+        x_vec[iter] <- x.x_guess;
+
+      }else{
+        // uses accelerated method
+        x_vec[iter] = xlag_2 - pow(xlag_1 - xlag_2, 2)/denom;
+        x.x_guess = x_vec[iter];
+      }
+    }
+
+    f_x = f(x);
+
+    if(x.verb > 0){
+      Rprintf("iteration: %d; x value: %.4f; f(x) value: %.4f\n"
+              , iter, x.x_guess, f_x);
+    }
+
+    // saves value from 5 interactions behind, to check convergence
+    if(iter%5 == 0){
+      check_convergence = f_x;
+    }
+
+    if(abs(f_x) > abs(check_convergence)){
+      Rcpp::warning("Algorithm is not converging.\n");
+      count_warning = count_warning + 1;
+    }
+
+    if(count_warning == 3){
+      Rcpp::stop("Algorithm is not converging.\n");
+    }
+
+  }
+  return x.x_guess;
+}
+
+
+
 /* functions for the information matrix of asymmetric subbotin  */
 /* ----------------------------------------------------------- */
 
@@ -733,8 +911,6 @@ double dB0dx2(double x){
   return -B0(x)*(3.*x-1.)/(dt1*dt1) + 2.*B1(x)*(x-1.)/(dt1*x) + B2(x)/dt1;
 
 }
-
-
 
 /* long options */
 /* ------------ */
