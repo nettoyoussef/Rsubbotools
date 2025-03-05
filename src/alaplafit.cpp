@@ -20,53 +20,6 @@
 
 #include "common.h"
 
-/* Output Functions */
-/*----------------- */
-
-void alapla_printcumul(Rcpp::NumericVector data, const double m, const double al, const double ar){
-
-  int size = data.size();
-  int i;
-  double dtmp1;
-
-  const double Asum=al+ar;
-
-  for(i=0;i<size;i++){
-    if(data[i]>m){
-      dtmp1=(data[i]-m)/ar;
-      dtmp1=1-exp(-dtmp1)*ar/Asum;
-     }
-    else{
-      dtmp1=(m-data[i])/al;
-      dtmp1=exp(-dtmp1)*al/Asum;
-    }
-    Rprintf("%e %e\n",data[i],dtmp1);
-  }
-
-}
-
-void alapla_printdensity(Rcpp::NumericVector data, const double m, const double al, const double ar){
-
-  int size = data.size();
-  int i;
-
-  const double norm=al+ar;
-
-  for(i=0;i<size;i++){
-    double dtmp1=data[i];
-    Rprintf("%e ",dtmp1);
-    dtmp1=dtmp1-m;
-    if(dtmp1>=0){
-      Rprintf("%e\n",exp(-dtmp1/ar)/norm);
-    }
-    else{
-      Rprintf("%e\n",exp( dtmp1/al)/norm);
-    }
-  }
-
-}
-
-
 /*----------------- */
 /* Object Function */
 /*---------------- */

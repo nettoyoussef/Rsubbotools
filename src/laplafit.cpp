@@ -20,50 +20,6 @@
 
 #include "common.h"
 
-
-/*------------------*/
-/* Output Functions */
-/*----------------- */
-
-void lapla_printcumul(Rcpp::NumericVector data, const double m, const double a){
-
-  int size = data.size();
-  int i;
-  double dtmp1;
-
-  for(i=0;i<size;i++){
-    if(data[i]>m){
-      dtmp1=1-exp( (m-data[i])/a )/2;
-    }
-    else{
-      dtmp1=exp( (data[i]-m)/a )/2;
-    }
-    Rprintf("%e %e\n",data[i],dtmp1);
-  }
-
-}
-
-void lapla_printdensity(Rcpp::NumericVector data, const double m, const double a){
-
-  int size = data.size();
-  int i;
-
-  for(i=0;i<size;i++){
-    double dtmp1=data[i];
-    Rprintf("%e ",dtmp1);
-    dtmp1=dtmp1-m;
-    if(dtmp1>=0){
-      Rprintf("%e\n",exp(-dtmp1/a)/(2*a));
-    }
-    else{
-      Rprintf("%e\n",exp( dtmp1/a)/(2*a));
-    }
-  }
-
-}
-/*----------------- */
-
-
 /* Objective Function */
 /*---------------- */
 
@@ -80,8 +36,6 @@ double lapla_nll(Rcpp::NumericVector data, const double m){
   return log(2*sum/size)+1.;
 
 }
-
-
 
 //' Fit a Laplace Distribution via maximum likelihood
 //'

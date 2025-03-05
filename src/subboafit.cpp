@@ -18,85 +18,13 @@
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
-
-/*
-  Verbosity levels:
-  0 just the final ouput
-  1 the results of intermediate steps
-  2 internal information on intermediate steps
-  3 gory details on intermediate steps
-*/
-
-
 #include "common.h"
 
-/* Output Functions */
-/*----------------- */
-
-void subboa_printcumul(Rcpp::NumericVector data, double param[]){
-
-  int size = data.size();
-  int i;
-  double dtmp1;
-  const double bl=param[0];
-  const double br=param[1];
-  const double al=param[2];
-  const double ar=param[3];
-  const double m=param[4];
-
-  const double Al=al*gsl_sf_gamma(1./bl+1.)*pow(bl,1./bl);
-  const double Ar=ar*gsl_sf_gamma(1./br+1.)*pow(br,1./br);
-  const double Asum=Al+Ar;
-
-  for(i=0;i<size;i++){
-    if(data[i]>m){
-      dtmp1=pow((data[i]-m)/ar,br)/br;
-      dtmp1=(Al+Ar*gsl_sf_gamma_inc_P(1./br,dtmp1))/Asum;
-     }
-    else{
-      dtmp1=pow((m-data[i])/al,bl)/bl;
-      dtmp1=Al*gsl_sf_gamma_inc_Q(1./bl,dtmp1)/Asum;
-    }
-    Rprintf("%e %e\n",data[i],dtmp1);
-  }
-
-}
-
-void subboa_printdensity(Rcpp::NumericVector data, double param[]){
-
-  int size = data.size();
-  int i;
-  const double bl=param[0];
-  const double br=param[1];
-  const double al=param[2];
-  const double ar=param[3];
-  const double m=param[4];
-
-  const double norm=al*pow(bl,1/bl)*gsl_sf_gamma(1./bl+1.)
-    +ar*pow(br,1/br)*gsl_sf_gamma(1./br+1);
-
-  for(i=0;i<size;i++){
-    double dtmp1=data[i];
-    Rprintf("%e ",dtmp1);
-    dtmp1-=m;
-    if(dtmp1>=0){
-      Rprintf("%e\n",exp(-pow(dtmp1/ar,br)/br)/norm);
-    }
-    else{
-      Rprintf("%e\n",exp(-pow(-dtmp1/al,bl)/bl)/norm);
-    }
-  }
-
-}
-/*----------------- */
-
-
-
 /*
-   par   array of paramaters
-   N     number of observations
-   dim   dimension of the matrix: 2 m known; 3 m unknown
-   I     the variance-covarance matrxi
+  par   array of paramaters
+  N     number of observations
+  dim   dimension of the matrix: 2 m known; 3 m unknown
+  I     the variance-covarance matrxi
 */
 RcppGSL::Matrix subboa_varcovar(const Rcpp::NumericVector par, const size_t N, const size_t dim){
 

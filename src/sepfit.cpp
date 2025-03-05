@@ -63,69 +63,7 @@ x[3] = alpha          kurtosis
 /* Output Functions */
 /*----------------- */
 
-double fSEP(double x, void *params){
 
-  const double *X = (double *) params;
-
-  const double m=X[0];
-  const double s=X[1];
-  const double l=X[2];
-  const double a=X[3];
-
-  const double z = (x-m)/s;
-  const double w = (z>0 ? 1 : -1)*pow(fabs(z),a/2)*l*sqrt(2/a);
-  const double C = 2*pow(a,1/a-1)*gsl_sf_gamma(1./a);
-
-  return 2*gsl_cdf_ugaussian_P(w)*exp(-pow(fabs(z),a)/a)/(s*C);
-
-}
-
-void sepfit_printcumul(Rcpp::NumericVector data, double x[]){
-
-  int size = data.size();
-  size_t i;
-  double dtmp1;
-  double cumul=0;
-  double result,error;
-
-  /* allocate at most 1000 subintervals */
-  gsl_integration_workspace * w
-    = gsl_integration_workspace_alloc (1000);
-
-  /* define the function to be integrated */
-  gsl_function F;
-  F.function = &fSEP;
-  F.params = x;
-
-
-  gsl_integration_qagil(&F,data[0],1e-7,1e-7,1000,w,&result,&error);
-
-  cumul=result;
-
-  Rprintf("%e %e\n",data[0],cumul);
-
-  for(i=1;i<size;i++){
-    gsl_integration_qag(&F,data[i-1],data[i],
-                        1e-7,1e-7,1000,4,w,&result,&error);
-    cumul+=result;
-    Rprintf("%e %e\n",data[i],cumul);
-  }
-
-}
-
-void sepfit_printdensity(Rcpp::NumericVector data, double x[]){
-
-  int size = data.size();
-  size_t i;
-
-  for(i=0;i<size;i++){
-    double dtmp1=data[i];
-    Rprintf("%e ",dtmp1);
-    Rprintf("%e\n",fSEP(dtmp1,x));
-  }
-
-}
-/*----------------- */
 
 
 

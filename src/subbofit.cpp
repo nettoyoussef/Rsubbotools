@@ -43,48 +43,12 @@ double geta(Rcpp::NumericVector& data, const double b, const double mu){
   return(pow(sum/size, 1./b));
 }
 
-
-void subbo_printcumul(Rcpp::NumericVector data, double param[]){
-
-  int size = data.size();
-  unsigned i;
-  double dtmp1;
-  const double b = param[0];
-  const double a = param[1];
-  const double m = param[2];
-
-  for(i = 0;i<size;i++){
-    dtmp1 = pow(fabs(data[i]-m)/a, b)/b;
-    dtmp1= .5+.5*(data[i]>m?1.:-1.)*gsl_sf_gamma_inc_P(1./b, dtmp1);
-    Rprintf("%e %e\n",data[i], dtmp1);
-  }
-
-}
-
-void subbo_printdensity(Rcpp::NumericVector data, double param[]){
-
-  int size = data.size();
-  unsigned i;
-  const double b = param[0];
-  const double a = param[1];
-  const double m = param[2];
-
-  const double norm = 2*a*gsl_sf_gamma(1./b+1.)*pow(b, 1./b);
-
-  for(i = 0;i<size;i++){
-    const double dtmp1 = data[i];
-    Rprintf("%e ",dtmp1);
-    Rprintf("%e\n",exp(-pow(fabs(dtmp1-m)/a, b)/b)/norm);
-  }
-
-}
 /*----------------- */
-
 /*
-   par   array of paramaters
-   N     number of observations
-   dim   dimension of the matrix: 2 m known; 3 m unknown
-   I     the variance-covariance matrix
+  par   array of paramaters
+  N     number of observations
+  dim   dimension of the matrix: 2 m known; 3 m unknown
+  I     the variance-covariance matrix
 */
 RcppGSL::Matrix subbo_varcovar(const Rcpp::NumericVector par, const size_t N, const size_t dim){
 
