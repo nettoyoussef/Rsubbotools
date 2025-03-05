@@ -1,8 +1,6 @@
-
 #include "common.h"
 
-
-// tabulated values for the heigt of the Ziggurat levels
+// tabulated values for the height of the Ziggurat levels
 static const double ytab[128] = {
   1              , 0.963598623011  , 0.936280813353  , 0.913041104253 ,
   0.892278506696 , 0.873239356919  , 0.855496407634  , 0.838778928349 ,
@@ -111,7 +109,6 @@ static const double wtab[128] = {
   1.83813550477e-07, 1.92166040885e-07, 2.05295471952e-07, 2.22600839893e-07
 };
 
-
 // The Gamma distribution of order a>0 is defined by:
 // p(x) dx = {1 / \Gamma(a) b^a } x^{a-1} e^{-x/b} dx
 // for x>0.  If X and Y are independent gamma-distributed random
@@ -123,7 +120,9 @@ static const double wtab[128] = {
 //double gsl_ran_gaussian_ziggurat(const gsl_rng * r, double sigma)
 //double gsl_ran_gaussian_ratio_method(const gsl_rng * r, double sigma)
 //
-//This function computes a Gaussian random variate using the alternative Marsaglia-Tsang ziggurat and Kinderman-Monahan-Leva ratio methods. The Ziggurat algorithm is the fastest available algorithm in most cases.
+// This function computes a Gaussian random variate using the alternative
+// Marsaglia-Tsang ziggurat and Kinderman-Monahan-Leva ratio methods.
+// The Ziggurat algorithm is the fastest available algorithm in most cases.
 
 //double gsl_ran_gaussian_ziggurat(
 
@@ -228,17 +227,17 @@ static const double wtab[128] = {
 //}
 
 
-
-
 //' Generates a Gamma-distributed sample
 //'
-//' This function returns a sample from a gamma distributed random variable.
+//' This function returns a sample from a gamma-distributed random variable.
 //' The method used to generate this sample is the Marsaglia-Tsang fast gamma
-//' method. See more details below.
+//' method. See more details below. The name was chosen so it doesn't clash
+//' with R's native method.
 //'
 //' The gamma distribution is given by the function:
-//' \dqn{f(x) = /frac{1}{\Gamma(a)b^a}x^{a-1}e^{-x/b}}, x > 0}
-//' Based on Marsaglia and Tsang, "A Simple Method for
+//' \deqn{f(x) = \frac{1}{\Gamma(b)a^b}x^{b-1}e^{-x/a}, x > 0}
+//' where \eqn{b} is a shape parameter and \eqn{a} is a scale parameter.
+//' The RNG is given by Marsaglia and Tsang, "A Simple Method for
 //' generating gamma variables", ACM Transactions on Mathematical
 //' Software, Vol 26, No 3 (2000), p363-372.
 //' Available at:
@@ -253,12 +252,12 @@ static const double wtab[128] = {
 //' GSL file: randist/gamma.c
 //'
 //' @param n (int)
-//' @param a (numeric)
-//' @param b (numeric)
+//' @param b (numeric) - shape parameter. Must be in the range \eqn{(0, \infty)}.
+//' @param a (numeric) - scale parameter. Must be in the range \eqn{(0, \infty)}.
 //' @return a numeric vector containing a random sample with above parameters.
 //'
 //' @examples
-//' sample_gamma <- rgamma(1000, 1, 1)
+//' sample_gamma <- rgamma_c(1000, 1, 1)
 //' @export
 //' @md
 // [[Rcpp::export]]
@@ -328,15 +327,15 @@ template <typename T> int sgn(T val) {
 //'
 //' The Laplace distribution is given by the two-sided exponential distribution
 //' given by the function:
-//' \dqn{f(x;a,m) = \frac{1}{2a} e^{- \left| \frac{x-m}{a} \right| }}
+//' \deqn{ f(x;a,m) = \frac{1}{2a} e^{- \left| \frac{x-m}{a} \right|} }
 //' The random sampling is done by inverse transform sampling.
 //'
 //' Copyright (C) 2020-2021 Elias Haddad
 //' License: GPL 3+
 //'
-//' @param n (int) - the size of the sample
-//' @param m (numeric) - the location parameter
-//' @param a (numeric) - the scale parameter
+//' @param n (int) - the size of the sample.
+//' @param m (numeric) - the location parameter.
+//' @param a (numeric) - the scale parameter.
 //' @return a numeric vector containing a random sample with above parameters.
 //'
 //' @examples
@@ -387,13 +386,13 @@ Rcpp::NumericVector rlaplace( unsigned n
 //' Copyright (C) 2020-2021 Elias Haddad
 //' License: GPL 3+
 //'
-//' @param n (int) - the size of the sample
-//' @param m (numeric) - the location parameter
+//' @param n (int) - the size of the sample.
+//' @param m (numeric) - the location parameter.
 //' @param al,ar (numeric) - left and right scale parameters, respectively.
 //' @return a numeric vector containing a random sample.
 //'
 //' @examples
-//' sample_gamma <- ralaplace(1000, 0, 1)
+//' sample_gamma <- ralaplace(1000)
 //' @export
 //' @md
 // [[Rcpp::export]]
@@ -428,18 +427,13 @@ Rcpp::NumericVector ralaplace( unsigned n
 }
 
 
-
-
-
-
-
 //' Generates a random sample from a Exponential Power distribution
 //'
-//' This function returns a sample from a gamma distributed random variable.
+//' This function returns a sample from a gamma-distributed random variable.
 //'
 //' The exponential power distribution (EP) is given by the function:
-//' \dqn{ f(a,b) = \frac{1}{2a\Gamma(1+1/b)}e^{-|x/a|^b}, -\infty < x < \infty }.
-//' where \eqn{b} is a shape parameter, \eqn{a} is a scale parameter and \Gamma
+//' \deqn{ f(a,b) = \frac{1}{2a\Gamma(1+1/b)}e^{-|x/a|^b}, -\infty < x < \infty }.
+//' where \eqn{b} is a shape parameter, \eqn{a} is a scale parameter and \eqn{\Gamma}
 //' representes the gamma function. While not done here, this distribution can
 //' be adapted to have non-zero location parameter.
 //' The Exponential Power distribution is related to the gamma distribution by
@@ -462,13 +456,14 @@ Rcpp::NumericVector ralaplace( unsigned n
 //  GSL file: randist/exppow.c
 //' GSL function: gsl_ran_exppow
 //'
-//' @param n (int) - size of the sample
-//' @param a (numeric) - scale parameter
-//' @param b (numeric) - shape parameter
+//' @param n (int) - size of the sample.
+//' @param m (numeric) - the location parameter.
+//' @param a (numeric) - scale parameter.
+//' @param b (numeric) - shape parameter.
 //' @return a numeric vector containing a random sample with above parameters.
 //'
 //' @examples
-//' sample_gamma <- rpower(1000, 1, 1)
+//' sample_gamma <- rpower(1000)
 //' @export
 //' @md
 // [[Rcpp::export]]
@@ -564,7 +559,7 @@ Rcpp::NumericVector rpower(
 //' The Subbotin distribution is given by the function:
 //' \deqn{ f(x;a,b,m) = \frac{1}{A} e^{- \frac{1}{b} \left|\frac{x-m}{a}\right|^b} }
 //' where \eqn{m} is a location parameter, \eqn{b} is a shape parameter, \eqn{a}
-//' is a scale parameter and \Gamma representes the gamma function.
+//' is a scale parameter and \eqn{\Gamma} representes the gamma function.
 //' Since the Subbotin distribution is basically the exponential distribution
 //' with scale parameter \eqn{a = ab^{1/b}} and \eqn{m=0}, we use the same
 //' method of the exponential power RNG and add the location parameter.
@@ -620,7 +615,7 @@ Rcpp::NumericVector rsubbo(
 //' with:
 //' \deqn{A = a_lb_l^{1/b_l}\Gamma(1+1/b_l) + a_rb_r^{1/b_r}\Gamma(1+1/b_r)}
 //' where \eqn{m} is a location parameter, \eqn{b*} are shape parameters, \eqn{a*}
-//' are scale parameters and \Gamma representes the gamma function.
+//' are scale parameters and \eqn{\Gamma} representes the gamma function.
 //' By a suitably transformation, it is possible to use the EP distribution with
 //' the Tadikamalla method to sample from this distribution. We basically take
 //' the absolute values of the numbers sampled from the \code{rpower} function,
@@ -632,7 +627,7 @@ Rcpp::NumericVector rsubbo(
 //' Copyright (C) 2020-2021 Elias Haddad
 //' License: GPL 3+
 //'
-//' @param n (int) - size of the sample
+//' @param n (int) - size of the sample.
 //' @param m (numeric) - location parameter.
 //' @param bl,br (numeric) - shape parameters.
 //' @param al,ar (numeric) - scale parameters.

@@ -4,16 +4,16 @@
 \alias{rasubbo}
 \title{Produces a random sample from a Asymmetric Power Exponential distribution}
 \usage{
-rasubbo(n, m = 0, bl = 2, br = 2, al = 1, ar = 1)
+rasubbo(n, m = 0, al = 1, ar = 1, bl = 2, br = 2)
 }
 \arguments{
-\item{n}{(int) - size of the sample}
+\item{n}{(int) - size of the sample.}
 
 \item{m}{(numeric) - location parameter.}
 
-\item{bl, br}{(numeric) - shape parameters.}
-
 \item{al, ar}{(numeric) - scale parameters.}
+
+\item{bl, br}{(numeric) - shape parameters.}
 }
 \value{
 a numeric vector containing a random sample.
@@ -32,7 +32,7 @@ The AEP distribution is expressed by the function:
 with:
 \deqn{A = a_lb_l^{1/b_l}\Gamma(1+1/b_l) + a_rb_r^{1/b_r}\Gamma(1+1/b_r)}
 where \eqn{m} is a location parameter, \eqn{b*} are shape parameters, \eqn{a*}
-are scale parameters and \Gamma representes the gamma function.
+are scale parameters and \eqn{\Gamma} representes the gamma function.
 By a suitably transformation, it is possible to use the EP distribution with
 the Tadikamalla method to sample from this distribution. We basically take
 the absolute values of the numbers sampled from the \code{rpower} function,

@@ -9,7 +9,6 @@ subbolafit(
   verb = 0L,
   method = 2L,
   interv_step = 10L,
-  output = 0L,
   provided_m_ = NULL,
   par = as.numeric(c(2, 2, 1, 0)),
   g_opt_par = as.numeric(c(0.1, 0.01, 100, 0.001, 1e-05, 2)),

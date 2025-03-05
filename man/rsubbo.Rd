@@ -26,7 +26,7 @@ Tadikamalla method.
 The Subbotin distribution is given by the function:
 \deqn{ f(x;a,b,m) = \frac{1}{A} e^{- \frac{1}{b} \left|\frac{x-m}{a}\right|^b} }
 where \eqn{m} is a location parameter, \eqn{b} is a shape parameter, \eqn{a}
-is a scale parameter and \Gamma representes the gamma function.
+is a scale parameter and \eqn{\Gamma} representes the gamma function.
 Since the Subbotin distribution is basically the exponential distribution
 with scale parameter \eqn{a = ab^{1/b}} and \eqn{m=0}, we use the same
 method of the exponential power RNG and add the location parameter.

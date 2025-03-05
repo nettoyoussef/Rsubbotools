@@ -4,14 +4,16 @@
 \alias{rpower}
 \title{GSL function: gsl_ran_exppow}
 \usage{
-rpower(n, a, b)
+rpower(n, m = 0, a = 1, b = 2)
 }
 \arguments{
-\item{n}{(int) - size of the sample}
+\item{n}{(int) - size of the sample.}
 
-\item{a}{(numeric) - scale parameter}
+\item{m}{(numeric) - the location parameter.}
 
-\item{b}{(numeric) - shape parameter}
+\item{a}{(numeric) - scale parameter.}
+
+\item{b}{(numeric) - shape parameter.}
 }
 \value{
 a numeric vector containing a random sample with above parameters.
@@ -20,5 +22,5 @@ a numeric vector containing a random sample with above parameters.
 GSL function: gsl_ran_exppow
 }
 \examples{
-sample_gamma <- rpower(1000, 1, 1)
+sample_gamma <- rpower(1000)
 }

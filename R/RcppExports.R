@@ -3,13 +3,14 @@
 
 #' Generates a Gamma-distributed sample
 #'
-#' This function returns a sample from a gamma distributed random variable.
+#' This function returns a sample from a gamma-distributed random variable.
 #' The method used to generate this sample is the Marsaglia-Tsang fast gamma
 #' method. See more details below.
 #'
 #' The gamma distribution is given by the function:
-#' \dqn{f(x) = /frac{1}{\Gamma(a)b^a}x^{a-1}e^{-x/b}}, x > 0}
-#' Based on Marsaglia and Tsang, "A Simple Method for
+#' \deqn{f(x) = \frac{1}{\Gamma(b)a^b}x^{b-1}e^{-x/a}, x > 0}
+#' where \eqn{b} is a shape parameter and \eqn{a} is a scale parameter.
+#' The RNG is given by Marsaglia and Tsang, "A Simple Method for
 #' generating gamma variables", ACM Transactions on Mathematical
 #' Software, Vol 26, No 3 (2000), p363-372.
 #' Available at:
@@ -23,11 +24,11 @@ NULL
 
 #' Generates a random sample from a Exponential Power distribution
 #'
-#' This function returns a sample from a gamma distributed random variable.
+#' This function returns a sample from a gamma-distributed random variable.
 #'
 #' The exponential power distribution (EP) is given by the function:
-#' \dqn{ f(a,b) = \frac{1}{2a\Gamma(1+1/b)}e^{-|x/a|^b}, -\infty < x < \infty }.
-#' where \eqn{b} is a shape parameter, \eqn{a} is a scale parameter and \Gamma
+#' \deqn{ f(a,b) = \frac{1}{2a\Gamma(1+1/b)}e^{-|x/a|^b}, -\infty < x < \infty }.
+#' where \eqn{b} is a shape parameter, \eqn{a} is a scale parameter and \eqn{\Gamma}
 #' representes the gamma function. While not done here, this distribution can
 #' be adapted to have non-zero location parameter.
 #' The Exponential Power distribution is related to the gamma distribution by
@@ -53,16 +54,16 @@ NULL
 #' GSL file: randist/gamma.c
 #'
 #' @param n (int)
-#' @param a (numeric)
-#' @param b (numeric)
+#' @param b (numeric) - shape parameter. Must be in the range \eqn{(0, \infty)}.
+#' @param a (numeric) - scale parameter. Must be in the range \eqn{(0, \infty)}.
 #' @return a numeric vector containing a random sample with above parameters.
 #'
 #' @examples
-#' sample_gamma <- rgamma(1000, 1, 1)
+#' sample_gamma <- rgamma_c(1000, 1, 1)
 #' @export
 #' @md
-rgamma <- function(n, a, b) {
-    .Call(`_Rsubbotools_rgamma`, n, a, b)
+rgamma_c <- function(n, b = 2., a = 1/2) {
+    .Call(`_Rsubbotools_rgamma_c`, n, b, a)
 }
 
 #' Generates a Laplace-distributed sample
@@ -71,22 +72,22 @@ rgamma <- function(n, a, b) {
 #'
 #' The Laplace distribution is given by the two-sided exponential distribution
 #' given by the function:
-#' \dqn{f(x;a,m) = \frac{1}{2a} e^{- \left| \frac{x-m}{a} \right| }}
+#' \deqn{ f(x;a,m) = \frac{1}{2a} e^{- \left| \frac{x-m}{a} \right|} }
 #' The random sampling is done by inverse transform sampling.
 #'
 #' Copyright (C) 2020-2021 Elias Haddad
 #' License: GPL 3+
 #'
-#' @param n (int) - the size of the sample
-#' @param m (numeric) - the location parameter
-#' @param a (numeric) - the scale parameter
+#' @param n (int) - the size of the sample.
+#' @param m (numeric) - the location parameter.
+#' @param a (numeric) - the scale parameter.
 #' @return a numeric vector containing a random sample with above parameters.
 #'
 #' @examples
 #' sample_gamma <- rlaplace(1000, 0, 1)
 #' @export
 #' @md
-rlaplace <- function(n, m = 0, a = 1) {
+rlaplace <- function(n, m = 0., a = 1.) {
     .Call(`_Rsubbotools_rlaplace`, n, m, a)
 }
 
@@ -108,32 +109,33 @@ rlaplace <- function(n, m = 0, a = 1) {
 #' Copyright (C) 2020-2021 Elias Haddad
 #' License: GPL 3+
 #'
-#' @param n (int) - the size of the sample
-#' @param m (numeric) - the location parameter
+#' @param n (int) - the size of the sample.
+#' @param m (numeric) - the location parameter.
 #' @param al,ar (numeric) - left and right scale parameters, respectively.
 #' @return a numeric vector containing a random sample.
 #'
 #' @examples
-#' sample_gamma <- ralaplace(1000, 0, 1)
+#' sample_gamma <- ralaplace(1000)
 #' @export
 #' @md
-ralaplace <- function(n, m = 0, al = 1, ar = 1) {
+ralaplace <- function(n, m = 0., al = 1., ar = 1.) {
     .Call(`_Rsubbotools_ralaplace`, n, m, al, ar)
 }
 
 #' GSL function: gsl_ran_exppow
 #'
-#' @param n (int) - size of the sample
-#' @param a (numeric) - scale parameter
-#' @param b (numeric) - shape parameter
+#' @param n (int) - size of the sample.
+#' @param m (numeric) - the location parameter.
+#' @param a (numeric) - scale parameter.
+#' @param b (numeric) - shape parameter.
 #' @return a numeric vector containing a random sample with above parameters.
 #'
 #' @examples
-#' sample_gamma <- rpower(1000, 1, 1)
+#' sample_gamma <- rpower(1000)
 #' @export
 #' @md
-rpower <- function(n, a, b) {
-    .Call(`_Rsubbotools_rpower`, n, a, b)
+rpower <- function(n, m = 0., a = 1., b = 2.) {
+    .Call(`_Rsubbotools_rpower`, n, m, a, b)
 }
 
 #' Produces a random sample from a Subbotin distribution
@@ -144,7 +146,7 @@ rpower <- function(n, a, b) {
 #' The Subbotin distribution is given by the function:
 #' \deqn{ f(x;a,b,m) = \frac{1}{A} e^{- \frac{1}{b} \left|\frac{x-m}{a}\right|^b} }
 #' where \eqn{m} is a location parameter, \eqn{b} is a shape parameter, \eqn{a}
-#' is a scale parameter and \Gamma representes the gamma function.
+#' is a scale parameter and \eqn{\Gamma} representes the gamma function.
 #' Since the Subbotin distribution is basically the exponential distribution
 #' with scale parameter \eqn{a = ab^{1/b}} and \eqn{m=0}, we use the same
 #' method of the exponential power RNG and add the location parameter.
@@ -163,7 +165,7 @@ rpower <- function(n, a, b) {
 #' sample_gamma <- rsubbo(1000, 1, 1)
 #' @export
 #' @md
-rsubbo <- function(n, m = 0.0, a = 1.0, b = 2.0) {
+rsubbo <- function(n, m = 0., a = 1., b = 2.) {
     .Call(`_Rsubbotools_rsubbo`, n, m, a, b)
 }
 
@@ -182,7 +184,7 @@ rsubbo <- function(n, m = 0.0, a = 1.0, b = 2.0) {
 #' with:
 #' \deqn{A = a_lb_l^{1/b_l}\Gamma(1+1/b_l) + a_rb_r^{1/b_r}\Gamma(1+1/b_r)}
 #' where \eqn{m} is a location parameter, \eqn{b*} are shape parameters, \eqn{a*}
-#' are scale parameters and \Gamma representes the gamma function.
+#' are scale parameters and \eqn{\Gamma} representes the gamma function.
 #' By a suitably transformation, it is possible to use the EP distribution with
 #' the Tadikamalla method to sample from this distribution. We basically take
 #' the absolute values of the numbers sampled from the \code{rpower} function,
@@ -194,7 +196,7 @@ rsubbo <- function(n, m = 0.0, a = 1.0, b = 2.0) {
 #' Copyright (C) 2020-2021 Elias Haddad
 #' License: GPL 3+
 #'
-#' @param n (int) - size of the sample
+#' @param n (int) - size of the sample.
 #' @param m (numeric) - location parameter.
 #' @param bl,br (numeric) - shape parameters.
 #' @param al,ar (numeric) - scale parameters.
@@ -204,8 +206,49 @@ rsubbo <- function(n, m = 0.0, a = 1.0, b = 2.0) {
 #' sample_gamma <- rasubbo(1000, 0, 0.5, 0.5,  1, 1)
 #' @export
 #' @md
-rasubbo <- function(n, m = 0.0, bl = 2, br = 2, al = 1, ar = 1) {
-    .Call(`_Rsubbotools_rasubbo`, n, m, bl, br, al, ar)
+rasubbo <- function(n, m = 0., al = 1., ar = 1., bl = 2., br = 2.) {
+    .Call(`_Rsubbotools_rasubbo`, n, m, al, ar, bl, br)
+}
+
+#' Produces a random sample from a Asymmetric Power Exponential distribution
+#'
+#'
+#' Generate pseudo random-number from an asymmetric power exponential distribution
+#' using the Tadikamalla method.
+#'
+#' The AEP distribution is expressed by the function:
+#' \deqn{f(x;a_l,a_r,b_l,b_r,m) =
+#' \begin{cases}
+#' \frac{1}{A} e^{- \frac{1}{b_l} |\frac{x-m}{a_l}|^{b_l} }, & x < m \\
+#' \frac{1}{A} e^{- \frac{1}{b_r} |\frac{x-m}{a_r}|^{b_r} }, & x > m
+#' \end{cases} }
+#' with:
+#' \deqn{A = a_lb_l^{1/b_l}\Gamma(1+1/b_l) + a_rb_r^{1/b_r}\Gamma(1+1/b_r)}
+#' where \eqn{m} is a location parameter, \eqn{b*} are shape parameters, \eqn{a*}
+#' are scale parameters and \eqn{\Gamma} representes the gamma function.
+#' By a suitably transformation, it is possible to use the EP distribution with
+#' the Tadikamalla method to sample from this distribution. We basically take
+#' the absolute values of the numbers sampled from the \code{rpower} function,
+#' which is equivalent from sampling from a half Exponential Power distribution.
+#' This values are then weighted by a constant expressed in the parameters.
+#' More details are available on the package vignette and on the
+#' function \code{rpower}.
+#' Copyright (C) 2003-2014 Giulio Bottazzi
+#' Copyright (C) 2020-2021 Elias Haddad
+#' License: GPL 3+
+#'
+#' @param n (int) - size of the sample.
+#' @param m (numeric) - location parameter.
+#' @param bl,br (numeric) - shape parameters.
+#' @param al,ar (numeric) - scale parameters.
+#' @return a numeric vector containing a random sample.
+#'
+#' @examples
+#' sample_gamma <- rasubbo(1000, 0, 0.5, 0.5,  1, 1)
+#' @export
+#' @md
+rasubbo2 <- function(n, m = 0., al = 1., ar = 1., bl = 2., br = 2.) {
+    .Call(`_Rsubbotools_rasubbo2`, n, m, al, ar, bl, br)
 }
 
 #' Fit an Asymmetric Laplace Distribution via maximum likelihood
@@ -255,8 +298,339 @@ alaplafit <- function(data, verb = 0L, interv_step = 10L, provided_m_ = NULL) {
     .Call(`_Rsubbotools_alaplafit`, data, verb, interv_step, provided_m_)
 }
 
+#' Returns CDF from EP Distribution
+#'
+#' The \code{ppower} returns the Cumulative Distribution Function at point x for
+#' the Exponential Power distribution with parameters \eqn{a}, \eqn{b} and \eqn{m}.
+#'
+#' The Exponential Power distribution (EP) is given by the function:
+#' \deqn{ f(a,b) = \frac{1}{2a\Gamma(1+1/b)}e^{-|(x-m)/a|^b}, -\infty < x < \infty }.
+#' where \eqn{b} is a shape parameter, \eqn{a} is a scale parameter, \eqn{m}
+#' is a location parameter and \eqn{\Gamma} represents the gamma function.
+#' @param x (numeric) - value in the range \eqn{(-\infty, \infty)} to evaluate
+#' the density.
+#' @param a (numeric) - scale parameter. Must be in the range \eqn{(0, \infty)}.
+#' @param b (numeric) - shape parameter. Must be in the range \eqn{(0, \infty)}.
+#' @param m (numeric) - location parameter. Must be in the range
+#' \eqn{(-\infty, \infty)}.
+#' @return a vector containing the values for the densities.
+#' @export
+#' @md
+ppower <- function(x, m = 0, a = 1, b = 2) {
+    .Call(`_Rsubbotools_ppower`, x, m, a, b)
+}
+
+#' Returns CDF from the Skewed Exponential Power distribution
+#'
+#' The \code{psep} returns the Cumulative Distribution Function at point x for
+#' the Skewed Exponential Power distribution with parameters \eqn{a}, \eqn{b}.
+#'
+#' The  SEP is a exponential power distribution controlled
+#' by four parameters, with formula:
+#' \deqn{ f(x; \mu, \alpha, \lambda, \sigma) =
+#' 2 \Phi(w) e^{-|z|^\alpha/\alpha}/ ( \sigma C)}
+#' where:
+#' \deqn{z = (x-\mu)/\sigma}
+#' \deqn{w = sign(z) |z|^{(\alpha/2)} \lambda \sqrt{2/\alpha}}
+#' \deqn{C = 2 \alpha^{(1/\alpha-1)} \Gamma(1/\alpha)}
+#' with \eqn{\Phi} the cumulative normal distribution with mean zero and variance
+#' one. The CDF is calculated through numerical integration using the GSL suite.
+#' Copyright (C) 2007-2014 Giulio Bottazzi
+#' Copyright (C) 2020-2021 Elias Haddad
+#' @param x - vector with values to evaluate CDF.
+#' @param alpha - the shape parameter.
+#' @param sigma - the scale parameter
+#' @param lambda - the skewness parameter.
+#' @param m - the location parameter.
+#' @export
+#' @md
+psep <- function(x, m = 0, alpha = 2, sigma = 1, lambda = 0) {
+    .Call(`_Rsubbotools_psep`, x, m, alpha, sigma, lambda)
+}
+
+#' Returns CDF from the Laplace Distribution
+#'
+#' The \code{plaplace} returns the Cumulative Distribution Function at point x
+#' for the Laplace distribution with parameters \eqn{a} and \eqn{m}.
+#'
+#' The Laplace distribution is a distribution controlled
+#' by two parameters, with formula:
+#' \deqn{f(x;a,m) = \frac{1}{2a} e^{- \left| \frac{x-m}{a} \right| }}
+#' where \eqn{a} is a scale parameter, and \eqn{m} is a location parameter.
+#' @param x (numeric) - value in the range \eqn{(-\infty, \infty)} to evaluate
+#' the density.
+#' @param a (numeric) - scale parameter. Must be in the range \eqn{(0, \infty)}.
+#' @param m (numeric) - location parameter.
+#' @return a vector containing the values for the densities.
+#' @export
+#' @md
+plaplace <- function(x, m = 0, a = 1) {
+    .Call(`_Rsubbotools_plaplace`, x, m, a)
+}
+
+#' Returns CDF from Asymmetric Laplace Distribution
+#'
+#' The \code{palaplace} returns the Cumulative Distribution Function at point x
+#' for the Asymmetric Laplace distribution with parameters \eqn{a*} and \eqn{m}.
+#'
+#' The Asymmetric Laplace distribution is a distribution controlled
+#' by three parameters, with formula:
+#' \deqn{f(x;a_l,a_r,m) =
+#' \begin{cases}
+#' \frac{1}{A} e^{-|\frac{x-m}{a_l}| }, & x < m \\
+#' \frac{1}{A} e^{-|\frac{x-m}{a_r}| }, & x > m
+#' \end{cases}}
+#' with:
+#' \deqn{A = a_l + a_r}
+#' where \eqn{a*} are scale parameters, and \eqn{m} is a location parameter.
+#' It is basically derived from the Asymmetric Exponential Power distribution
+#' by setting \eqn{b_l = b_r = b}.
+#' @param x (numeric) - value in the range \eqn{(-\infty, \infty)} to evaluate
+#' the density.
+#' @param al,ar (numeric) - scale parameters. Must be in the range
+#' \eqn{(0, \infty)}.
+#' @param m (numeric) - location parameter.
+#' @return a vector containing the values for the densities.
+#' @export
+#' @md
+palaplace <- function(x, m = 0, al = 1, ar = 1) {
+    .Call(`_Rsubbotools_palaplace`, x, m, al, ar)
+}
+
+#' Returns CDF from Subbotin Distribution
+#'
+#' The \code{psubbo} returns the Cumulative Distribution Function (CDF) from the
+#' the Subbotin evaluated at \eqn{a} and return \eqn{z}, such that
+#' \eqn{P(X < a) = z}.
+#'
+#' The Subbotin cumulative distribution function is given by:
+#' \deqn{F(x;a,b,m) = 0.5 + 0.5 \text{sign}(x -m)P(x, 1/b)}
+#' where \eqn{P} is the normalized incomplete gamma function:
+#' \deqn{P(x, 1/b) = 1 - \frac{1}{\Gamma(1/b)} \int_{0}^{x} t^{1/b -1}e^{-t} }
+#' and \eqn{a} is a scale parameter, \eqn{b} controls the tails (lower values
+#' represent fatter tails), and \eqn{m} is a location parameter.
+#' @param x (numeric) - value in the range \eqn{(-\infty, \infty)} to evaluate
+#' the density.
+#' @param a (numeric) - scale parameter. Must be in the range \eqn{(0, \infty)}.
+#' @param b (numeric) - shape parameter. Must be in the range \eqn{(0, \infty)}.
+#' @param m (numeric) - location parameter.
+#' @return a vector containing the values for the densities.
+#' @export
+#' @md
+psubbo <- function(x, m = 0, a = 1, b = 2) {
+    .Call(`_Rsubbotools_psubbo`, x, m, a, b)
+}
+
+#' Returns CDF from the AEP Distribution
+#'
+#' The \code{pasubbo} returns the Cumulative Distribution Function at point x
+#' for the AEP distribution with parameters \eqn{a*}, \eqn{b*}, \eqn{m}.
+#'
+#' The AEP is a exponential power distribution controlled
+#' by five parameters, with formula:
+#' \deqn{ f(x;a_l,a_r,b_l,b_r,m) =
+#' \begin{cases}
+#' \frac{1}{A} e^{- \frac{1}{b_l} |\frac{x-m}{a_l}|^{b_l} }, & x < m \\
+#' \frac{1}{A} e^{- \frac{1}{b_r} |\frac{x-m}{a_r}|^{b_r} }, & x > m
+#' \end{cases} }
+#' with:
+#' \deqn{A = a_lb_l^{1/b_l}\Gamma(1+1/b_l) + a_rb_r^{1/b_r}\Gamma(1+1/b_r)}
+#' where \eqn{l} and \eqn{r} represent left and right tails, \eqn{a*} are
+#' scale parameters, \eqn{b*} control the tails (lower values represent
+#' fatter tails), and \eqn{m} is a location parameter.
+#'
+#' @param x (numeric) - value in the range \eqn{(-\infty, \infty)} to evaluate
+#' the density.
+#' @param al,ar (numeric) - scale parameters. Must be in the range
+#' \eqn{(0, \infty)}.
+#' @param bl,br (numeric) - shape parameters. Must be in the range
+#' \eqn{(0, \infty)}.
+#' @param m (numeric) - location parameter.
+#' @return a vector containing the values for the densities.
+#' @export
+#' @md
+pasubbo <- function(x, m = 0, al = 1, ar = 1, bl = 2, br = 2) {
+    .Call(`_Rsubbotools_pasubbo`, x, m, al, ar, bl, br)
+}
+
 sortRcpp <- function(x) {
     invisible(.Call(`_Rsubbotools_sortRcpp`, x))
+}
+
+#' Returns density from EP Distribution
+#'
+#' The \code{dpower} returns the density at point x for the
+#' Exponential Power distribution with parameters \eqn{a}, \eqn{b} and \eqn{m}.
+#'
+#' The Exponential Power distribution (EP) is given by the function:
+#' \deqn{ f(a,b) = \frac{1}{2a\Gamma(1+1/b)}e^{-|(x-m)/a|^b}, -\infty < x < \infty }.
+#' where \eqn{b} is a shape parameter, \eqn{a} is a scale parameter, \eqn{m}
+#' is a location parameter and \eqn{\Gamma} represents the gamma function.
+#' @param x (numeric) - value in the range \eqn{(-\infty, \infty)} to evaluate
+#' the density.
+#' @param a (numeric) - scale parameter. Must be in the range \eqn{(0, \infty)}.
+#' @param b (numeric) - shape parameter. Must be in the range \eqn{(0, \infty)}.
+#' @param m (numeric) - location parameter. Must be in the range
+#' \eqn{(-\infty, \infty)}.
+#' @return a vector containing the values for the densities.
+#' @export
+#' @md
+dpower <- function(x, m = 0, a = 1, b = 2) {
+    .Call(`_Rsubbotools_dpower`, x, m, a, b)
+}
+
+#' Returns density from Skewed Exponential Power distribution
+#'
+#' The \code{dsep} returns the density at point x for the
+#' Gamma distribution with parameters \eqn{a}, \eqn{b}.
+#'
+#' The  SEP is a exponential power distribution controlled
+#' by four parameters, with formula:
+#' \deqn{ f(x; \mu, \alpha, \lambda, \sigma) =
+#' 2 \Phi(w) e^{-|z|^\alpha/\alpha}/ ( \sigma C)}
+#' where:
+#' \deqn{z = (x-\mu)/\sigma}
+#' \deqn{w = sign(z) |z|^{(\alpha/2)} \lambda \sqrt{2/\alpha}}
+#' \deqn{C = 2 \alpha^{(1/\alpha-1)} \Gamma(1/\alpha)}
+#' with \eqn{\Phi} the cumulative normal distribution with mean zero and variance
+#' one.
+#' @param x (numeric) - value in the range \eqn{(-\infty, \infty)} to evaluate
+#' the density.
+#' @param m (numeric) - location parameter. Must be in the range
+#' \eqn{(-\infty, \infty)}.
+#' @param a (numeric) - scale parameter. Must be in the range \eqn{(0, \infty)}.
+#' @param b (numeric) - shape parameter. Must be in the range \eqn{(0, \infty)}.
+#' @param lambda (numeric) - skewness parameter. Must be in the range \eqn{(-\infty, \infty)}.
+#' @return a vector containing the values for the densities.
+#' @export
+#' @md
+dsep <- function(x, m = 0, a = 1, b = 1, lambda = 1) {
+    .Call(`_Rsubbotools_dsep`, x, m, a, b, lambda)
+}
+
+#' Bottazzi's version of dsep
+#'
+#' Calculates the density of the SEP distribution.
+#'
+#' @param x (numeric) - value in the range \eqn{(-\infty, \infty)} to evaluate
+#' the density.
+#' @param m (numeric) - location parameter. Must be in the range
+#' \eqn{(-\infty, \infty)}.
+#' @param a (numeric) - scale parameter. Must be in the range \eqn{(0, \infty)}.
+#' @param b (numeric) - shape parameter. Must be in the range \eqn{(0, \infty)}.
+#' @param lambda (numeric) - skewness parameter. Must be in the range \eqn{(-\infty, \infty)}.
+#' @return a vector containing the values for the densities.
+#' @export
+#' @md
+dsep_bottazzi <- function(x, m, a, b, lambda) {
+    .Call(`_Rsubbotools_dsep_bottazzi`, x, m, a, b, lambda)
+}
+
+#' Returns density from Laplace Distribution
+#'
+#' The \code{dlaplace} returns the density at point x for the
+#' Laplace distribution with parameters \eqn{a} and \eqn{m}.
+#'
+#' The Laplace distribution is a distribution controlled
+#' by two parameters, with formula:
+#' \deqn{f(x;a,m) = \frac{1}{2a} e^{- \left| \frac{x-m}{a} \right| }}
+#' where \eqn{a} is a scale parameter, and \eqn{m} is a location parameter.
+#' @param x (numeric) - value in the range \eqn{(-\infty, \infty)} to evaluate
+#' the density.
+#' @param a (numeric) - scale parameter. Must be in the range \eqn{(0, \infty)}.
+#' @param m (numeric) - location parameter.
+#' @return a vector containing the values for the densities.
+#' @export
+#' @md
+dlaplace <- function(x, m = 0, a = 1) {
+    .Call(`_Rsubbotools_dlaplace`, x, m, a)
+}
+
+#' Returns density from Asymmetric Laplace Distribution
+#'
+#' The \code{dalaplace} returns the density at point x for the
+#' Asymmetric Laplace distribution with parameters \eqn{a*} and \eqn{m}.
+#'
+#' The Asymmetric Laplace distribution is a distribution controlled
+#' by three parameters, with formula:
+#' \deqn{f(x;a_l,a_r,m) =
+#' \begin{cases}
+#' \frac{1}{A} e^{-|\frac{x-m}{a_l}| }, & x < m \\
+#' \frac{1}{A} e^{-|\frac{x-m}{a_r}| }, & x > m
+#' \end{cases}}
+#' with:
+#' \deqn{A = a_l + a_r}
+#' where \eqn{a*} are scale parameters, and \eqn{m} is a location parameter.
+#' It is basically derived from the Asymmetric Exponential Power distribution
+#' by setting \eqn{b_l = b_r = b}.
+#' @param x (numeric) - value in the range \eqn{(-\infty, \infty)} to evaluate
+#' the density.
+#' @param al,ar (numeric) - scale parameters. Must be in the range
+#' \eqn{(0, \infty)}.
+#' @param m (numeric) - location parameter.
+#' @return a vector containing the values for the densities.
+#' @export
+#' @md
+dalaplace <- function(x, m = 0, al = 1, ar = 1) {
+    .Call(`_Rsubbotools_dalaplace`, x, m, al, ar)
+}
+
+#' Returns density from Subbotin Distribution
+#'
+#' The \code{dsubbo} returns the density at point x for the
+#' Subbotin distribution with parameters \eqn{a}, \eqn{b}, \eqn{m}.
+#'
+#' The Subbotin distribution is a exponential power distribution controlled
+#' by three parameters, with formula:
+#' \deqn{f(x;a,b,m) = \frac{1}{A} e^{-\frac{1}{b} |\frac{x-m}{a}|^b}}
+#' with:
+#' \deqn{A = 2ab^{1/b}\Gamma(1+1/b)}
+#' where \eqn{a} is a scale parameter, \eqn{b} controls the tails (lower values
+#' represent fatter tails), and \eqn{m} is a location parameter.
+#' @param x (numeric) - value in the range \eqn{(-\infty, \infty)} to evaluate
+#' the density.
+#' @param a (numeric) - scale parameter. Must be in the range \eqn{(0, \infty)}.
+#' @param b (numeric) - shape parameter. Must be in the range \eqn{(0, \infty)}.
+#' @param m (numeric) - location parameter.
+#' @return a vector containing the values for the densities.
+#' @export
+#' @md
+dsubbo <- function(x, m = 0, a = 1, b = 2) {
+    .Call(`_Rsubbotools_dsubbo`, x, m, a, b)
+}
+
+#' Returns density from the AEP Distribution
+#'
+#' The \code{dasubbo} returns the density at point x for the
+#' AEP distribution with parameters \eqn{a*}, \eqn{b*}, \eqn{m}. Notice
+#' that this function can generate RNGs for both the \code{subboafit} and
+#' \code{subbolafit} routines.
+#'
+#' The AEP is a exponential power distribution controlled
+#' by five parameters, with formula:
+#' \deqn{ f(x;a_l,a_r,b_l,b_r,m) =
+#' \begin{cases}
+#' \frac{1}{A} e^{- \frac{1}{b_l} |\frac{x-m}{a_l}|^{b_l} }, & x < m \\
+#' \frac{1}{A} e^{- \frac{1}{b_r} |\frac{x-m}{a_r}|^{b_r} }, & x > m
+#' \end{cases} }
+#' with:
+#' \deqn{A = a_lb_l^{1/b_l}\Gamma(1+1/b_l) + a_rb_r^{1/b_r}\Gamma(1+1/b_r)}
+#' where \eqn{l} and \eqn{r} represent left and right tails, \eqn{a*} are
+#' scale parameters, \eqn{b*} control the tails (lower values represent
+#' fatter tails), and \eqn{m} is a location parameter.
+#'
+#' @param x (numeric) - value in the range \eqn{(-\infty, \infty)} to evaluate
+#' the density.
+#' @param al,ar (numeric) - scale parameters. Must be in the range
+#' \eqn{(0, \infty)}.
+#' @param bl,br (numeric) - shape parameters. Must be in the range
+#' \eqn{(0, \infty)}.
+#' @param m (numeric) - location parameter.
+#' @return a vector containing the values for the densities.
+#' @export
+#' @md
+dasubbo <- function(x, m = 0, al = 1, ar = 1, bl = 2, br = 2) {
+    .Call(`_Rsubbotools_dasubbo`, x, m, al, ar, bl, br)
 }
 
 #' Fit a Laplace Distribution via maximum likelihood
@@ -293,6 +667,173 @@ sortRcpp <- function(x) {
 #' @md
 laplafit <- function(data, verb = 0L, interv_step = 10L, provided_m_ = NULL) {
     .Call(`_Rsubbotools_laplafit`, data, verb, interv_step, provided_m_)
+}
+
+#' Returns quantile from EP Distribution
+#'
+#' The \code{qpower} returns the density at point x for the
+#' Exponential Power distribution with parameters \eqn{a}, \eqn{b} and \eqn{m}.
+#'
+#' The Exponential Power distribution (EP) is given by the function:
+#' \deqn{ f(a,b) = \frac{1}{2a\Gamma(1+1/b)}e^{-|(x-m)/a|^b}, -\infty < x < \infty }.
+#' where \eqn{b} is a shape parameter, \eqn{a} is a scale parameter, \eqn{m}
+#' is a location parameter and \eqn{\Gamma} represents the gamma function.
+#' Copyright (C) 2021 Elias Haddad
+#'
+#' @param x (numeric) - value in the range \eqn{(-\infty, \infty)} to evaluate
+#' the density.
+#' @param a (numeric) - scale parameter. Must be in the range \eqn{(0, \infty)}.
+#' @param b (numeric) - shape parameter. Must be in the range \eqn{(0, \infty)}.
+#' @param m (numeric) - location parameter. Must be in the range
+#' \eqn{(-\infty, \infty)}.
+#' @return a vector containing the values for the densities.
+#' @export
+#' @md
+qpower <- function(x, m = 0, a = 1, b = 2) {
+    .Call(`_Rsubbotools_qpower`, x, m, a, b)
+}
+
+#' Returns quantile from the Skewed Exponential Power distribution
+#'
+#' The \code{qsep} returns the Cumulative Distribution Function at point x for
+#' the Skewed Exponential Power distribution with parameters \eqn{a}, \eqn{b}.
+#'
+#' The  SEP is a exponential power distribution controlled
+#' by four parameters, with formula:
+#' \deqn{ f(x; \mu, a, \lambda, b) =
+#' 2 \Phi(w) e^{-|z|^a/a}/ ( b C)}
+#' where:
+#' \deqn{z = (x-\mu)/b}
+#' \deqn{w = sign(z) |z|^{(a/2)} \lambda \sqrt{2/a}}
+#' \deqn{C = 2 a^{(1/a-1)} \Gamma(1/a)}
+#' with \eqn{\Phi} the cumulative normal distribution with mean zero and variance
+#' one. The CDF is calculated through numerical integration using the GSL suite.
+#' Copyright (C) 2007-2014 Giulio Bottazzi
+#' Copyright (C) 2020-2021 Elias Haddad
+#' @param x (numeric) - vector with values to evaluate CDF.
+#' @param m (numeric) - the location parameter.
+#' @param a (numeric) - the shape parameter.
+#' @param b (numeric) - the scale parameter
+#' @param lambda (numeric) - the skewness parameter.
+#' @param method (numeric) - If 0, uses the Newton-Raphson procedure for optimization. If 1, uses Steffensen.
+#' @param step_size (numeric) - the size of the step in the numerical optimization (gradient descent). Default is 1e-4.
+#' @param tol (numeric) - error tolerance (default is 1e-10).
+#' @param max_iter (numeric) - maximum number of iterations for the optimization procedure (default is 100).
+#' @param verb (numeric) - verbosity level of the process (default 0).
+#' @return a vector containing the values for the densities.
+#' @export
+#' @md
+qsep <- function(x, m = 0, a = 2, b = 1, lambda = 0, method = 0L, step_size = 1e-4, tol = 1e-10, max_iter = 100L, verb = 0L) {
+    .Call(`_Rsubbotools_qsep`, x, m, a, b, lambda, method, step_size, tol, max_iter, verb)
+}
+
+#' Returns quantile from Laplace Distribution
+#'
+#' The \code{qlaplace} returns the density at point x for the
+#' Laplace distribution with parameters \eqn{a} and \eqn{m}.
+#'
+#' The Laplace distribution is a distribution controlled
+#' by two parameters, with formula:
+#' \deqn{f(x;a,m) = \frac{1}{2a} e^{- \left| \frac{x-m}{a} \right| }}
+#' where \eqn{a} is a scale parameter, and \eqn{m} is a location parameter.
+#' Copyright (C) 2021 Elias Haddad
+#'
+#' @param x (numeric) - value in the range \eqn{(-\infty, \infty)} to evaluate
+#' the density.
+#' @param a (numeric) - scale parameter. Must be in the range \eqn{(0, \infty)}.
+#' @param m (numeric) - location parameter.
+#' @return a vector containing the values for the densities.
+#' @export
+#' @md
+qlaplace <- function(x, m = 0, a = 1) {
+    .Call(`_Rsubbotools_qlaplace`, x, m, a)
+}
+
+#' Asymmetric Laplace distribution with parameters \eqn{a*} and \eqn{m}.
+#'
+#' The Asymmetric Laplace distribution is a distribution controlled
+#' by three parameters, with formula:
+#' \deqn{f(x;a_l,a_r,m) =
+#' \begin{cases}
+#' \frac{1}{A} e^{-|\frac{x-m}{a_l}| }, & x < m \\
+#' \frac{1}{A} e^{-|\frac{x-m}{a_r}| }, & x > m
+#' \end{cases}}
+#' with:
+#' \deqn{A = a_l + a_r}
+#' where \eqn{a*} are scale parameters, and \eqn{m} is a location parameter.
+#' It is basically derived from the Asymmetric Exponential Power distribution
+#' by setting \eqn{b_l = b_r = b}.
+#' Copyright (C) 2021 Elias Haddad
+#'
+#' @param x (numeric) - value in the range \eqn{(-\infty, \infty)} to evaluate
+#' the density.
+#' @param al,ar (numeric) - scale parameters. Must be in the range
+#' \eqn{(0, \infty)}.
+#' @param m (numeric) - location parameter.
+#' @return a vector containing the values for the densities.
+#' @export
+#' @md
+qalaplace <- function(x, m = 0, al = 1, ar = 1) {
+    .Call(`_Rsubbotools_qalaplace`, x, m, al, ar)
+}
+
+#' Returns CDF from Subbotin Distribution
+#'
+#' The \code{qsubbo} returns the Cumulative Distribution Function (CDF) from the
+#' the Subbotin evaluated at \eqn{a} and return \eqn{z}, such that
+#' \eqn{P(X < a) = z}.
+#'
+#' The Subbotin cumulative distribution function is given by:
+#' \deqn{F(x;a,b,m) = 0.5 + 0.5 \text{sign}(x -m)P(x, 1/b)}
+#' where \eqn{P} is the normalized incomplete gamma function:
+#' \deqn{P(x, 1/b) = 1 - \frac{1}{\Gamma(1/b)} \int_{0}^{x} t^{1/b -1}e^{-t} }
+#' and \eqn{a} is a scale parameter, \eqn{b} controls the tails (lower values
+#' represent fatter tails), and \eqn{m} is a location parameter.
+#' Copyright (C) 2021 Elias Haddad
+#'
+#' @param x (numeric) - value in the range \eqn{(-\infty, \infty)} to evaluate
+#' the density.
+#' @param a (numeric) - scale parameter. Must be in the range \eqn{(0, \infty)}.
+#' @param b (numeric) - shape parameter. Must be in the range \eqn{(0, \infty)}.
+#' @param m (numeric) - location parameter.
+#' @return a vector containing the values for the densities.
+#' @export
+#' @md
+qsubbo <- function(x, m = 0, a = 1, b = 2) {
+    .Call(`_Rsubbotools_qsubbo`, x, m, a, b)
+}
+
+#' Returns CDF from the AEP Distribution
+#'
+#' The \code{qasubbo} returns the density at point x for the
+#' AEP distribution with parameters \eqn{a*}, \eqn{b*}, \eqn{m}.
+#'
+#' The AEP is a exponential power distribution controlled
+#' by five parameters, with formula:
+#' \deqn{ f(x;a_l,a_r,b_l,b_r,m) =
+#' \begin{cases}
+#' \frac{1}{A} e^{- \frac{1}{b_l} |\frac{x-m}{a_l}|^{b_l} }, & x < m \\
+#' \frac{1}{A} e^{- \frac{1}{b_r} |\frac{x-m}{a_r}|^{b_r} }, & x > m
+#' \end{cases} }
+#' with:
+#' \deqn{A = a_lb_l^{1/b_l}\Gamma(1+1/b_l) + a_rb_r^{1/b_r}\Gamma(1+1/b_r)}
+#' where \eqn{l} and \eqn{r} represent left and right tails, \eqn{a*} are
+#' scale parameters, \eqn{b*} control the tails (lower values represent
+#' fatter tails), and \eqn{m} is a location parameter.
+#' Copyright (C) 2020-2021 Elias Haddad
+#'
+#' @param x (numeric) - value in the range \eqn{(-\infty, \infty)} to evaluate
+#' the density.
+#' @param al,ar (numeric) - scale parameters. Must be in the range
+#' \eqn{(0, \infty)}.
+#' @param bl,br (numeric) - shape parameters. Must be in the range
+#' \eqn{(0, \infty)}.
+#' @param m (numeric) - location parameter.
+#' @return a vector containing the values for the densities.
+#' @export
+#' @md
+qasubbo <- function(x, m = 0, al = 1, ar = 1, bl = 2, br = 2) {
+    .Call(`_Rsubbotools_qasubbo`, x, m, al, ar, bl, br)
 }
 
 #' Fit a Skewed Exponential Power density via maximum likelihood
@@ -464,8 +1005,8 @@ subboafit <- function(data, verb = 0L, method = 6L, interv_step = 10L, provided_
     .Call(`_Rsubbotools_subboafit`, data, verb, method, interv_step, provided_m_, par, g_opt_par, itv_opt_par)
 }
 
-#' Return the Fisher Information Matrix for the Subbotin Distribution 
-#' 
+#' Return the Fisher Information Matrix for the Subbotin Distribution
+#'
 #' Calculate the standard errors, the correlation, the
 #' Fisher Information matrix and its inverse for a power exponential density
 #' with given parameters
@@ -477,17 +1018,17 @@ subboafit <- function(data, verb = 0L, method = 6L, interv_step = 10L, provided_
 #' @param O_munknown numeric - if true assumes m known
 #' @return a list containing four elements:
 #' * std_error - the standard error for the parameters
-#' * cor_ab    - the correlation between parameters a and b 
-#' * infmatrix - the Fisher Information Matrix 
-#' * inv_infmatrix - the Inverse Fisher Information Matrix 
+#' * cor_ab    - the correlation between parameters a and b
+#' * infmatrix - the Fisher Information Matrix
+#' * inv_infmatrix - the Inverse Fisher Information Matrix
 #' @export
 #' @md
 subbofish <- function(size = 1L, b = 2.0, m = 0.0, a = 1.0, O_munknown = 0L) {
     .Call(`_Rsubbotools_subbofish`, size, b, m, a, O_munknown)
 }
 
-mm <- function(std_over_aad, verb) {
-    .Call(`_Rsubbotools_mm`, std_over_aad, verb)
+mm_subbotin <- function(std_over_aad, verb = 0L) {
+    .Call(`_Rsubbotools_mm_subbotin`, std_over_aad, verb)
 }
 
 optim_method_moments <- function(data, fmin, provided_m_ = NULL, verb = 0L) {
@@ -660,7 +1201,7 @@ subbofit <- function(data, verb = 0L, method = 3L, interv_step = 10L, provided_m
 #' subbolafit(sample_subbo)
 #' @export
 #' @md
-subbolafit <- function(data, verb = 0L, method = 2L, interv_step = 10L, output = 0L, provided_m_ = NULL, par = as.numeric( c(2., 2., 1., 0.)), g_opt_par = as.numeric( c(.1, 1e-2, 100, 1e-3, 1e-5, 2)), itv_opt_par = as.numeric( c(.01, 1e-3, 200, 1e-3, 1e-5, 2))) {
-    .Call(`_Rsubbotools_subbolafit`, data, verb, method, interv_step, output, provided_m_, par, g_opt_par, itv_opt_par)
+subbolafit <- function(data, verb = 0L, method = 2L, interv_step = 10L, provided_m_ = NULL, par = as.numeric( c(2., 2., 1., 0.)), g_opt_par = as.numeric( c(.1, 1e-2, 100, 1e-3, 1e-5, 2)), itv_opt_par = as.numeric( c(.01, 1e-3, 200, 1e-3, 1e-5, 2))) {
+    .Call(`_Rsubbotools_subbolafit`, data, verb, method, interv_step, provided_m_, par, g_opt_par, itv_opt_par)
 }
 

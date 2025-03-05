@@ -7,11 +7,11 @@
 rlaplace(n, m = 0, a = 1)
 }
 \arguments{
-\item{n}{(int) - the size of the sample}
+\item{n}{(int) - the size of the sample.}
 
-\item{m}{(numeric) - the location parameter}
+\item{m}{(numeric) - the location parameter.}
 
-\item{a}{(numeric) - the scale parameter}
+\item{a}{(numeric) - the scale parameter.}
 }
 \value{
 a numeric vector containing a random sample with above parameters.
@@ -22,7 +22,7 @@ This function returns a sample from a Laplace-distributed random variable.
 \details{
 The Laplace distribution is given by the two-sided exponential distribution
 given by the function:
-\dqn{f(x;a,m) = \frac{1}{2a} e^{- \left| \frac{x-m}{a} \right| }}
+\deqn{ f(x;a,m) = \frac{1}{2a} e^{- \left| \frac{x-m}{a} \right|} }
 The random sampling is done by inverse transform sampling.
 
 Copyright (C) 2020-2021 Elias Haddad

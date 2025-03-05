@@ -7,9 +7,9 @@
 ralaplace(n, m = 0, al = 1, ar = 1)
 }
 \arguments{
-\item{n}{(int) - the size of the sample}
+\item{n}{(int) - the size of the sample.}
 
-\item{m}{(numeric) - the location parameter}
+\item{m}{(numeric) - the location parameter.}
 
 \item{al, ar}{(numeric) - left and right scale parameters, respectively.}
 }
@@ -35,5 +35,5 @@ Copyright (C) 2020-2021 Elias Haddad
 License: GPL 3+
 }
 \examples{
-sample_gamma <- ralaplace(1000, 0, 1)
+sample_gamma <- ralaplace(1000)
 }
