@@ -45,11 +45,11 @@ void moment(double *, double *, double *, double *);
 
 void subbotools_header(char const *,FILE *);
 
-
 /* C++ ----------- */
+#include<R.h>
+# include <Rmath.h>     // pgamma()
 #include<RcppGSL.h>
 // [[Rcpp::depends(RcppGSL)]]
-
 #include<Rcpp.h>
 /*- -------------- */
 
@@ -66,6 +66,9 @@ void Rcppdeepcopy(Rcpp::NumericVector x_orig, Rcpp::NumericVector x_dest);
 
 // functions for optimizing the Subbotin Family fit
 #include "multimin.h"
+// multimin already includes structs, which contains data structures for
+// all routines
+//#include "structs.h"
 
 Rcpp::List interval_optim(
                           Rcpp::NumericVector data
@@ -99,6 +102,10 @@ Rcpp::List global_optim(
                         );
 
 
+// optimization functions for quantiles
+double newton_c(newton_args x);
+double steffensen_c(newton_args x);
+
 /* functions for the information matrix of asymmetric subbotin  */
 double B0(double);
 double B1(double);
@@ -113,3 +120,58 @@ extern int gb_option_index;
 // functions for the Laplace fit
 double median(Rcpp::NumericVector data, size_t size);
 double calculate_index(size_t size);
+
+// functions for the quantile and RNG
+double inc_lower_gamma(double b, double p);
+double inv_inc_lower_gamma(double b, double p);
+double inc_upper_gamma(double b, double p);
+double inv_inc_upper_gamma(double b, double p);
+
+
+// Templates
+
+// returns sign of variable
+// source
+// https://stackoverflow.com/a/4609795/7233796
+// templates must be on header files
+// see
+// https://stackoverflow.com/q/5612791/7233796
+template <typename T> int sgn(T val) {
+  return (T(0) < val) - (val < T(0));
+}
+
+
+template <typename T>
+    std::vector<std::size_t> rank_vector(const std::vector<T>& vector){
+
+    // source:  https://stackoverflow.com/a/30685882/7233796
+
+    // vector that is sorted, with same size as the original vector
+    std::vector<std::size_t> indices(vector.size());
+
+    // increases the vector by +1 starting on zero
+    std::iota(indices.begin(), indices.end(), 0u);
+
+    // sort with custom function
+    // this function returns the original position of the entries
+    // from the sorted vector
+    std::sort(indices.begin(), indices.end(), [&](int lhs, int rhs) {
+      // the sort criteria is the left element of the original vector
+      // being smaller than the right one
+      return vector[lhs] < vector[rhs];
+    });
+
+    // create another empty vector
+    std::vector<std::size_t> res(vector.size());
+
+    for (std::size_t i = 0; i < indices.size(); ++i) {
+      res[indices[i]] = i;
+    }
+
+    //for (std::size_t i = 0; i < indices.size(); ++i) {
+    //  Rprintf("indices[%d] =%d, res[%d] = %d\n", i, indices[i], i, res[i]);
+    //}
+
+    return res;
+    //return indices;
+  }

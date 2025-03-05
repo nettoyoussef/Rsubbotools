@@ -62,3 +62,16 @@ struct multimin_algorithm {
   const gsl_multimin_fminimizer_type *Tf;
   const char *Tname;
 };
+
+// used in the sep quantile function
+struct newton_args{
+  double x;
+  double x_guess;
+  Rcpp::NumericVector func_args;
+  double step_size;
+  double tol;
+  int max_iter;
+  int verb;
+  double (*f)(newton_args) = NULL;
+  double (*dfdx)(newton_args) = NULL;
+};

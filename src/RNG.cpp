@@ -313,14 +313,6 @@ Rcpp::NumericVector rgamma_c(
     }
 }
 
-// source
-// https://stackoverflow.com/a/4609795/7233796
-template <typename T> int sgn(T val) {
-    return (T(0) < val) - (val < T(0));
-}
-
-
-
 //' Generates a Laplace-distributed sample
 //'
 //' This function returns a sample from a Laplace-distributed random variable.
