@@ -1,223 +1,204 @@
-
 ##############################################################################
 
 # Subboafit
+skip_on_cran()
 
 paste0("Subboafit")
-library(testthat)
-source(paste0(getwd(), "/tests/testthat/test-functions.R"))
 
 test_that("SubLaplace:", {
+  # subboafit -V 1 < sublaplace.txt
+  #
+  #--- FINAL RESULT --------------------------------------------------
+  #                           | correlation matrix
+  #     value     std.err     |  bl      br      al      ar      m
+  # bl=  0.4988    0.0009042  |    --   0.0000  0.0000  0.0000 -0.0000
+  # br=  0.4999    0.0009073  |  0.6438    --   0.0000  0.0000  0.0000
+  # al=  3.998     0.007684   |  0.2077  0.5035    --   0.0000  0.0000
+  # ar=  3.992     0.007665   |  0.5044  0.2104  0.3945    --  -0.0000
+  # m = -0.0005344 -nan       | -nan -nan -nan -nan    --
+  #
+  #                           Upper triangle: covariances
+  #                           Lower triangle: correlation coefficients
+  #-------------------------------------------------------------------
+  #
+  # bl           br           al           ar           m            log-like
+  #  4.9876e-01   4.9988e-01   3.9980e+00   3.9921e+00  -5.3440e-04   3.3857e+00
 
 
-    # subboafit -V 1 < sublaplace.txt
-    #
-    #subboafit -V 1 < sublaplace.txt
-    #
-    #--- FINAL RESULT --------------------------------------------------
-    #                           | correlation matrix
-    #     value     std.err     |  bl      br      al      ar      m
-    # bl=  0.4993    0.0009056  |    --   0.0000  0.0000  0.0000 -0.0000
-    # br=  0.4993    0.0009059  |  0.6440    --   0.0000  0.0000  0.0000
-    # al=  7.994     0.01536    |  0.2093  0.5040    --   0.0001  0.0000
-    # ar=  7.986     0.01534    |  0.5039  0.2089  0.3945    --  -0.0000
-    # m =  0.007982  -nan       | -nan -nan -nan -nan    --
-    #
-    #                           Upper triangle: covariances
-    #                           Lower triangle: correlation coefficients
-    #-------------------------------------------------------------------
-    #
-    # bl           br           al           ar           m            log-like
-    #4.9932e-01   4.9934e-01   7.9943e+00   7.9859e+00   7.9821e-03   4.0788e+00
-
-    orig_value <-
-        generate_orig_dt(
-            coef           =
-                c(4.9932e-01, 4.9934e-01, 7.9943e+00, 7.9859e+00, 7.9821e-03)
-          , log_likelihood = 4.0788e+00
-          , std_error      = c(0.0009056, 0.0009059, 0.01536, 0.01534, NaN)
-          # we pass the transposed matrix and the code corrects it
-          , matrix         =
-                c(
-                    NA    , 0.0000, 0.0000, 0.0000, -0.0000
-                  , 0.6440, NA    , 0.0000, 0.0000, 0.0000
-                  , 0.2093, 0.5040, NA    , 0.0001, 0.0000
-                  , 0.5039, 0.2089, 0.3945, NA    , -0.0000
-                  , NaN   , NaN   , NaN   , NaN   , NA
-                )
-          , distribution   = "subboafit"
-        )
-    check_fits(orig_value, .5, subboafit)
+  orig_value <-
+    generate_orig_dt(
+      coef =
+        c(4.9876e-01, 4.9988e-01, 3.9980e+00, 3.9921e+00, -5.3440e-04),
+      log_likelihood = 3.3857e+00,
+      std_error = c(0.0009042, 0.0009073, 0.007684, 0.007665, NaN)
+      # we pass the transposed matrix and the code corrects it
+      , matrix =
+        c(
+          NA, 0.0000, 0.0000, 0.0000, -0.0000,
+          0.6438, NA, 0.0000, 0.0000, 0.0000,
+          0.2077, 0.5035, NA, 0.0001, 0.0000,
+          0.5044, 0.2104, 0.3945, NA, -0.0000,
+          NaN, NaN, NaN, NaN, NA
+        ),
+      distribution = "subboafit"
+    )
+  check_fits(orig_value, .5, subboafit)
 
 
-    # Generate tests for the covariance matrices
-    data_test   <- generate_datasets(.5)
-    subbo_test <- subboafit(data_test$x, verb = 3)
-
-}
-)
+  # Generate tests for the covariance matrices
+  data_test <- generate_datasets(.5)
+  subbo_test <- subboafit(data_test$x, verb = 3)
+})
 
 
 test_that("Laplace:", {
+  # subboafit -V 1 < laplace.txt
+  #
+  #--- FINAL RESULT --------------------------------------------------
+  #                           | correlation matrix
+  #     value     std.err     |  bl      br      al      ar      m
+  # bl=  1.003     0.002636   |    --  -0.0000  0.0000 -0.0000  0.0000
+  # br=  1.001     0.002634   | -0.0021    --  -0.0000  0.0000 -0.0000
+  # al=  1.002     0.001803   |  0.6199 -0.0034    --  -0.0000  0.0000
+  # ar=  0.9977    0.001798   | -0.0025  0.6182 -0.0039    --  -0.0000
+  # m =  0.003416  0.002343   |  0.5632 -0.5641  0.5881 -0.5877    --
+  #
+  #                           Upper triangle: covariances
+  #                           Lower triangle: correlation coefficients
+  #-------------------------------------------------------------------
+  #
+  # bl           br           al           ar           m            log-like
+  # 1.0027e+00   1.0007e+00   1.0020e+00   9.9769e-01   3.4161e-03   1.6923e+00
 
-    # subboafit -V 1 < laplace.txt
-    #
-    #--- FINAL RESULT --------------------------------------------------
-    #                           | correlation matrix
-    #     value     std.err     |  bl      br      al      ar      m
-    # bl=  1.003     0.002636   |    --  -0.0000  0.0000 -0.0000  0.0000
-    # br=  1.001     0.002634   | -0.0021    --  -0.0000  0.0000 -0.0000
-    # al=  2.004     0.003607   |  0.6199 -0.0034    --  -0.0000  0.0000
-    # ar=  1.995     0.003595   | -0.0025  0.6182 -0.0039    --  -0.0000
-    # m =  0.006832  0.004686   |  0.5632 -0.5641  0.5881 -0.5877    --
-    #
-    #                           Upper triangle: covariances
-    #                           Lower triangle: correlation coefficients
-    #-------------------------------------------------------------------
-    #
-    # bl           br           al           ar           m            log-like
-    # 1.0027e+00   1.0007e+00   2.0039e+00   1.9954e+00   6.8321e-03   2.3854e+00
-
-    orig_value <-
-        generate_orig_dt(
-            coef           = c(1.0027e+00, 1.0007e+00, 2.0039e+00, 1.9954e+00, 6.8321e-03)
-           ,log_likelihood = 2.3854e+00
-          , std_error      = c(0.002636, 0.002634, 0.003607, 0.003595, 0.004686)
-          , matrix         =
-                c(
-                    NA, -0.0000, 0.0000, -0.0000, 0.0000
-                   ,-0.0021, NA, -0.0000, 0.0000, -0.0000
-                   ,0.6199, -0.0034, NA, -0.0000, 0.0000
-                   ,-0.0025, 0.6182, -0.0039, NA, -0.0000
-                   ,0.5632, -0.5641, 0.5881, -0.5877, NA
-                )
-          , distribution   = "subboafit"
-        )
-    check_fits(orig_value, 1, subboafit)
-
-}
-)
+  orig_value <-
+    generate_orig_dt(
+      coef = c(1.0027e+00, 1.0007e+00, 1.0020e+00, 9.9769e-01, 3.4161e-03),
+      log_likelihood = 1.6923e+00,
+      std_error = c(0.002636, 0.002634, 0.001803, 0.001798, 0.002343),
+      matrix =
+        c(
+          NA, -0.0000, 0.0000, -0.0000, 0.0000,
+          -0.0021, NA, -0.0000, 0.0000, -0.0000,
+          0.6199, -0.0034, NA, -0.0000, 0.0000,
+          -0.0025, 0.6182, -0.0039, NA, -0.0000,
+          0.5632, -0.5641, 0.5881, -0.5877, NA
+        ),
+      distribution = "subboafit"
+    )
+  check_fits(orig_value, 1, subboafit)
+})
 
 test_that("Subnormal:", {
+  # subboafit -V 1 < subnormal.txt
+  #
+  #--- FINAL RESULT --------------------------------------------------
+  #                           | correlation matrix
+  #     value     std.err     |  bl      br      al      ar      m
+  # bl=  1.505     0.005966   |    --  -0.0000  0.0000 -0.0000  0.0000
+  # br=  1.503     0.005967   | -0.4643    --  -0.0000  0.0000 -0.0000
+  # al=  0.765     0.002499   |  0.8585 -0.6045    --  -0.0000  0.0000
+  # ar=  0.7625    0.002495   | -0.6040  0.8585 -0.7549    --  -0.0000
+  # m =  0.001722  0.003918   |  0.7780 -0.7786  0.9149 -0.9150    --
+  #
+  #                           Upper triangle: covariances
+  #                           Lower triangle: correlation coefficients
+  #-------------------------------------------------------------------
+  #
+  # bl           br           al           ar           m            log-like
+  # 1.5053e+00   1.5029e+00   7.6504e-01   7.6245e-01   1.7217e-03   1.2572e+00
 
-    # subboafit -V 1 < subnormal.txt
-    #
-    #--- FINAL RESULT --------------------------------------------------
-    #                           | correlation matrix
-    #     value     std.err     |  bl      br      al      ar      m
-    # bl=  1.505     0.005966   |    --  -0.0000  0.0000 -0.0000  0.0000
-    # br=  1.503     0.005967   | -0.4643    --  -0.0000  0.0000 -0.0000
-    # al=  1.53      0.004998   |  0.8585 -0.6045    --  -0.0000  0.0000
-    # ar=  1.525     0.00499    | -0.6040  0.8585 -0.7549    --  -0.0000
-    # m =  0.003443  0.007837   |  0.7780 -0.7786  0.9149 -0.9150    --
-    #
-    #                           Upper triangle: covariances
-    #                           Lower triangle: correlation coefficients
-    #-------------------------------------------------------------------
-    #
-    # bl           br           al           ar           m            log-like
-    # 1.5053e+00   1.5029e+00   1.5301e+00   1.5249e+00   3.4434e-03   1.9504e+00
-
-    orig_value <-
-        generate_orig_dt(
-            coef           = c(1.5053e+00, 1.5029e+00, 1.5301e+00, 1.5249e+00, 3.4434e-03)
-          , log_likelihood = 1.9504e+00
-          , std_error      = c(0.005966, 0.005967, 0.004998, 0.00499, 0.007837)
-          , matrix         =
-                c(
-                    NA, -0.0000, 0.0000, -0.0000, 0.0000
-                   ,-0.4643, NA, -0.0000, 0.0000, -0.0000
-                   ,0.8585, -0.6045, NA, -0.0000, 0.0000
-                   ,-0.6040, 0.8585, -0.7549, NA, -0.0000
-                   ,0.7780, -0.7786, 0.9149, -0.9150, NA
-                )
-          , distribution   = "subboafit"
-        )
-    check_fits(orig_value, 1.5, subboafit)
-
-}
-)
+  orig_value <-
+    generate_orig_dt(
+      coef = c(1.5053e+00, 1.5029e+00, 7.6504e-01, 7.6245e-01, 1.7217e-03),
+      log_likelihood = 1.2572e+00,
+      std_error = c(0.005966, 0.005967, 0.002499, 0.002495, 0.003918),
+      matrix =
+        c(
+          NA, -0.0000, 0.0000, -0.0000, 0.0000,
+          -0.4643, NA, -0.0000, 0.0000, -0.0000,
+          0.8585, -0.6045, NA, -0.0000, 0.0000,
+          -0.6040, 0.8585, -0.7549, NA, -0.0000,
+          0.7780, -0.7786, 0.9149, -0.9150, NA
+        ),
+      distribution = "subboafit"
+    )
+  check_fits(orig_value, 1.5, subboafit)
+})
 
 
 test_that("Normal:", {
+  # subboafit -V 1 < normal.txt
+  #
+  #--- FINAL RESULT --------------------------------------------------
+  #                           | correlation matrix
+  #     value     std.err     |  bl      br      al      ar      m
+  # bl=  2.012     0.01143    |    --  -0.0001  0.0000 -0.0000  0.0001
+  # br=  1.997     0.01138    | -0.6925    --  -0.0000  0.0000 -0.0001
+  # al=  0.7107    0.003887   |  0.9248 -0.8091    --  -0.0000  0.0000
+  # ar=  0.7049    0.00387    | -0.8080  0.9251 -0.9227    --  -0.0000
+  # m =  0.004351  0.005779   |  0.8724 -0.8735  0.9729 -0.9730    --
+  #
+  #                           Upper triangle: covariances
+  #                           Lower triangle: correlation coefficients
+  #-------------------------------------------------------------------
+  #
+  # bl           br           al           ar           m            log-like
+  # 2.0121e+00   1.9968e+00   7.1068e-01   7.0494e-01   4.3510e-03   1.0725e+00
 
-    # subboafit -V 1 < normal.txt
-    #
-    #--- FINAL RESULT --------------------------------------------------
-    #                           | correlation matrix
-    #     value     std.err     |  bl      br      al      ar      m
-    # bl=  2.012     0.01143    |    --  -0.0001  0.0001 -0.0001  0.0001
-    # br=  1.997     0.01138    | -0.6925    --  -0.0001  0.0001 -0.0001
-    # al=  1.421     0.007773   |  0.9248 -0.8091    --  -0.0001  0.0001
-    # ar=  1.41      0.007741   | -0.8079  0.9251 -0.9227    --  -0.0001
-    # m =  0.008723  0.01156    |  0.8724 -0.8735  0.9729 -0.9730    --
-    #
-    #                           Upper triangle: covariances
-    #                           Lower triangle: correlation coefficients
-    #-------------------------------------------------------------------
-    #
-    # bl           br           al           ar           m            log-like
-    # 2.0121e+00   1.9968e+00   1.4214e+00   1.4099e+00   8.7232e-03   1.7657e+00
-
-
-    orig_value <-
-        generate_orig_dt(
-            coef           = c(2.0121e+00, 1.9968e+00, 1.4214e+00, 1.4099e+00, 8.7232e-03)
-          , log_likelihood = 1.7657e+00
-          , std_error      = c(0.01143, 0.01138, 0.007773, 0.007741, 0.01156)
-          , matrix         =
-                c(
-                    NA, -0.0001, 0.0001, -0.0001, 0.0001
-                   ,-0.6925, NA, -0.0001, 0.0001, -0.0001
-                   ,0.9248, -0.8091, NA, -0.0001, 0.0001
-                   ,-0.8079, 0.9251, -0.9227, NA, -0.0001
-                   ,0.8724, -0.8735, 0.9729, -0.9730, NA
-                )
-          , distribution   = "subboafit"
-        )
-    check_fits(orig_value, 2, subboafit)
-
-}
-)
+  orig_value <-
+    generate_orig_dt(
+      coef = c(2.0121e+00, 1.9968e+00, 7.1068e-01, 7.0494e-01, 4.3510e-03),
+      log_likelihood = 1.0725e+00,
+      std_error = c(0.01143, 0.01138, 0.003887, 0.00387, 0.005779),
+      matrix =
+        c(
+          NA, -0.0001, 0.0000, -0.0000, 0.0001,
+          -0.6925, NA, -0.0000, 0.0000, -0.0001,
+          0.9248, -0.8091, NA, -0.0000, 0.0000,
+          -0.8079, 0.9251, -0.9227, NA, -0.0000,
+          0.8724, -0.8735, 0.9729, -0.9730, NA
+        ),
+      distribution = "subboafit"
+    )
+  check_fits(orig_value, 2, subboafit)
+})
 
 test_that("SuperNormal:", {
+  # subboafit -V 1 < supernormal.txt
+  #
+  #--- FINAL RESULT --------------------------------------------------
+  #                           | correlation matrix
+  #     value     std.err     |  bl      br      al      ar      m
+  # bl=  2.523     0.01928    |    --  -0.0003  0.0001 -0.0001  0.0001
+  # br=  2.474     0.01919    | -0.8063    --  -0.0001  0.0001 -0.0001
+  # al=  0.7015    0.005593   |  0.9520 -0.8903    --  -0.0000  0.0000
+  # ar=  0.6842    0.005548   | -0.8879  0.9531 -0.9668    --  -0.0000
+  # m =  0.01212   0.007865   |  0.9178 -0.9203  0.9879 -0.9882    --
+  #
+  #                           Upper triangle: covariances
+  #                           Lower triangle: correlation coefficients
+  #-------------------------------------------------------------------
+  #
+  # bl           br           al           ar           m            log-like
+  # 2.5234e+00   2.4742e+00   7.0150e-01   6.8424e-01   1.2117e-02   9.7328e-01
 
-    # subboafit -V 1 < supernormal.txt
-    #
-    #--- FINAL RESULT --------------------------------------------------
-    #                           | correlation matrix
-    #     value     std.err     |  bl      br      al      ar      m
-    # bl=  2.523     0.01928    |    --  -0.0003  0.0002 -0.0002  0.0003
-    # br=  2.474     0.01919    | -0.8063    --  -0.0002  0.0002 -0.0003
-    # al=  1.403     0.01119    |  0.9520 -0.8903    --  -0.0001  0.0002
-    # ar=  1.368     0.0111     | -0.8879  0.9531 -0.9668    --  -0.0002
-    # m =  0.02425   0.01573    |  0.9178 -0.9203  0.9879 -0.9882    --
-    #
-    #                           Upper triangle: covariances
-    #                           Lower triangle: correlation coefficients
-    #-------------------------------------------------------------------
-    #
-    # bl           br           al           ar           m            log-like
-    # 2.5235e+00   2.4742e+00   1.4030e+00   1.3685e+00   2.4252e-02   1.6664e+00
 
-    orig_value <-
-        generate_orig_dt(
-            coef           = c(2.5235e+00, 2.4742e+00, 1.4030e+00, 1.3685e+00, 2.4252e-02)
-          , log_likelihood = 1.6664e+00
-          , std_error      = c(0.01928, 0.01919, 0.01119, 0.0111, 0.01573)
-          , matrix         =
-                c(
-                    NA, -0.0003, 0.0002, -0.0002, 0.0003
-                   ,-0.8063, NA, -0.0002, 0.0002, -0.0003
-                   ,0.9520, -0.8903, NA, -0.0001, 0.0002
-                   ,-0.8879, 0.9531, -0.9668, NA, -0.0002
-                   ,0.9178, -0.9203, 0.9879, -0.9882, NA
-                )
-          , distribution   = "subboafit"
-        )
-    check_fits(orig_value, 2.5, subboafit)
-
-}
-)
+  orig_value <-
+    generate_orig_dt(
+      coef = c(2.5234e+00, 2.4742e+00, 7.0150e-01, 6.8424e-01, 1.2117e-02),
+      log_likelihood = 9.7328e-01,
+      std_error = c(0.01928, 0.01919, 0.005593, 0.005548, 0.007865),
+      matrix =
+        c(
+          NA, -0.0003, 0.0001, -0.0001, 0.0001,
+          -0.8063, NA, -0.0001, 0.0001, -0.0001,
+          0.9520, -0.8903, NA, -0.0000, 0.0000,
+          -0.8879, 0.9531, -0.9668, NA, -0.0000,
+          0.9178, -0.9203, 0.9879, -0.9882, NA
+        ),
+      distribution = "subboafit"
+    )
+  check_fits(orig_value, 2.5, subboafit)
+})
 
 ##############################################################################

@@ -4,7 +4,6 @@
 
 paste0("Subbolafit")
 library(testthat)
-source(paste0(getwd(), "/tests/testthat/test-functions.R"))
 
 # this routine does not output the std error for the parameters, neither does
 # it returns the covariance matrix

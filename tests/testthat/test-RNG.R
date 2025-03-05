@@ -1,70 +1,123 @@
-
 ##############################################################################
 
 # RNGs
-
+library(testthat)
 paste0("Random Number Generators")
 
-library(testthat)
-source(paste0(getwd(), "/tests/testthat/test-functions.R"))
+
+##############################################################################
 
 paste0("Check if setting seed on RNGs work")
 
 test_that("rpower: ", {
-
-    # values for parameters
-    # tests each conditional statement
-    # SubLaplace, Laplace, mid Norm-Lap,
-    # Normal and superNormal, on this order
-    b <- c(0.7, 1, 1.5, 2, 2.5)
-
-    lapply(1:length(b), function(i){
-        x = compare_RNG(rpower, list(100, 2, b[i]))
-        expect_identical(x[["x"]], x[["y"]], label = paste0("parameter b=", b[i]))
-    })
+  test_function_rng_seed(rpower, list(n = 100))
+})
+test_that("rsubbo: ", {
+  test_function_rng_seed(rsubbo, list(n = 100))
+})
+test_that("rasubbo: ", {
+  test_function_rng_seed(rasubbo, list(n = 100))
+})
+test_that("rlaplace: ", {
+  test_function_rng_seed(rlaplace, list(n = 100))
+})
+test_that("ralaplace: ", {
+  test_function_rng_seed(ralaplace, list(n = 100))
+})
+test_that("rgamma_c: ", {
+  test_function_rng_seed(rgamma_c, list(n = 100))
 })
 
+##############################################################################
+
+paste0("Check if RNG results are consistent with R's rnorm")
+
+b <- c(10^-3, 10^-2, 10^-1, 0, 10, 10^2, 10^3)
+
+# Basically compares the value of the second ar with the third for the vector b
+## Functions may differ in the number of calls to seeds, so I cannot vectorize
+## I have to run a loop and set a seed for a unitary sample.
+test_that("rsubbo: ", {
+  test_function_rng(100, rnorm(1), rsubbo(1))
+})
+test_that("rasubbo: ", {
+  test_function_rng(100, rnorm(1), rasubbo(1))
+})
+test_that("rpower: ", {
+  test_function_rng(100, rnorm(1), rpower(1, 0, sqrt(2), 2))
+})
+test_that("rpower - m!=0:", {
+  test_function_rng(100, rnorm(1, 10), rpower(1, 10, sqrt(2), 2))
+})
+
+# failling
+test_that("rgamma_c: ", {
+  test_function_rng(b^(-1 / 2) * rnorm(b^(1 / 2)), rgamma_c(b, 2, 1 / 2), "parameter b=")
+})
+test_that("rsep: ", {
+  test_function_rng(100, rnorm(1), rsep(1, 2, 1, 0, 0))
+})
+
+##############################################################################
+
+paste0("Check if RNG results are consistent with rlaplace")
+
+paste0("Laplacian Density")
 
 test_that("rsubbo: ", {
-
-    x = compare_RNG(rsubbo, list())
-    expect_identical(x[["x"]], x[["y"]])
+  test_function_rng(100, rlaplace(1), rsubbo(1, 0, 1, 1))
 })
+test_that("rasubbo: ", {
+  test_function_rng(100, rlaplace(1), rasubbo(1, 0, 1, 1, 1, 1))
+})
+test_that("ralaplace: ", {
+  test_function_rng(100, rlaplace(1), ralaplace(1, 0, 1, 1))
+})
+test_that("rpower: ", {
+  test_function_rng(100, rlaplace(1), rpower(1, 0, 1, 1))
+})
+test_that("rpower - m!=0: ", {
+  test_function_rng(100, rlaplace(1, 10), rpower(1, 10, 1, 1))
+})
+
+##############################################################################
+
+paste0("Check if RNG results are consistent with ralaplace")
 
 test_that("rasubbo: ", {
+  test_function_rng(100, ralaplace(1, 0, 1, 2), rasubbo(1, 0, 1, 2, 1, 1))
+})
 
-    x = compare_RNG(rasubbo, list())
-    expect_identical(x[["x"]], x[["y"]])
+##############################################################################
+
+paste0("Check if RNG results are consistent with rsubbo")
+
+# rsubbo(n, 0, a, b) == rpower(n, 0, a * pow(b, 1./b), b)
+# rsubbo(n, 0, a, b) == rasubbo(n, 0, a, a, b, b)
+# rpower(n, )
+# E = a*G(1/b)^{1/b}
+
+test_that("rpower - m!=0: ", {
+  test_function_rng(100, rlaplace(1, 10), rpower(1, 10, 1, 1))
 })
 
 
-test_that("rlaplace: ", {
-
-    x = compare_RNG(rlaplace, list(n = 100, a =1))
-    expect_identical(x[["x"]], x[["y"]])
+# failling
+test_that("rgamma_c: ", {
+  test_function_rng(100, rlaplace(1), 1 / 2 * rgamma_c(1, 1, 1))
+})
+test_that("rsep: ", {
+  test_function_rng(100, rlaplace(1), rsep(1, 0, 1, 1, 0))
 })
 
-test_that("rgamma_mt: ", {
 
-    # test argument for all if conditions
-    a <- c(0.5, 1, 2)
-
-    lapply(1:length(b), function(i){
-        x = compare_RNG(rgamma_mt, list(100, a[i], 1))
-        expect_identical(x[["x"]], x[["y"]], label = paste0("parameter b=", b[i]))
-    })
-
-
-})
-
+##############################################################################
 
 paste0("Test arguments for functions")
 
-test_that("rgamma_mt: ", {
-
-    # the 'a' parameter must be positive
-    expect_error(rgamma_mt(100, -1, 1) )
-
+test_that("rgamma_c: ", {
+  # the 'a' parameter must be positive
+  expect_error(rgamma_c(100, -1, 1))
 })
 
 ##############################################################################
