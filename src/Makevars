@@ -1,11 +1,8 @@
-CXX_STD = CXX11
-PKG_LIBS = `$(R_HOME)/bin/Rscript -e "RcppGSL:::LdFlags()"`
-CXXFLAGS = -g -march=x86-64 -mtune=generic -O2 -fno-plt
 
-CC=g++
-CXX=g++
-CXX11=g++
-CXX14=g++
-cXX18=g++
-cXX1X=g++
-LDFLAGS=-L/usr/lib
+# set by configure
+GSL_CFLAGS = -I/usr/include
+GSL_LIBS   = -L/usr/lib/x86_64-linux-gnu -lgsl -lgslcblas -lm
+
+# combine with standard arguments for R
+PKG_CPPFLAGS = $(GSL_CFLAGS)
+PKG_LIBS = $(GSL_LIBS)

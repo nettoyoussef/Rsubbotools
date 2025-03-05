@@ -1,10 +1,17 @@
-PKG_CPPFLAGS= -I../windows/gsl-2.4/include -I../inst/include
-PKG_LIBS= -L../windows/gsl-2.4/lib${R_ARCH} -lgsl -lgslcblas
+# set GSL folder depending on the Windows Version
+ifeq "$(WIN)" "64"
+GSL_LIBS = -L$(LIB_GSL)/lib/x64 -lgsl -lgslcblas -lm
+else
+GSL_LIBS = -L$(LIB_GSL)/lib/i386 -lgsl -lgslcblas -lm
+endif
 
-all: clean winlibs
+# use pkg-config conditionally to support older versions of Rtools
+ifeq (,$(shell pkg-config --version 2>/dev/null))
+   PKG_LIBS = -lgsl -lgslcblas -lm
+   #PKG_LIBS = -L$(LIB_GSL)/bin -lgsl -lgslcblas -lm
+else
+   PKG_LIBS = $(shell pkg-config --libs gsl)
+endif
 
-winlibs:
-	"${R_HOME}/bin${R_ARCH_BIN}/Rscript.exe" "../tools/winlibs.R"
-
-clean:
-	rm -f $(SHLIB) $(OBJECTS)
+# Ver se é necessário
+PKG_CPPFLAGS = -I$(LIB_GSL)/include

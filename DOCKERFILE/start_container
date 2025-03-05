@@ -14,4 +14,5 @@ xhost +local:docker
 export DISPLAY=$DISPLAY
 
 # start docker application
-docker-compose up --build
+docker-compose build
+docker-compose up

@@ -1,4 +1,4 @@
-FROM rocker/verse:3.6.1
+FROM rocker/verse:4.4.2
 
 LABEL Name=general Version=0.0.1
 
@@ -30,13 +30,27 @@ RUN apt-get update && apt-get install -y --force-yes --allow-unauthenticated --n
 
 # Install subbotools 
 
-RUN wget -P /tmp/ ftp://cafed.sssup.it/packages/subbotools-1.3.0.tar.gz && \
-    cd /tmp && \
-    tar xvzf subbotools-1.3.0.tar.gz && \
+#RUN wget -P /tmp/ ftp://cafed.sssup.it/packages/subbotools-1.3.0.tar.gz && \
+#    cd /tmp && \
+#    tar xvzf subbotools-1.3.0.tar.gz && \
+#    cd subbotools-1.3.0 && \
+#    ./configure && \
+#    make && \
+#    make install
+
+# tive que usar uma versao editada do pacote ja que a versao disponivel no site
+# de Santanna esta com problemas nos arquivos do laplafit e laplaafit (Data e Size
+# precisam ser declarados com extern)
+COPY subbotools-1.3.0.tar.gz /tmp/subbotools-1.3.0.tar.gz 
+
+RUN cd /tmp/ && \
+    tar xvzf ./subbotools-1.3.0.tar.gz && \
     cd subbotools-1.3.0 && \
     ./configure && \
     make && \
     make install
+
+
 
 ################################
 

@@ -1,15 +1,14 @@
-version: '3'
-
 services:
-  r_temp:
+  rsubbotools:
    build:
      context: ./working_container
      dockerfile: Dockerfile
+   image: rsubbotools
    env_file: .env  
-   container_name: rocker_container
+   container_name: rsubbotools
    volumes:
       - "${RENV_PATHS_CACHE_HOST}:${RENV_PATHS_CACHE}"
-      - "/home/eliasy/:/home/eliasy"
+      - "${PROJECT_DIR}:/root/project"
       - "/tmp/.X11-unix:/tmp/.X11-unix:ro" # bind mounts the X11 socket residing in /tmp/.X11-unix on your local machine into /tmp/.X11-unix in the container and :ro makes the socket read only.
    environment:
         - DISPLAY

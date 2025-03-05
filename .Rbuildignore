@@ -1,11 +1,15 @@
 ^renv$
 ^renv\.lock$
 ^README\.Rmd$
+^LICENSE\.md$
 ^other_files$
 ^original_package$
 ^original_c$
 ^main\.R$
+^temp\.R$
 ^DOCKERFILE$
 ^main\.org$
+^check.org$
 ^src/TAGS$
 ^references$
+^ltximg$
