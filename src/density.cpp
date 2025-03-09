@@ -107,12 +107,11 @@ Rcpp::NumericVector dpower(
 //'
 //' The  SEP is a exponential power distribution controlled
 //' by four parameters, with formula:
-//' \deqn{ f(x; \mu, \alpha, \lambda, \sigma) =
-//' 2 \Phi(w) e^{-|z|^\alpha/\alpha}/ ( \sigma C)}
+//' \deqn{ f(x; m, b, a, \lambda) = 2 \Phi(w) e^{-|z|^b/b}/(c)}
 //' where:
-//' \deqn{z = (x-\mu)/\sigma}
-//' \deqn{w = sign(z) |z|^{(\alpha/2)} \lambda \sqrt{2/\alpha}}
-//' \deqn{C = 2 \alpha^{(1/\alpha-1)} \Gamma(1/\alpha)}
+//' \deqn{z = (x-m)/a}
+//' \deqn{w = sign(z) |z|^{(b/2)} \lambda \sqrt{2/b}}
+//' \deqn{c = 2 ab^{(1/b)-1} \Gamma(1/b)}
 //' with \eqn{\Phi} the cumulative normal distribution with mean zero and variance
 //' one.
 //' @param x (numeric) - value in the range \eqn{(-\infty, \infty)} to evaluate

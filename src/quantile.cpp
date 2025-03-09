@@ -56,8 +56,8 @@ Rcpp::NumericVector qpower(
       Rcpp::stop("x range must be in [0, 1].");
     }
     quantile[i] = (
-      m + 
-      a 
+      m +
+      a
       * sgn(x[i]-0.5)
       * pow(
          inv_inc_lower_gamma(1./b, 2*gsl_sf_gamma(1./b)*fabs(x[i] - 0.5))
@@ -115,14 +115,15 @@ double pdf_sep(newton_args x){
 //'
 //' The  SEP is a exponential power distribution controlled
 //' by four parameters, with formula:
-//' \deqn{ f(x; \mu, a, \lambda, b) =
-//' 2 \Phi(w) e^{-|z|^a/a}/ ( b C)}
+//' \deqn{ f(x; m, b, a, \lambda) = 2 \Phi(w) e^{-|z|^b/b}/(c)}
 //' where:
-//' \deqn{z = (x-\mu)/b}
-//' \deqn{w = sign(z) |z|^{(a/2)} \lambda \sqrt{2/a}}
-//' \deqn{C = 2 a^{(1/a-1)} \Gamma(1/a)}
+//' \deqn{z = (x-m)/a}
+//' \deqn{w = sign(z) |z|^{(b/2)} \lambda \sqrt{2/b}}
+//' \deqn{c = 2 ab^{(1/b)-1} \Gamma(1/b)}
 //' with \eqn{\Phi} the cumulative normal distribution with mean zero and variance
-//' one. The CDF is calculated through numerical integration using the GSL suite.
+//' one. The CDF is calculated through numerical integration using the GSL suite
+//' and the quantile is solved by inversion using a root-finding algorithm
+//' (Newton-Raphson by default).
 //' Copyright (C) 2007-2014 Giulio Bottazzi
 //' Copyright (C) 2020-2021 Elias Haddad
 //' @param x (numeric) - vector with values to evaluate CDF.
@@ -130,10 +131,13 @@ double pdf_sep(newton_args x){
 //' @param a (numeric) - the scale parameter.
 //' @param b (numeric) - the shape parameter
 //' @param lambda (numeric) - the skewness parameter.
-//' @param method (numeric) - If 0, uses the Newton-Raphson procedure for optimization. If 1, uses Steffensen.
-//' @param step_size (numeric) - the size of the step in the numerical optimization (gradient descent). Default is 1e-4.
+//' @param method (numeric) - If 0, uses the Newton-Raphson procedure for
+//' optimization. If 1, uses Steffensen.
+//' @param step_size (numeric) - the size of the step in the numerical
+//' optimization (gradient descent). Default is 1e-4.
 //' @param tol (numeric) - error tolerance (default is 1e-10).
-//' @param max_iter (numeric) - maximum number of iterations for the optimization procedure (default is 100).
+//' @param max_iter (numeric) - maximum number of iterations for the
+//' optimization procedure (default is 100).
 //' @param verb (numeric) - verbosity level of the process (default 0).
 //' @return a vector containing the values for the densities.
 //' @export

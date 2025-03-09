@@ -131,20 +131,19 @@ double fSEP(double x, void *params){
 //'
 //' The  SEP is a exponential power distribution controlled
 //' by four parameters, with formula:
-//' \deqn{ f(x; \mu, \alpha, \lambda, \sigma) =
-//' 2 \Phi(w) e^{-|z|^\alpha/\alpha}/ ( \sigma C)}
+//' \deqn{ f(x; m, b, a, \lambda) = 2 \Phi(w) e^{-|z|^b/b}/(c)}
 //' where:
-//' \deqn{z = (x-\mu)/\sigma}
-//' \deqn{w = sign(z) |z|^{(\alpha/2)} \lambda \sqrt{2/\alpha}}
-//' \deqn{C = 2 \alpha^{(1/\alpha-1)} \Gamma(1/\alpha)}
+//' \deqn{z = (x-m)/a}
+//' \deqn{w = sign(z) |z|^{(b/2)} \lambda \sqrt{2/b}}
+//' \deqn{c = 2 ab^{(1/b)-1} \Gamma(1/b)}
 //' with \eqn{\Phi} the cumulative normal distribution with mean zero and variance
 //' one. The CDF is calculated through numerical integration using the GSL suite.
 //' Copyright (C) 2007-2014 Giulio Bottazzi
 //' Copyright (C) 2020-2021 Elias Haddad
 //' @param x - vector with values to evaluate CDF.
 //' @param m - the location parameter.
-//' @param a - the shape parameter.
-//' @param b - the shapescale parameter
+//' @param a - the scale parameter.
+//' @param b - the shape parameter
 //' @param lambda - the skewness parameter.
 //' @export
 //' @md
@@ -208,116 +207,6 @@ Rcpp::NumericVector psep(
   return cdf;
 }
 
-
-//' Returns CDF from the Skewed Exponential Power distribution
-//'
-//' The \code{psep} returns the Cumulative Distribution Function at point x for
-//' the Skewed Exponential Power distribution with parameters \eqn{a}, \eqn{b}.
-//'
-//' The  SEP is a exponential power distribution controlled
-//' by four parameters, with formula:
-//' \deqn{ f(x; \mu, \alpha, \lambda, \sigma) =
-//' 2 \Phi(w) e^{-|z|^\alpha/\alpha}/ ( \sigma C)}
-//' where:
-//' \deqn{z = (x-\mu)/\sigma}
-//' \deqn{w = sign(z) |z|^{(\alpha/2)} \lambda \sqrt{2/\alpha}}
-//' \deqn{C = 2 \alpha^{(1/\alpha-1)} \Gamma(1/\alpha)}
-//' with \eqn{\Phi} the cumulative normal distribution with mean zero and variance
-//' one. The CDF is calculated through numerical integration using the GSL suite.
-//' Copyright (C) 2007-2014 Giulio Bottazzi
-//' Copyright (C) 2020-2021 Elias Haddad
-//' @param x - vector with values to evaluate CDF.
-//' @param m - the location parameter.
-//' @param alpha - the shape parameter.
-//' @param sigma - the scale parameter
-//' @param lambda - the skewness parameter.
-//' @export
-//' @md
-Rcpp::NumericVector psep_orig(
-  Rcpp::NumericVector x
-  ,double m      = 0
-  ,double alpha  = 2
-  ,double sigma  = 1
-  ,double lambda = 0
-){
-
-  // need to declare a vector of parameters to use with GSL integration suite
-  double par[4];
-  par[0]=m;
-  par[1]=sigma;
-  par[2]=lambda;
-  par[3]=alpha;
-
-  size_t i,n;
-  double cumul=0;
-  double result,error;
-
-  // size of x vector
-  n = x.size();
-  Rcpp::NumericVector x_copy(n);
-  Rcpp::NumericVector cdf(n);
-  Rcpp::NumericVector ordered_cdf(n);
-  std::vector<size_t> indices(n);
-
-  // saves data original position
-  indices = rank_vector( Rcpp::as<std::vector<double>>(x) );
-
-  // value check for R
-  for(i=0; i <n; i++){
-    if( x_copy[i] == R_PosInf ){
-      Rcpp::stop("Infinity values found on x[%d]", i);
-    }
-    if( x_copy[i] == R_NegInf ){
-      Rcpp::stop("-Infinity values found on x[%d]", i);
-    }
-  }
-
-  // have to sort copy of the data
-  // this operation MUST be done after the check for infinity values
-  Rcppdeepcopy(x, x_copy);
-  sortRcpp(x_copy);
-
-  /* allocate at most n subintervals */
-  gsl_integration_workspace * w
-    = gsl_integration_workspace_alloc (10000);
-
-  /* define the function to be integrated */
-  gsl_function F;
-  F.function = &fSEP;
-  F.params = par;
-
-  gsl_integration_qagil(&F,x_copy[0],1e-7,1e-7,10000,w,&result,&error);
-  cumul=result;
-  ordered_cdf[0] = result;
-
-  if(n > 1){
-    for(i=1;i<n;i++){
-      // limit of n must be the same size as workspace allocation above
-      gsl_integration_qag(&F,x_copy[i-1], x_copy[i],
-                          1e-7,1e-7,10000,6,w,&result,&error);
-      cumul+=result;
-      ordered_cdf[i] = cumul;
-      //Rprintf("copy[%d] = %f\n", i-1, x_copy[i-1]);
-      //Rprintf("copy[%d] = %f\n", i, x_copy[i]);
-      //Rprintf("result[%d] = %f\n", i, result);
-      //Rprintf("ordered_cdf[%d] = %f\n", i, ordered_cdf[i]);
-    }
-  }
-
-  // generates the vector in the original order
-  for(i=0;i<n;i++){
-    cdf[i] = ordered_cdf[indices[i]];
-    // for debug
-    //Rprintf("cdf[%d] = %f\n", i, cdf[i]);
-    //Rprintf("ordered_cdf[%d] = %f\n", i, ordered_cdf[i]);
-    //Rprintf("indices[%d] = %f\n", i, indices[i]);
-  }
-
-  // free the workspace memory
-  gsl_integration_workspace_free(w);
-
-  return cdf;
-}
 
 //' Returns CDF from the Laplace Distribution
 //'

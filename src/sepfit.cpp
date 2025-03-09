@@ -28,28 +28,6 @@
   3 gory details on intermediate steps
 */
 
-
-/* Density parameterization
-
-f(x) = 2 \Phi(w) e^{-|z|^alpha/alpha}/ ( sigma C)
-
-where
-
-z = (x-mu)/sigma
-w = sing(z) |z|^(alpha/2) lambda \sqrt{2/alpha}
-C = 2 alpha^(1/alpha-1) \Gamma(1/alpha)
-
-with Phi the normal distribution with mean zero and variance one.
-
-
-x[0] = mu             center
-x[1] = sigma          width
-x[2] = lambda         skewness
-x[3] = alpha          kurtosis
-
-
- */
-
 #include "common.h"
 
 #include <gsl/gsl_linalg.h>
@@ -62,9 +40,6 @@ x[3] = alpha          kurtosis
 
 /* Output Functions */
 /*----------------- */
-
-
-
 
 
 /*
@@ -152,32 +127,35 @@ RcppGSL::Matrix sep_varcovar(const Rcpp::NumericVector par, const size_t N, cons
 }
 
 
-
-/* Object Function */
-/*---------------- */
-
-void sep_objf(Rcpp::NumericVector data, const size_t n, Rcpp::NumericVector x, void *params, double *f){
+/*-------------------- */
+/* Objective Function */
+/*-------------------- */
+void sep_objf(
+  Rcpp::NumericVector data
+  , const size_t n
+  , Rcpp::NumericVector x
+  , void *params
+  , double *f
+){
 
   unsigned size = data.size();
   double dtmp1=0;
   size_t i;
 
   const double m=x[0];
-  const double s=x[1];
-  const double l=x[2];
-  const double a=x[3];
+  const double a=x[1];
+  const double b=x[2];
+  const double lambda=x[3];
 
   for(i=0;i<size;i++){
-    const double z = (data[i]-m)/s;
-    const double w = (z>0 ? 1 : -1)*pow(fabs(z),a/2)*l*sqrt(2/a);
+    const double z = (data[i]-m)/a;
+    const double w = sgn(z)*pow(fabs(z),b/2)*lambda*sqrt(2/b);
 
-    dtmp1 += pow(fabs(z),a)/a - log(gsl_cdf_ugaussian_P(w));
+    dtmp1 += pow(fabs(z),b)/b - log(gsl_cdf_ugaussian_P(w));
   }
 
-  *f = dtmp1/size +(1/a-1)*log(a)+gsl_sf_lngamma (1/a) + log(s);
+  *f = dtmp1/size +(1/b-1)*log(b)+gsl_sf_lngamma (1/b) + log(a);
 
-    /*   fprintf(Fmessages,"# ---- objf mu=%.3e sigma=%.3e lambda=%.3e alpha=%.3e ll=%.3e\n", */
-    /*    x[0],x[1],x[2],x[3],*f); */
 }
 
 
@@ -193,38 +171,35 @@ void sep_objdf(
   size_t i;
 
   const double m=x[0];
-  const double s=x[1];
-  const double l=x[2];
-  const double a=x[3];
+  const double a=x[1];
+  const double b=x[2];
+  const double lambda=x[3];
 
   df[0]=df[1]=df[2]=df[3]=0.0;
 
   for(i=0;i<size;i++){
-    const double z  = (data[i]-m)/s;
-    const double sz = (z>0 ? 1 : -1);
+    const double z  = (data[i]-m)/a;
+    const double sz = sgn(z);
     const double az = fabs(z);
-    const double w  = sz*pow(az,a/2)*l*sqrt(2/a);
+    const double w  = sz*pow(az,b/2)*lambda*sqrt(2/b);
 
-    const double dwdz = pow(az,a/2-1)*l*sqrt(a/2);
+    const double dwdz = pow(az,b/2-1)*lambda*sqrt(b/2);
 
-    const double dwdl = sz*pow(az,a/2)*sqrt(2/a);
-    const double dwda = w*(log(az)-1/a)/2;
+    const double dwdl = sz*pow(az,b/2)*sqrt(2/b);
+    const double dwda = w*(log(az)-1/b)/2;
 
     const double fionfi = gsl_ran_ugaussian_pdf(w)/gsl_cdf_ugaussian_P(w);
 
-    df[0] += fionfi*dwdz - sz*pow(az,a-1);
-    df[1] += fionfi*dwdz*z -pow(az,a);
-    df[2] += -fionfi*dwdl;
-    df[3] += -fionfi*dwda+pow(az,a)*(a*log(az)-1)/(a*a);
+    df[0] += fionfi*dwdz - sz*pow(az,b-1);
+    df[1] += fionfi*dwdz*z -pow(az,b);
+    df[2] += -fionfi*dwda+pow(az,b)*(b*log(az)-1)/(b*b);
+    df[3] += -fionfi*dwdl;
   }
 
-  df[0] = df[0]/(size*s);
-  df[1] = (df[1]/size+1)/s;
-  df[2] = df[2]/size;
-  df[3] = df[3]/size - (log(a)+a-1+gsl_sf_psi(1/a))/(a*a);
-
-  /*   fprintf(Fmessages,"# ---- objdf mu=%.3e sigma=%.3e lambda=%.3e alpha=%.3e\n", */
-  /*      x[0],x[1],x[2],x[3]); */
+  df[0] = df[0]/(size*a);
+  df[1] = (df[1]/size+1)/a;
+  df[2] = df[2]/size - (log(b)+b-1+gsl_sf_psi(1/b))/(b*b);
+  df[3] = df[3]/size;
 
 }
 
@@ -236,43 +211,38 @@ void sep_objfdf(Rcpp::NumericVector data, const size_t n, Rcpp::NumericVector x,
   size_t i;
 
   const double m=x[0];
-  const double s=x[1];
-  const double l=x[2];
-  const double a=x[3];
+  const double a=x[1];
+  const double b=x[2];
+  const double lambda=x[3];
 
   *f=df[0]=df[1]=df[2]=df[3]=0.0;
 
   for(i=0;i<size;i++){
-    const double z  = (data[i]-m)/s;
-    const double sz = (z>0 ? 1 : -1);
+    const double z  = (data[i]-m)/a;
+    const double sz = sgn(z);
     const double az = fabs(z);
-    const double w  = sz*pow(az,a/2)*l*sqrt(2/a);
+    const double w  = sz*pow(az,b/2)*lambda*sqrt(2/b);
 
-    const double dwdz = pow(az,a/2-1)*l*sqrt(a/2);
-    const double dwdl = sz*pow(az,a/2)*sqrt(2/a);
-    const double dwda = w*(log(az)-1/a)/2;
+    const double dwdz = pow(az,b/2-1)*lambda*sqrt(b/2);
+    const double dwdl = sz*pow(az,b/2)*sqrt(2/b);
+    const double dwda = w*(log(az)-1/b)/2;
 
     const double fionfi = gsl_ran_ugaussian_pdf(w)/gsl_cdf_ugaussian_P(w);
 
-    df[0] += fionfi*dwdz - sz*pow(az,a-1);
-    df[1] += fionfi*dwdz*z -pow(az,a);
-    df[2] += -fionfi*dwdl;
-    df[3] += -fionfi*dwda+pow(az,a)*(a*log(az)-1)/(a*a);
+    df[0] += fionfi*dwdz - sz*pow(az,b-1);
+    df[1] += fionfi*dwdz*z -pow(az,b);
+    df[2] += -fionfi*dwda+pow(az,b)*(b*log(az)-1)/(b*b);
+    df[3] += -fionfi*dwdl;
 
-    *f += pow(az,a)/a-log(gsl_cdf_ugaussian_P(w));
+    *f += pow(az,b)/b-log(gsl_cdf_ugaussian_P(w));
   }
 
-  df[0] = df[0]/(size*s);
-  df[1] = (df[1]/size+1)/s;
-  df[2] = df[2]/size;
-  df[3] = df[3]/size - (log(a)+a-1+gsl_sf_psi(1/a))/(a*a);
+  df[0] = df[0]/(size*a);
+  df[1] = (df[1]/size+1)/a;
+  df[2] = df[2]/size - (log(b)+b-1+gsl_sf_psi(1/b))/(b*b);
+  df[3] = df[3]/size;
 
-  *f = (*f)/size +(1/a-1)*log(a)+gsl_sf_lngamma (1/a) + log(s);
-
-
-  /*   fprintf(Fmessages,"# ---- objfdf mu=%.3e sigma=%.3e lambda=%.3e alpha=%.3e ll=%.3e grad= %.3e %.3e %.3e %.3e \n", */
-  /*      x[0],x[1],x[2],x[3],*f,df[0],df[1],df[2],df[3]); */
-
+  *f = (*f)/size +(1/b-1)*log(b)+gsl_sf_lngamma (1/b) + log(a);
 
 }
 /*---------------- */
@@ -287,14 +257,13 @@ void sep_objfdf(Rcpp::NumericVector data, const size_t n, Rcpp::NumericVector x,
 //'
 //' The  SEP is a exponential power distribution controlled
 //' by four parameters, with formula:
-//' \deqn{ f(x; \mu, \alpha, \lambda, \sigma) =
-//' 2 \Phi(w) e^{-|z|^\alpha/\alpha}/ ( \sigma C)}
+//' \deqn{ f(x; m, b, a, \lambda) = 2 \Phi(w) e^{-|z|^b/b}/(c)}
 //' where:
-//' \deqn{z = (x-\mu)/\sigma}
-//' \deqn{w = sign(z) |z|^{(\alpha/2)} \lambda \sqrt{2/\alpha}}
-//' \deqn{C = 2 \alpha^{(1/\alpha-1)} \Gamma(1/\alpha)}
-//' with \eqn{\Phi} the cumulative normal distribution with mean zero and variance
-//' one.
+//' \deqn{z = (x-m)/a}
+//' \deqn{w = sign(z) |z|^{(b/2)} \lambda \sqrt{2/b}}
+//' \deqn{c = 2 ab^{(1/b)-1} \Gamma(1/b)}
+//' with \eqn{\Phi} the cumulative normal distribution with mean zero and
+//' variance one.
 //' Details on this method are available on the package vignette.
 //'
 //' @param data (NumericVector) - the sample used to fit the distribution.
@@ -304,9 +273,9 @@ void sep_objfdf(Rcpp::NumericVector data, const size_t n, Rcpp::NumericVector x,
 //' * 2  intermediate steps results
 //' * 3  intermediate steps internals
 //' * 4+  details of optim. routine
-//' @param par NumericVector - vector containing the initial guess for
-//' parameters mu, sigma, lambda and alpha, respectively. Default values of are
-//' c(0, 1, 0, 2).
+//' @param par NumericVector - vector containing the initial guess for parameters
+//' m (location), a (scale), b (shape), lambda (skewness), respectively.
+//' Default values of are c(0, 1, 2, 0), i.e. a normal distribution.
 //' @param g_opt_par NumericVector - vector containing the global optimization
 //' parameters.
 //' The optimization parameters are:
@@ -337,11 +306,11 @@ void sep_objfdf(Rcpp::NumericVector data, const size_t n, Rcpp::NumericVector x,
 //' @md
 // [[Rcpp::export]]
 Rcpp::List sepfit(
-                  Rcpp::NumericVector data
-                  ,int verb = 0
-                  ,Rcpp::NumericVector par = Rcpp::NumericVector::create(0., 1., 0., 2.)
-                  ,Rcpp::NumericVector g_opt_par = Rcpp::NumericVector::create(.1, 1e-2, 100, 1e-3, 1e-5, 2)
-                  ){
+  Rcpp::NumericVector data
+  ,int verb = 0
+  ,Rcpp::NumericVector par = Rcpp::NumericVector::create(0., 1., 2., 0.)
+  ,Rcpp::NumericVector g_opt_par = Rcpp::NumericVector::create(.1, 1e-2, 100, 1e-3, 1e-5, 2)
+){
 
 
   // check arguments
@@ -350,8 +319,8 @@ Rcpp::List sepfit(
     Rcpp::stop("Number of default values for parameters must be equal to four.");
   }
 
-  if(par[1]<=0 || par[3]<=0){
-    Rcpp::stop("initial values for sigma and alpha should be positive\n");
+  if(par[1]<=0 || par[2]<=0){
+    Rcpp::stop("initial values for a and b should be positive\n");
 
 }
 
@@ -365,7 +334,7 @@ Rcpp::List sepfit(
 
   // define optimization parameters
    struct multimin_params global_oparams =
-     {(double)       g_opt_par[0]
+     {(double)        g_opt_par[0]
       ,(double)       g_opt_par[1]
       ,(unsigned int) g_opt_par[2]
       ,(double)       g_opt_par[3]
@@ -397,7 +366,7 @@ Rcpp::List sepfit(
    /* ------------------------ */
    if(verb >0){
      Rprintf("INITIAL VALUES\n");
-     Rprintf("#  par    mu     sigma     lambda     alpha     ll\n");
+     Rprintf("#  par    m     a     b    lambda  ll\n");
      Rprintf("#  value  %.2f  %.2f  %.2f  %.2f  %.2f\n"
              , par[0], par[1], par[2], par[3], fmin);
      Rprintf("\n");
@@ -413,27 +382,28 @@ Rcpp::List sepfit(
    /* ----------------------------------- */
    xmin.fill(0);
    xmax.fill(0);
-   type[0] = 0;
-   type[1] = 4;
-   type[2] = 0;
-   type[3] = 4;
+   type[0] = 0; // location (m)
+   type[1] = 4; // scale (a)
+   type[2] = 4; // shape (b)
+   type[3] = 0; // skewness (lambda)
 
    /* perform global minimization */
    /* --------------------------- */
-   multimin(data              // sample
-            ,4                // number of parameters
-            ,par              // starting guess / returns parameters value
-            ,&fmin            // pointer to update the minimum likelihood
-            ,type             // type of transformation of the data
-            ,xmin             // minimum values for the parameters
-            ,xmax             // maximum values for the parameters
-            ,sep_objf         // objective function to minimize
-            ,sep_objdf        // df/dx of the objective function
-            ,sep_objfdf       // objf + objdf
-            ,NULL             // fparams
-            ,global_oparams   // parameters for the optmization
-            ,verb             // set verbosity level
-            );
+   multimin(
+     data              // sample
+     ,4                // number of parameters
+     ,par              // starting guess / returns parameters value
+     ,&fmin            // pointer to update the minimum likelihood
+     ,type             // type of transformation of the data
+     ,xmin             // minimum values for the parameters
+     ,xmax             // maximum values for the parameters
+     ,sep_objf         // objective function to minimize
+     ,sep_objdf        // df/dx of the objective function
+     ,sep_objfdf       // objf + objdf
+     ,NULL             // fparams
+     ,global_oparams   // parameters for the optmization
+     ,verb             // set verbosity level
+   );
 
    if(verb >0){
      Rprintf("#>>> mu=%.3e sigma=%.3e lambda=%.3e alpha=%.3e ll=%e\n",
@@ -452,23 +422,22 @@ Rcpp::List sepfit(
     // and on its lower diagonal presents the correlation coefficients between the parameters
 
     // vector of standard errors
-    Rcpp::NumericVector std_error =
-      Rcpp::NumericVector::create(
-                                  sqrt(V(0,0))  // mu
-                                  ,sqrt(V(1,1)) // si
-                                  ,sqrt(V(2,2)) // la
-                                  ,sqrt(V(3,3)) // al
-                                  );
+    Rcpp::NumericVector std_error = Rcpp::NumericVector::create(
+      sqrt(V(0,0))  // m (location)
+      ,sqrt(V(1,1)) // a (scale)
+      ,sqrt(V(2,2)) // b (shape)
+      ,sqrt(V(3,3)) // lambda (skewness)
+    );
 
   // Name of parameters
-  Rcpp::CharacterVector param_names = Rcpp::CharacterVector::create("mu", "si", "la", "al");
+  Rcpp::CharacterVector param_names = Rcpp::CharacterVector::create("m", "a", "b", "lambda");
 
   // main dataframe with coefficients
-  Rcpp::List dt =
-  Rcpp::DataFrame::create(Rcpp::Named("param")      = param_names
-                          ,Rcpp::Named("coef")      = par
-                          ,Rcpp::Named("std_error") = std_error
-                          );
+  Rcpp::List dt = Rcpp::DataFrame::create(
+    Rcpp::Named("param")      = param_names
+    ,Rcpp::Named("coef")      = par
+    ,Rcpp::Named("std_error") = std_error
+  );
 
   // convert matrix
   Rcpp::NumericMatrix matrix = Rcpp::as<Rcpp::NumericMatrix>(Rcpp::wrap(V));

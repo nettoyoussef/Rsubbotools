@@ -7,7 +7,7 @@
 sepfit(
   data,
   verb = 0L,
-  par = as.numeric(c(0, 1, 0, 2)),
+  par = as.numeric(c(0, 1, 2, 0)),
   g_opt_par = as.numeric(c(0.1, 0.01, 100, 0.001, 1e-05, 2))
 )
 }
@@ -24,8 +24,8 @@ sepfit(
 }}
 
 \item{par}{NumericVector - vector containing the initial guess for
-parameters mu, sigma, lambda and alpha, respectively. Default values of are
-c(0, 1, 0, 2).}
+parameters m (location, a (scale), b (shape), lambda (skewness), respectively.
+Default values of are c(0, 1, 2, 0), i.e. a normal distribution.}
 
 \item{g_opt_par}{NumericVector - vector containing the global optimization
 parameters.
@@ -67,14 +67,13 @@ log-likelihood function. See details below.
 \details{
 The  SEP is a exponential power distribution controlled
 by four parameters, with formula:
-\deqn{ f(x; \mu, \alpha, \lambda, \sigma) =
-2 \Phi(w) e^{-|z|^\alpha/\alpha}/ ( \sigma C)}
+\deqn{ f(x; m, b, a, \lambda) = 2 \Phi(w) e^{-|z|^b/b}/(c)}
 where:
-\deqn{z = (x-\mu)/\sigma}
-\deqn{w = sign(z) |z|^{(\alpha/2)} \lambda \sqrt{2/\alpha}}
-\deqn{C = 2 \alpha^{(1/\alpha-1)} \Gamma(1/\alpha)}
-with \eqn{\Phi} the cumulative normal distribution with mean zero and variance
-one.
+\deqn{z = (x-m)/a}
+\deqn{w = sign(z) |z|^{(b/2)} \lambda \sqrt{2/b}}
+\deqn{c = 2 ab^{(1/b)-1} \Gamma(1/b)}
+with \eqn{\Phi} the cumulative normal distribution with mean zero and
+variance one.
 Details on this method are available on the package vignette.
 }
 \examples{
