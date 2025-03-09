@@ -1,6 +1,13 @@
-/*insert GNU extensions*/
+// Insert GNU extensions
+// in particular, necessary for use of NAN extension*/
+#ifndef _GNU_SOURCE
 #define _GNU_SOURCE
-/*in particular, use of NAN extension*/
+#endif /* _GNU_SOURCE */
+
+// ifndef - include guard, used  to avoid redefinition errors when
+// reimporting the same module several times
+#ifndef COMMON_H
+#define COMMON_H
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -31,6 +38,7 @@ extern int errno;
 
 /* --------------- */
 
+
 // #include "config.h"
 
 void *my_alloc(size_t);
@@ -47,7 +55,7 @@ void subbotools_header(char const *,FILE *);
 
 /* C++ ----------- */
 #include<R.h>
-# include <Rmath.h>     // pgamma()
+#include <Rmath.h>     // pgamma()
 #include<RcppGSL.h>
 // [[Rcpp::depends(RcppGSL)]]
 #include<Rcpp.h>
@@ -68,38 +76,38 @@ void Rcppdeepcopy(Rcpp::NumericVector x_orig, Rcpp::NumericVector x_dest);
 #include "multimin.h"
 // multimin already includes structs, which contains data structures for
 // all routines
-//#include "structs.h"
+#include "structs.h"
 
 Rcpp::List interval_optim(
-                          Rcpp::NumericVector data
-                          ,Rcpp::IntegerVector type
-                          ,Rcpp::NumericVector xmin
-                          ,Rcpp::NumericVector xmax
-                          ,Rcpp::NumericVector par
-                          ,double fmin
-                          ,struct multimin_params interv_oparams
-                          ,int interv_step
-                          ,unsigned n_param
-                          ,unsigned m_position
-                          ,void (*f)    (Rcpp::NumericVector, const size_t, Rcpp::NumericVector, void *, double *)
-                          ,void (* df)  (Rcpp::NumericVector, const size_t, Rcpp::NumericVector, void *, Rcpp::NumericVector)
-                          ,void (* fdf) (Rcpp::NumericVector, const size_t, Rcpp::NumericVector, void *, double *, Rcpp::NumericVector)
-                          ,int verb
-                          );
+  Rcpp::NumericVector data
+  ,Rcpp::IntegerVector type
+  ,Rcpp::NumericVector xmin
+  ,Rcpp::NumericVector xmax
+  ,Rcpp::NumericVector par
+  ,double fmin
+  ,struct multimin_params interv_oparams
+  ,unsigned interv_step
+  ,unsigned n_param
+  ,unsigned m_position
+  ,void (*f)    (Rcpp::NumericVector, const size_t, Rcpp::NumericVector, void *, double *)
+  ,void (* df)  (Rcpp::NumericVector, const size_t, Rcpp::NumericVector, void *, Rcpp::NumericVector)
+  ,void (* fdf) (Rcpp::NumericVector, const size_t, Rcpp::NumericVector, void *, double *, Rcpp::NumericVector)
+  ,int verb
+);
 
 Rcpp::List global_optim(
-                        Rcpp::NumericVector data
-                        ,double fmin
-                        ,struct multimin_params global_oparams
-                        ,Rcpp::NumericVector par
-                        ,unsigned n_param
-                        ,unsigned m_position
-                        ,void (*f)    (Rcpp::NumericVector, const size_t, Rcpp::NumericVector, void *, double *)
-                        ,void (* df)  (Rcpp::NumericVector, const size_t, Rcpp::NumericVector, void *, Rcpp::NumericVector)
-                        ,void (* fdf) (Rcpp::NumericVector, const size_t, Rcpp::NumericVector, void *, double *, Rcpp::NumericVector)
-                        ,Rcpp::Nullable<Rcpp::NumericVector> provided_m_
-                        ,int verb
-                        );
+  Rcpp::NumericVector data
+  ,double fmin
+  ,struct multimin_params global_oparams
+  ,Rcpp::NumericVector par
+  ,unsigned n_param
+  ,unsigned m_position
+  ,void (*f)    (Rcpp::NumericVector, const size_t, Rcpp::NumericVector, void *, double *)
+  ,void (* df)  (Rcpp::NumericVector, const size_t, Rcpp::NumericVector, void *, Rcpp::NumericVector)
+  ,void (* fdf) (Rcpp::NumericVector, const size_t, Rcpp::NumericVector, void *, double *, Rcpp::NumericVector)
+  ,Rcpp::Nullable<Rcpp::NumericVector> provided_m_
+  ,int verb
+);
 
 
 // optimization functions for quantiles
@@ -175,3 +183,5 @@ template <typename T>
     return res;
     //return indices;
   }
+
+#endif /* COMMON_H */

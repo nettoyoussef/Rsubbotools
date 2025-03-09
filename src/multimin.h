@@ -1,6 +1,5 @@
-/*insert GNU extensions*/
-#define _GNU_SOURCE
-/*in particular, use of NAN extension*/
+#ifndef MULTIMIN_H
+#define MULTIMIN_H
 
 /* C++ ----------- */
 #include<Rcpp.h>
@@ -16,7 +15,7 @@
 #include <gsl/gsl_blas.h>
 
 /* --------------- */
-
+#include "common.h"
 #include "structs.h"
 
 void multimin(
@@ -42,3 +41,5 @@ void multimin(
 //       void (*) (const Rcpp::NumericVector, const size_t,const double *, void *,double *,double *),
 //       void *,
 //       const struct multimin_params);
+
+#endif /* MULTIMIN_H */

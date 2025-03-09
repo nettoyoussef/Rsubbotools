@@ -1,5 +1,5 @@
-
-
+#ifndef STRUCTS_H
+#define STRUCTS_H
 
 struct multimin_params {
   double step_size;
@@ -75,3 +75,5 @@ struct newton_args{
   double (*f)(newton_args) = NULL;
   double (*dfdx)(newton_args) = NULL;
 };
+
+#endif /* STRUCTS_H */
