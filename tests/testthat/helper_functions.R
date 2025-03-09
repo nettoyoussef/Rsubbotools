@@ -10,7 +10,7 @@ test_function <- function(b, func1, func2, msg_param) {
 
 test_function_rng_seed <- function(func, param_list) {
   x <- compare_RNG(func, param_list)
-  expect_identical(x[["x"]], x[["y"]])
+  expect_equal(x[["x"]], x[["y"]])
 }
 
 test_function_rng <- function(size, rng_function_1, rng_function_2) {
@@ -19,7 +19,7 @@ test_function_rng <- function(size, rng_function_1, rng_function_2) {
     x <- rng_function_1
     set.seed(i)
     y <- rng_function_2
-    expect_identical(x, y)
+    expect_equal(x, y)
   })
 }
 

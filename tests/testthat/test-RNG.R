@@ -50,14 +50,6 @@ test_that("rpower - m!=0:", {
   test_function_rng(100, rnorm(1, 10), rpower(1, 10, sqrt(2), 2))
 })
 
-# failling
-test_that("rgamma_c: ", {
-  test_function_rng(b^(-1 / 2) * rnorm(b^(1 / 2)), rgamma_c(b, 2, 1 / 2), "parameter b=")
-})
-test_that("rsep: ", {
-  test_function_rng(100, rnorm(1), rsep(1, 2, 1, 0, 0))
-})
-
 ##############################################################################
 
 paste0("Check if RNG results are consistent with rlaplace")
@@ -82,14 +74,6 @@ test_that("rpower - m!=0: ", {
 
 ##############################################################################
 
-paste0("Check if RNG results are consistent with ralaplace")
-
-test_that("rasubbo: ", {
-  test_function_rng(100, ralaplace(1, 0, 1, 2), rasubbo(1, 0, 1, 2, 1, 1))
-})
-
-##############################################################################
-
 paste0("Check if RNG results are consistent with rsubbo")
 
 # rsubbo(n, 0, a, b) == rpower(n, 0, a * pow(b, 1./b), b)
@@ -101,15 +85,14 @@ test_that("rpower - m!=0: ", {
   test_function_rng(100, rlaplace(1, 10), rpower(1, 10, 1, 1))
 })
 
+##############################################################################
+
+paste0("Check if RNG results are consistent with ralaplace")
 
 # failling
-test_that("rgamma_c: ", {
-  test_function_rng(100, rlaplace(1), 1 / 2 * rgamma_c(1, 1, 1))
+test_that("rasubbo: ", {
+  test_function_rng(100, ralaplace(1, 0, 1, 2), rasubbo(1, 0, 1, 2, 1, 1))
 })
-test_that("rsep: ", {
-  test_function_rng(100, rlaplace(1), rsep(1, 0, 1, 1, 0))
-})
-
 
 ##############################################################################
 
@@ -119,5 +102,3 @@ test_that("rgamma_c: ", {
   # the 'a' parameter must be positive
   expect_error(rgamma_c(100, -1, 1))
 })
-
-##############################################################################

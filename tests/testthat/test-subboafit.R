@@ -1,8 +1,11 @@
 ##############################################################################
 
 # Subboafit
-skip_on_cran()
-
+# checks against original implementation of subbotools
+# Depends on using the same sample to fit as the subbotools package
+# since R changes the rng in each version, to work this test must be manually
+# updated each time or use a constant sample
+skip()
 paste0("Subboafit")
 
 test_that("SubLaplace:", {
