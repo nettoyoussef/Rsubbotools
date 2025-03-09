@@ -28,10 +28,11 @@ parameters.
 \details{
 The AEP distribution is expressed by the function:
 \deqn{f(x;a_l,a_r,b_l,b_r,m) =
-\begin{cases}
-\frac{1}{A} e^{- \frac{1}{b_l} |\frac{x-m}{a_l}|^{b_l} }, & x < m
-\frac{1}{A} e^{- \frac{1}{b_r} |\frac{x-m}{a_r}|^{b_r} }, & x > m
-\end{cases} }
+\frac{1}{A} e^{- \frac{1}{b_l} |\frac{x-m}{a_l}|^{b_l} }, x < m
+}
+\deqn{f(x;a_l,a_r,b_l,b_r,m) =
+\frac{1}{A} e^{- \frac{1}{b_r} |\frac{x-m}{a_r}|^{b_r} }, x > m
+}
 with:
 \deqn{A = a_lb_l^{1/b_l}\Gamma(1+1/b_l) + a_rb_r^{1/b_r}\Gamma(1+1/b_r)}
 where \eqn{m} is a location parameter, \eqn{b*} are shape parameters, \eqn{a*}
@@ -43,9 +44,6 @@ which is equivalent from sampling from a half Exponential Power distribution.
 This values are then weighted by a constant expressed in the parameters.
 More details are available on the package vignette and on the
 function \code{rpower}.
-Copyright (C) 2003-2014 Giulio Bottazzi
-Copyright (C) 2020-2021 Elias Haddad
-License: GPL 3+
 }
 \examples{
 sample_gamma <- rasubbo(1000, 0, 0.5, 0.5,  1, 1)

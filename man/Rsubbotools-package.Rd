@@ -4,9 +4,16 @@
 \name{Rsubbotools-package}
 \alias{Rsubbotools}
 \alias{Rsubbotools-package}
-\title{Rsubbotools: functions for the Subbottin and AEP distributions}
+\title{Rsubbotools: Functions for the Subbottin and AEP Distributions (Generalized Error Distribution)}
 \description{
-estimation of the symmetric and asymmetric power exponential, a.k.a. the Subbottin family of distributions. The package is able to draw samples and create parametric fits using Maximum Likelihood estimation. It also provides functions for the asymmetric Laplace and skewed power exponential distributions.
+This library is able to create densities, probabilities, random numbers, quantiles, and maximum likelihood estimation for several distributions, mainly the symmetric and asymmetric power exponential (AEP), a.k.a. the Subbottin family of distributions, also known as the generalized error distribution. Estimation is made using the design of Bottazzi (2004) \url{https://ideas.repec.org/p/ssa/lemwps/2004-14.html}, where the likelihood is maximized by several optimization procedures using the GNU Scientific Library, translated to C++ code, which makes it both fast and accurate. The package also provides functions for the gamma, Laplace, and Asymmetric Laplace distributions.
+}
+\seealso{
+Useful links:
+\itemize{
+  \item Report bugs at \url{https://github.com/nettoyoussef/Rsubbotools/issues}
+}
+
 }
 \author{
 \strong{Maintainer}: Elias Haddad \email{eliasynetto@gmail.com} (\href{https://orcid.org/0000-0003-1863-1022}{ORCID})
@@ -14,6 +21,14 @@ estimation of the symmetric and asymmetric power exponential, a.k.a. the Subbott
 Authors:
 \itemize{
   \item Giulio Bottazzi \email{bottazzi@sssup.it} (\href{https://orcid.org/0000-0003-2565-4732}{ORCID})
+  \item Fernando J. Von Zuben (\href{https://orcid.org/0000-0002-4128-5415}{ORCID}) [thesis advisor]
+}
+
+Other contributors:
+\itemize{
+  \item Jochen Voss [contributor]
+  \item J.D. Lamb [contributor]
+  \item Brian Gough [contributor]
 }
 
 }

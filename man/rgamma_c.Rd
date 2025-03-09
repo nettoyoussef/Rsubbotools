@@ -29,16 +29,11 @@ where \eqn{b} is a shape parameter and \eqn{a} is a scale parameter.
 The RNG is given by Marsaglia and Tsang, "A Simple Method for
 generating gamma variables", ACM Transactions on Mathematical
 Software, Vol 26, No 3 (2000), p363-372.
-Available at:
-https://doi.org/10.1145/358407.358414
+Available at \doi{10.1145/358407.358414}.
 This function is based on the original GSL version, adapted to
 use R's system of RNGs. All credits to the original authors.
 Implemented by J.D.Lamb@btinternet.com, minor modifications for GSL
 by Brian Gough. Adapted to R by Elias Haddad.
-Copyright (C) J.D.Lamb, Brian Gough.
-Copyright (C) 2020-2021 Elias Haddad
-License: GPL 3+
-GSL file: randist/gamma.c
 }
 \examples{
 sample_gamma <- rgamma_c(1000, 1, 1)

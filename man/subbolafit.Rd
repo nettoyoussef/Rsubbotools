@@ -77,7 +77,6 @@ a list containing the following items:
 \itemize{
 \item "dt" - dataset containing parameters estimations and standard deviations.
 \item "log-likelihood" - negative log-likelihood value.
-\item "matrix" - the covariance matrix for the parameters.
 }
 }
 \description{
@@ -91,10 +90,11 @@ level of accuracy required. See details below.
 The  LAPE is a exponential power distribution controlled
 by four parameters, with formula:
 \deqn{ f(x;a,b_l,b_r,m) =
-\begin{cases}
-\frac{1}{A} e^{- \frac{1}{b_l} |\frac{x-m}{a}|^{b_l} }, & x < m
-\frac{1}{A} e^{- \frac{1}{b_r} |\frac{x-m}{a}|^{b_r} }, & x > m
-\end{cases} }
+\frac{1}{A} e^{- \frac{1}{b_l} |\frac{x-m}{a}|^{b_l} }, x < m
+}
+\deqn{ f(x;a,b_l,b_r,m) =
+\frac{1}{A} e^{- \frac{1}{b_r} |\frac{x-m}{a}|^{b_r} }, x > m
+}
 with:
 \deqn{A = ab_l^{1/b_l}\Gamma(1+1/b_l) + ab_r^{1/b_r}\Gamma(1+1/b_r)}
 where \eqn{l} and \eqn{r} represent left and right tails, \eqn{a} is a

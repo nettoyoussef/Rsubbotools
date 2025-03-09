@@ -31,9 +31,6 @@ Since the Subbotin distribution is basically the exponential distribution
 with scale parameter \eqn{a = ab^{1/b}} and \eqn{m=0}, we use the same
 method of the exponential power RNG and add the location parameter.
 Details can be found on the documentation of the \code{rpower} function.
-Copyright (C) 2002-2014 Giulio Bottazzi
-Copyright (C) 2020-2021 Elias Haddad
-License: GPL 3+
 }
 \examples{
 sample_gamma <- rsubbo(1000, 1, 1)

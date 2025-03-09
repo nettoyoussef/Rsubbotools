@@ -5,7 +5,8 @@
 #'
 #' This function returns a sample from a gamma-distributed random variable.
 #' The method used to generate this sample is the Marsaglia-Tsang fast gamma
-#' method. See more details below.
+#' method. See more details below. The name was chosen so it doesn't clash
+#' with R's native method.
 #'
 #' The gamma distribution is given by the function:
 #' \deqn{f(x) = \frac{1}{\Gamma(b)a^b}x^{b-1}e^{-x/a}, x > 0}
@@ -13,14 +14,73 @@
 #' The RNG is given by Marsaglia and Tsang, "A Simple Method for
 #' generating gamma variables", ACM Transactions on Mathematical
 #' Software, Vol 26, No 3 (2000), p363-372.
-#' Available at:
-#' https://doi.org/10.1145/358407.358414
+#' Available at \doi{10.1145/358407.358414}.
 #' This function is based on the original GSL version, adapted to
 #' use R's system of RNGs. All credits to the original authors.
 #' Implemented by J.D.Lamb@btinternet.com, minor modifications for GSL
 #' by Brian Gough. Adapted to R by Elias Haddad.
-#' Copyright (C) J.D.Lamb, Brian Gough.
-NULL
+#'
+#' @param n (int)
+#' @param b (numeric) - shape parameter. Must be in the range \eqn{(0, \infty)}.
+#' @param a (numeric) - scale parameter. Must be in the range \eqn{(0, \infty)}.
+#' @return a numeric vector containing a random sample with above parameters.
+#'
+#' @examples
+#' sample_gamma <- rgamma_c(1000, 1, 1)
+#' @export
+#' @md
+rgamma_c <- function(n, b = 2, a = 1/2) {
+    .Call(`_Rsubbotools_rgamma_c`, n, b, a)
+}
+
+#' Generates a Laplace-distributed sample
+#'
+#' This function returns a sample from a Laplace-distributed random variable.
+#'
+#' The Laplace distribution is given by the two-sided exponential distribution
+#' given by the function:
+#' \deqn{ f(x;a,m) = \frac{1}{2a} e^{- \left| \frac{x-m}{a} \right|} }
+#' The random sampling is done by inverse transform sampling.
+#' @param n (int) - the size of the sample.
+#' @param m (numeric) - the location parameter.
+#' @param a (numeric) - the scale parameter.
+#' @return a numeric vector containing a random sample with above parameters.
+#'
+#' @examples
+#' sample_gamma <- rlaplace(1000, 0, 1)
+#' @export
+#' @md
+rlaplace <- function(n, m = 0, a = 1) {
+    .Call(`_Rsubbotools_rlaplace`, n, m, a)
+}
+
+#' Generates an Asymmetric Laplace-distributed sample
+#'
+#' This function returns a sample from an Asymetric Laplace distribution.
+#'
+#' The Asymmetric Laplace distribution is given by the two-sided exponential
+#' distribution given by the function:
+#' \deqn{f(x;a_l,a_r,m) =
+#' \frac{1}{A} e^{-|\frac{x-m}{a_l}| }, x < m
+#' }
+#' \deqn{f(x;a_l,a_r,m) =
+#' \frac{1}{A} e^{-|\frac{x-m}{a_r}| }, x > m
+#' }
+#' with:
+#' \deqn{A = a_l + a_r}
+#' The random sampling is done by inverse transform sampling.
+#' @param n (int) - the size of the sample.
+#' @param m (numeric) - the location parameter.
+#' @param al,ar (numeric) - left and right scale parameters, respectively.
+#' @return a numeric vector containing a random sample.
+#'
+#' @examples
+#' sample_gamma <- ralaplace(1000)
+#' @export
+#' @md
+ralaplace <- function(n, m = 0, al = 1, ar = 1) {
+    .Call(`_Rsubbotools_ralaplace`, n, m, al, ar)
+}
 
 #' Generates a random sample from a Exponential Power distribution
 #'
@@ -33,7 +93,7 @@ NULL
 #' be adapted to have non-zero location parameter.
 #' The Exponential Power distribution is related to the gamma distribution by
 #' the equation:
-#' E = a*G(1/b)^{1/b}
+#' \deqn{E = a*G(1/b)^{1/b}}
 #' where E and G are respectively EP and gamma random variables. This property
 #' is used for cases where \eqn{b<1} and \eqn{b>4}. For \eqn{1 \leq b \leq 4}
 #' rejection methods based on the Laplace and normal distributions are used,
@@ -44,86 +104,6 @@ NULL
 #' September 1980, Volume 75, Number 371, pages 683-686.
 #' This function is based on the original GSL version, adapted to
 #' use R's system of RNGs by Elias Haddad. All credits to the original authors.
-#' Copyright (C) 1996, 1997, 1998, 1999, 2000, 2006, 2007 James Theiler, Brian Gough
-#' Copyright (C) 2006 Giulio Bottazzi
-#' Copyright (C) 2020-2021 Elias Haddad
-#' License: GPL 3+
-NULL
-
-#' License: GPL 3+
-#' GSL file: randist/gamma.c
-#'
-#' @param n (int)
-#' @param b (numeric) - shape parameter. Must be in the range \eqn{(0, \infty)}.
-#' @param a (numeric) - scale parameter. Must be in the range \eqn{(0, \infty)}.
-#' @return a numeric vector containing a random sample with above parameters.
-#'
-#' @examples
-#' sample_gamma <- rgamma_c(1000, 1, 1)
-#' @export
-#' @md
-rgamma_c <- function(n, b = 2., a = 1/2) {
-    .Call(`_Rsubbotools_rgamma_c`, n, b, a)
-}
-
-#' Generates a Laplace-distributed sample
-#'
-#' This function returns a sample from a Laplace-distributed random variable.
-#'
-#' The Laplace distribution is given by the two-sided exponential distribution
-#' given by the function:
-#' \deqn{ f(x;a,m) = \frac{1}{2a} e^{- \left| \frac{x-m}{a} \right|} }
-#' The random sampling is done by inverse transform sampling.
-#'
-#' Copyright (C) 2020-2021 Elias Haddad
-#' License: GPL 3+
-#'
-#' @param n (int) - the size of the sample.
-#' @param m (numeric) - the location parameter.
-#' @param a (numeric) - the scale parameter.
-#' @return a numeric vector containing a random sample with above parameters.
-#'
-#' @examples
-#' sample_gamma <- rlaplace(1000, 0, 1)
-#' @export
-#' @md
-rlaplace <- function(n, m = 0., a = 1.) {
-    .Call(`_Rsubbotools_rlaplace`, n, m, a)
-}
-
-#' Generates an Asymmetric Laplace-distributed sample
-#'
-#' This function returns a sample from an Asymetric Laplace distribution.
-#'
-#' The Asymmetric Laplace distribution is given by the two-sided exponential
-#' distribution given by the function:
-#' \deqn{f(x;a_l,a_r,m) =
-#' \begin{cases}
-#' \frac{1}{A} e^{-|\frac{x-m}{a_l}| }, & x < m \\
-#' \frac{1}{A} e^{-|\frac{x-m}{a_r}| }, & x > m
-#' \end{cases}}
-#' with:
-#' \deqn{A = a_l + a_r}
-#' The random sampling is done by inverse transform sampling.
-#'
-#' Copyright (C) 2020-2021 Elias Haddad
-#' License: GPL 3+
-#'
-#' @param n (int) - the size of the sample.
-#' @param m (numeric) - the location parameter.
-#' @param al,ar (numeric) - left and right scale parameters, respectively.
-#' @return a numeric vector containing a random sample.
-#'
-#' @examples
-#' sample_gamma <- ralaplace(1000)
-#' @export
-#' @md
-ralaplace <- function(n, m = 0., al = 1., ar = 1.) {
-    .Call(`_Rsubbotools_ralaplace`, n, m, al, ar)
-}
-
-#' GSL function: gsl_ran_exppow
-#'
 #' @param n (int) - size of the sample.
 #' @param m (numeric) - the location parameter.
 #' @param a (numeric) - scale parameter.
@@ -134,7 +114,7 @@ ralaplace <- function(n, m = 0., al = 1., ar = 1.) {
 #' sample_gamma <- rpower(1000)
 #' @export
 #' @md
-rpower <- function(n, m = 0., a = 1., b = 2.) {
+rpower <- function(n, m = 0, a = 1, b = 2) {
     .Call(`_Rsubbotools_rpower`, n, m, a, b)
 }
 
@@ -151,10 +131,6 @@ rpower <- function(n, m = 0., a = 1., b = 2.) {
 #' with scale parameter \eqn{a = ab^{1/b}} and \eqn{m=0}, we use the same
 #' method of the exponential power RNG and add the location parameter.
 #' Details can be found on the documentation of the \code{rpower} function.
-#' Copyright (C) 2002-2014 Giulio Bottazzi
-#' Copyright (C) 2020-2021 Elias Haddad
-#' License: GPL 3+
-#'
 #' @param n (int) - the size of the sample.
 #' @param m (numeric) - the location parameter.
 #' @param a (numeric) - the scale parameter.
@@ -165,7 +141,7 @@ rpower <- function(n, m = 0., a = 1., b = 2.) {
 #' sample_gamma <- rsubbo(1000, 1, 1)
 #' @export
 #' @md
-rsubbo <- function(n, m = 0., a = 1., b = 2.) {
+rsubbo <- function(n, m = 0, a = 1, b = 2) {
     .Call(`_Rsubbotools_rsubbo`, n, m, a, b)
 }
 
@@ -174,13 +150,15 @@ rsubbo <- function(n, m = 0., a = 1., b = 2.) {
 #'
 #' Generate pseudo random-number from an asymmetric power exponential distribution
 #' using the Tadikamalla method.
+#' This is the original version of Bottazzi (2004)
 #'
 #' The AEP distribution is expressed by the function:
 #' \deqn{f(x;a_l,a_r,b_l,b_r,m) =
-#' \begin{cases}
-#' \frac{1}{A} e^{- \frac{1}{b_l} |\frac{x-m}{a_l}|^{b_l} }, & x < m \\
-#' \frac{1}{A} e^{- \frac{1}{b_r} |\frac{x-m}{a_r}|^{b_r} }, & x > m
-#' \end{cases} }
+#' \frac{1}{A} e^{- \frac{1}{b_l} |\frac{x-m}{a_l}|^{b_l} }, x < m
+#' }
+#' \deqn{f(x;a_l,a_r,b_l,b_r,m) =
+#' \frac{1}{A} e^{- \frac{1}{b_r} |\frac{x-m}{a_r}|^{b_r} }, x > m
+#' }
 #' with:
 #' \deqn{A = a_lb_l^{1/b_l}\Gamma(1+1/b_l) + a_rb_r^{1/b_r}\Gamma(1+1/b_r)}
 #' where \eqn{m} is a location parameter, \eqn{b*} are shape parameters, \eqn{a*}
@@ -192,10 +170,6 @@ rsubbo <- function(n, m = 0., a = 1., b = 2.) {
 #' This values are then weighted by a constant expressed in the parameters.
 #' More details are available on the package vignette and on the
 #' function \code{rpower}.
-#' Copyright (C) 2003-2014 Giulio Bottazzi
-#' Copyright (C) 2020-2021 Elias Haddad
-#' License: GPL 3+
-#'
 #' @param n (int) - size of the sample.
 #' @param m (numeric) - location parameter.
 #' @param bl,br (numeric) - shape parameters.
@@ -206,8 +180,8 @@ rsubbo <- function(n, m = 0., a = 1., b = 2.) {
 #' sample_gamma <- rasubbo(1000, 0, 0.5, 0.5,  1, 1)
 #' @export
 #' @md
-rasubbo <- function(n, m = 0., al = 1., ar = 1., bl = 2., br = 2.) {
-    .Call(`_Rsubbotools_rasubbo`, n, m, al, ar, bl, br)
+rasubbo_orig <- function(n, m = 0, al = 1, ar = 1, bl = 2, br = 2) {
+    .Call(`_Rsubbotools_rasubbo_orig`, n, m, al, ar, bl, br)
 }
 
 #' Produces a random sample from a Asymmetric Power Exponential distribution
@@ -215,13 +189,17 @@ rasubbo <- function(n, m = 0., al = 1., ar = 1., bl = 2., br = 2.) {
 #'
 #' Generate pseudo random-number from an asymmetric power exponential distribution
 #' using the Tadikamalla method.
+#' This version improves on Bottazzi (2004) by making the mass of each
+#' distribution to depend on the ratio between the \eqn{al} and the \eqn{ar}
+#' parameters.
 #'
 #' The AEP distribution is expressed by the function:
 #' \deqn{f(x;a_l,a_r,b_l,b_r,m) =
-#' \begin{cases}
-#' \frac{1}{A} e^{- \frac{1}{b_l} |\frac{x-m}{a_l}|^{b_l} }, & x < m \\
-#' \frac{1}{A} e^{- \frac{1}{b_r} |\frac{x-m}{a_r}|^{b_r} }, & x > m
-#' \end{cases} }
+#' \frac{1}{A} e^{- \frac{1}{b_l} |\frac{x-m}{a_l}|^{b_l} }, x < m
+#' }
+#' \deqn{f(x;a_l,a_r,b_l,b_r,m) =
+#' \frac{1}{A} e^{- \frac{1}{b_r} |\frac{x-m}{a_r}|^{b_r} }, x > m
+#' }
 #' with:
 #' \deqn{A = a_lb_l^{1/b_l}\Gamma(1+1/b_l) + a_rb_r^{1/b_r}\Gamma(1+1/b_r)}
 #' where \eqn{m} is a location parameter, \eqn{b*} are shape parameters, \eqn{a*}
@@ -233,10 +211,6 @@ rasubbo <- function(n, m = 0., al = 1., ar = 1., bl = 2., br = 2.) {
 #' This values are then weighted by a constant expressed in the parameters.
 #' More details are available on the package vignette and on the
 #' function \code{rpower}.
-#' Copyright (C) 2003-2014 Giulio Bottazzi
-#' Copyright (C) 2020-2021 Elias Haddad
-#' License: GPL 3+
-#'
 #' @param n (int) - size of the sample.
 #' @param m (numeric) - location parameter.
 #' @param bl,br (numeric) - shape parameters.
@@ -247,8 +221,8 @@ rasubbo <- function(n, m = 0., al = 1., ar = 1., bl = 2., br = 2.) {
 #' sample_gamma <- rasubbo(1000, 0, 0.5, 0.5,  1, 1)
 #' @export
 #' @md
-rasubbo2 <- function(n, m = 0., al = 1., ar = 1., bl = 2., br = 2.) {
-    .Call(`_Rsubbotools_rasubbo2`, n, m, al, ar, bl, br)
+rasubbo <- function(n, m = 0, al = 1, ar = 1, bl = 2, br = 2) {
+    .Call(`_Rsubbotools_rasubbo`, n, m, al, ar, bl, br)
 }
 
 #' Fit an Asymmetric Laplace Distribution via maximum likelihood
@@ -259,11 +233,8 @@ rasubbo2 <- function(n, m = 0., al = 1., ar = 1., bl = 2., br = 2.) {
 #'
 #' The Asymmetric Laplace distribution is a distribution controlled
 #' by three parameters, with formula:
-#' \deqn{f(x;a_l,a_r,m) =
-#' \begin{cases}
-#' \frac{1}{A} e^{-|\frac{x-m}{a_l}| }, & x < m \\
-#' \frac{1}{A} e^{-|\frac{x-m}{a_r}| }, & x > m
-#' \end{cases}}
+#' \deqn{f(x;a_l,a_r,m) = \frac{1}{A} e^{-|\frac{x-m}{a_l}| }, x < m}
+#' \deqn{f(x;a_l,a_r,m) = \frac{1}{A} e^{-|\frac{x-m}{a_r}| }, x > m}
 #' with:
 #' \deqn{A = a_l + a_r}
 #' where \eqn{a*} are scale parameters, and \eqn{m} is a location parameter.
@@ -309,9 +280,9 @@ alaplafit <- function(data, verb = 0L, interv_step = 10L, provided_m_ = NULL) {
 #' is a location parameter and \eqn{\Gamma} represents the gamma function.
 #' @param x (numeric) - value in the range \eqn{(-\infty, \infty)} to evaluate
 #' the density.
+#' @param m (numeric) - location parameter. Must be in the range
 #' @param a (numeric) - scale parameter. Must be in the range \eqn{(0, \infty)}.
 #' @param b (numeric) - shape parameter. Must be in the range \eqn{(0, \infty)}.
-#' @param m (numeric) - location parameter. Must be in the range
 #' \eqn{(-\infty, \infty)}.
 #' @return a vector containing the values for the densities.
 #' @export
@@ -327,25 +298,22 @@ ppower <- function(x, m = 0, a = 1, b = 2) {
 #'
 #' The  SEP is a exponential power distribution controlled
 #' by four parameters, with formula:
-#' \deqn{ f(x; \mu, \alpha, \lambda, \sigma) =
-#' 2 \Phi(w) e^{-|z|^\alpha/\alpha}/ ( \sigma C)}
+#' \deqn{ f(x; m, b, a, \lambda) = 2 \Phi(w) e^{-|z|^b/b}/(c)}
 #' where:
-#' \deqn{z = (x-\mu)/\sigma}
-#' \deqn{w = sign(z) |z|^{(\alpha/2)} \lambda \sqrt{2/\alpha}}
-#' \deqn{C = 2 \alpha^{(1/\alpha-1)} \Gamma(1/\alpha)}
+#' \deqn{z = (x-m)/a}
+#' \deqn{w = sign(z) |z|^{(b/2)} \lambda \sqrt{2/b}}
+#' \deqn{c = 2 ab^{(1/b)-1} \Gamma(1/b)}
 #' with \eqn{\Phi} the cumulative normal distribution with mean zero and variance
 #' one. The CDF is calculated through numerical integration using the GSL suite.
-#' Copyright (C) 2007-2014 Giulio Bottazzi
-#' Copyright (C) 2020-2021 Elias Haddad
 #' @param x - vector with values to evaluate CDF.
-#' @param alpha - the shape parameter.
-#' @param sigma - the scale parameter
-#' @param lambda - the skewness parameter.
 #' @param m - the location parameter.
+#' @param a - the scale parameter.
+#' @param b - the shape parameter
+#' @param lambda - the skewness parameter.
 #' @export
 #' @md
-psep <- function(x, m = 0, alpha = 2, sigma = 1, lambda = 0) {
-    .Call(`_Rsubbotools_psep`, x, m, alpha, sigma, lambda)
+psep <- function(x, m = 0, a = 2, b = 1, lambda = 0) {
+    .Call(`_Rsubbotools_psep`, x, m, a, b, lambda)
 }
 
 #' Returns CDF from the Laplace Distribution
@@ -376,10 +344,11 @@ plaplace <- function(x, m = 0, a = 1) {
 #' The Asymmetric Laplace distribution is a distribution controlled
 #' by three parameters, with formula:
 #' \deqn{f(x;a_l,a_r,m) =
-#' \begin{cases}
-#' \frac{1}{A} e^{-|\frac{x-m}{a_l}| }, & x < m \\
-#' \frac{1}{A} e^{-|\frac{x-m}{a_r}| }, & x > m
-#' \end{cases}}
+#' \frac{1}{A} e^{-|\frac{x-m}{a_l}| }, x < m
+#' }
+#' \deqn{f(x;a_l,a_r,m) =
+#' \frac{1}{A} e^{-|\frac{x-m}{a_r}| }, x > m
+#' }
 #' with:
 #' \deqn{A = a_l + a_r}
 #' where \eqn{a*} are scale parameters, and \eqn{m} is a location parameter.
@@ -387,9 +356,9 @@ plaplace <- function(x, m = 0, a = 1) {
 #' by setting \eqn{b_l = b_r = b}.
 #' @param x (numeric) - value in the range \eqn{(-\infty, \infty)} to evaluate
 #' the density.
+#' @param m (numeric) - location parameter.
 #' @param al,ar (numeric) - scale parameters. Must be in the range
 #' \eqn{(0, \infty)}.
-#' @param m (numeric) - location parameter.
 #' @return a vector containing the values for the densities.
 #' @export
 #' @md
@@ -411,9 +380,9 @@ palaplace <- function(x, m = 0, al = 1, ar = 1) {
 #' represent fatter tails), and \eqn{m} is a location parameter.
 #' @param x (numeric) - value in the range \eqn{(-\infty, \infty)} to evaluate
 #' the density.
+#' @param m (numeric) - location parameter.
 #' @param a (numeric) - scale parameter. Must be in the range \eqn{(0, \infty)}.
 #' @param b (numeric) - shape parameter. Must be in the range \eqn{(0, \infty)}.
-#' @param m (numeric) - location parameter.
 #' @return a vector containing the values for the densities.
 #' @export
 #' @md
@@ -429,10 +398,11 @@ psubbo <- function(x, m = 0, a = 1, b = 2) {
 #' The AEP is a exponential power distribution controlled
 #' by five parameters, with formula:
 #' \deqn{ f(x;a_l,a_r,b_l,b_r,m) =
-#' \begin{cases}
-#' \frac{1}{A} e^{- \frac{1}{b_l} |\frac{x-m}{a_l}|^{b_l} }, & x < m \\
-#' \frac{1}{A} e^{- \frac{1}{b_r} |\frac{x-m}{a_r}|^{b_r} }, & x > m
-#' \end{cases} }
+#' \frac{1}{A} e^{- \frac{1}{b_l} |\frac{x-m}{a_l}|^{b_l} }, x < m
+#' }
+#' \deqn{ f(x;a_l,a_r,b_l,b_r,m) =
+#' \frac{1}{A} e^{- \frac{1}{b_r} |\frac{x-m}{a_r}|^{b_r} }, x > m
+#' }
 #' with:
 #' \deqn{A = a_lb_l^{1/b_l}\Gamma(1+1/b_l) + a_rb_r^{1/b_r}\Gamma(1+1/b_r)}
 #' where \eqn{l} and \eqn{r} represent left and right tails, \eqn{a*} are
@@ -441,11 +411,11 @@ psubbo <- function(x, m = 0, a = 1, b = 2) {
 #'
 #' @param x (numeric) - value in the range \eqn{(-\infty, \infty)} to evaluate
 #' the density.
+#' @param m (numeric) - location parameter.
 #' @param al,ar (numeric) - scale parameters. Must be in the range
 #' \eqn{(0, \infty)}.
 #' @param bl,br (numeric) - shape parameters. Must be in the range
 #' \eqn{(0, \infty)}.
-#' @param m (numeric) - location parameter.
 #' @return a vector containing the values for the densities.
 #' @export
 #' @md
@@ -468,10 +438,10 @@ sortRcpp <- function(x) {
 #' is a location parameter and \eqn{\Gamma} represents the gamma function.
 #' @param x (numeric) - value in the range \eqn{(-\infty, \infty)} to evaluate
 #' the density.
-#' @param a (numeric) - scale parameter. Must be in the range \eqn{(0, \infty)}.
-#' @param b (numeric) - shape parameter. Must be in the range \eqn{(0, \infty)}.
 #' @param m (numeric) - location parameter. Must be in the range
 #' \eqn{(-\infty, \infty)}.
+#' @param a (numeric) - scale parameter. Must be in the range \eqn{(0, \infty)}.
+#' @param b (numeric) - shape parameter. Must be in the range \eqn{(0, \infty)}.
 #' @return a vector containing the values for the densities.
 #' @export
 #' @md
@@ -486,12 +456,11 @@ dpower <- function(x, m = 0, a = 1, b = 2) {
 #'
 #' The  SEP is a exponential power distribution controlled
 #' by four parameters, with formula:
-#' \deqn{ f(x; \mu, \alpha, \lambda, \sigma) =
-#' 2 \Phi(w) e^{-|z|^\alpha/\alpha}/ ( \sigma C)}
+#' \deqn{ f(x; m, b, a, \lambda) = 2 \Phi(w) e^{-|z|^b/b}/(c)}
 #' where:
-#' \deqn{z = (x-\mu)/\sigma}
-#' \deqn{w = sign(z) |z|^{(\alpha/2)} \lambda \sqrt{2/\alpha}}
-#' \deqn{C = 2 \alpha^{(1/\alpha-1)} \Gamma(1/\alpha)}
+#' \deqn{z = (x-m)/a}
+#' \deqn{w = sign(z) |z|^{(b/2)} \lambda \sqrt{2/b}}
+#' \deqn{c = 2 ab^{(1/b)-1} \Gamma(1/b)}
 #' with \eqn{\Phi} the cumulative normal distribution with mean zero and variance
 #' one.
 #' @param x (numeric) - value in the range \eqn{(-\infty, \infty)} to evaluate
@@ -508,24 +477,6 @@ dsep <- function(x, m = 0, a = 1, b = 1, lambda = 1) {
     .Call(`_Rsubbotools_dsep`, x, m, a, b, lambda)
 }
 
-#' Bottazzi's version of dsep
-#'
-#' Calculates the density of the SEP distribution.
-#'
-#' @param x (numeric) - value in the range \eqn{(-\infty, \infty)} to evaluate
-#' the density.
-#' @param m (numeric) - location parameter. Must be in the range
-#' \eqn{(-\infty, \infty)}.
-#' @param a (numeric) - scale parameter. Must be in the range \eqn{(0, \infty)}.
-#' @param b (numeric) - shape parameter. Must be in the range \eqn{(0, \infty)}.
-#' @param lambda (numeric) - skewness parameter. Must be in the range \eqn{(-\infty, \infty)}.
-#' @return a vector containing the values for the densities.
-#' @export
-#' @md
-dsep_bottazzi <- function(x, m, a, b, lambda) {
-    .Call(`_Rsubbotools_dsep_bottazzi`, x, m, a, b, lambda)
-}
-
 #' Returns density from Laplace Distribution
 #'
 #' The \code{dlaplace} returns the density at point x for the
@@ -537,8 +488,8 @@ dsep_bottazzi <- function(x, m, a, b, lambda) {
 #' where \eqn{a} is a scale parameter, and \eqn{m} is a location parameter.
 #' @param x (numeric) - value in the range \eqn{(-\infty, \infty)} to evaluate
 #' the density.
-#' @param a (numeric) - scale parameter. Must be in the range \eqn{(0, \infty)}.
 #' @param m (numeric) - location parameter.
+#' @param a (numeric) - scale parameter. Must be in the range \eqn{(0, \infty)}.
 #' @return a vector containing the values for the densities.
 #' @export
 #' @md
@@ -554,10 +505,11 @@ dlaplace <- function(x, m = 0, a = 1) {
 #' The Asymmetric Laplace distribution is a distribution controlled
 #' by three parameters, with formula:
 #' \deqn{f(x;a_l,a_r,m) =
-#' \begin{cases}
-#' \frac{1}{A} e^{-|\frac{x-m}{a_l}| }, & x < m \\
-#' \frac{1}{A} e^{-|\frac{x-m}{a_r}| }, & x > m
-#' \end{cases}}
+#' \frac{1}{A} e^{-|\frac{x-m}{a_l}| }, x < m
+#' }
+#' \deqn{f(x;a_l,a_r,m) =
+#' \frac{1}{A} e^{-|\frac{x-m}{a_r}| }, x > m
+#' }
 #' with:
 #' \deqn{A = a_l + a_r}
 #' where \eqn{a*} are scale parameters, and \eqn{m} is a location parameter.
@@ -565,9 +517,9 @@ dlaplace <- function(x, m = 0, a = 1) {
 #' by setting \eqn{b_l = b_r = b}.
 #' @param x (numeric) - value in the range \eqn{(-\infty, \infty)} to evaluate
 #' the density.
+#' @param m (numeric) - location parameter.
 #' @param al,ar (numeric) - scale parameters. Must be in the range
 #' \eqn{(0, \infty)}.
-#' @param m (numeric) - location parameter.
 #' @return a vector containing the values for the densities.
 #' @export
 #' @md
@@ -589,9 +541,9 @@ dalaplace <- function(x, m = 0, al = 1, ar = 1) {
 #' represent fatter tails), and \eqn{m} is a location parameter.
 #' @param x (numeric) - value in the range \eqn{(-\infty, \infty)} to evaluate
 #' the density.
+#' @param m (numeric) - location parameter.
 #' @param a (numeric) - scale parameter. Must be in the range \eqn{(0, \infty)}.
 #' @param b (numeric) - shape parameter. Must be in the range \eqn{(0, \infty)}.
-#' @param m (numeric) - location parameter.
 #' @return a vector containing the values for the densities.
 #' @export
 #' @md
@@ -609,10 +561,11 @@ dsubbo <- function(x, m = 0, a = 1, b = 2) {
 #' The AEP is a exponential power distribution controlled
 #' by five parameters, with formula:
 #' \deqn{ f(x;a_l,a_r,b_l,b_r,m) =
-#' \begin{cases}
-#' \frac{1}{A} e^{- \frac{1}{b_l} |\frac{x-m}{a_l}|^{b_l} }, & x < m \\
-#' \frac{1}{A} e^{- \frac{1}{b_r} |\frac{x-m}{a_r}|^{b_r} }, & x > m
-#' \end{cases} }
+#' \frac{1}{A} e^{- \frac{1}{b_l} |\frac{x-m}{a_l}|^{b_l} }, x < m
+#' }
+#' \deqn{ f(x;a_l,a_r,b_l,b_r,m) =
+#' \frac{1}{A} e^{- \frac{1}{b_r} |\frac{x-m}{a_r}|^{b_r} }, x > m
+#' }
 #' with:
 #' \deqn{A = a_lb_l^{1/b_l}\Gamma(1+1/b_l) + a_rb_r^{1/b_r}\Gamma(1+1/b_r)}
 #' where \eqn{l} and \eqn{r} represent left and right tails, \eqn{a*} are
@@ -621,11 +574,11 @@ dsubbo <- function(x, m = 0, a = 1, b = 2) {
 #'
 #' @param x (numeric) - value in the range \eqn{(-\infty, \infty)} to evaluate
 #' the density.
+#' @param m (numeric) - location parameter.
 #' @param al,ar (numeric) - scale parameters. Must be in the range
 #' \eqn{(0, \infty)}.
 #' @param bl,br (numeric) - shape parameters. Must be in the range
 #' \eqn{(0, \infty)}.
-#' @param m (numeric) - location parameter.
 #' @return a vector containing the values for the densities.
 #' @export
 #' @md
@@ -678,13 +631,12 @@ laplafit <- function(data, verb = 0L, interv_step = 10L, provided_m_ = NULL) {
 #' \deqn{ f(a,b) = \frac{1}{2a\Gamma(1+1/b)}e^{-|(x-m)/a|^b}, -\infty < x < \infty }.
 #' where \eqn{b} is a shape parameter, \eqn{a} is a scale parameter, \eqn{m}
 #' is a location parameter and \eqn{\Gamma} represents the gamma function.
-#' Copyright (C) 2021 Elias Haddad
 #'
 #' @param x (numeric) - value in the range \eqn{(-\infty, \infty)} to evaluate
 #' the density.
+#' @param m (numeric) - location parameter. Must be in the range
 #' @param a (numeric) - scale parameter. Must be in the range \eqn{(0, \infty)}.
 #' @param b (numeric) - shape parameter. Must be in the range \eqn{(0, \infty)}.
-#' @param m (numeric) - location parameter. Must be in the range
 #' \eqn{(-\infty, \infty)}.
 #' @return a vector containing the values for the densities.
 #' @export
@@ -700,25 +652,27 @@ qpower <- function(x, m = 0, a = 1, b = 2) {
 #'
 #' The  SEP is a exponential power distribution controlled
 #' by four parameters, with formula:
-#' \deqn{ f(x; \mu, a, \lambda, b) =
-#' 2 \Phi(w) e^{-|z|^a/a}/ ( b C)}
+#' \deqn{ f(x; m, b, a, \lambda) = 2 \Phi(w) e^{-|z|^b/b}/(c)}
 #' where:
-#' \deqn{z = (x-\mu)/b}
-#' \deqn{w = sign(z) |z|^{(a/2)} \lambda \sqrt{2/a}}
-#' \deqn{C = 2 a^{(1/a-1)} \Gamma(1/a)}
+#' \deqn{z = (x-m)/a}
+#' \deqn{w = sign(z) |z|^{(b/2)} \lambda \sqrt{2/b}}
+#' \deqn{c = 2 ab^{(1/b)-1} \Gamma(1/b)}
 #' with \eqn{\Phi} the cumulative normal distribution with mean zero and variance
-#' one. The CDF is calculated through numerical integration using the GSL suite.
-#' Copyright (C) 2007-2014 Giulio Bottazzi
-#' Copyright (C) 2020-2021 Elias Haddad
+#' one. The CDF is calculated through numerical integration using the GSL suite
+#' and the quantile is solved by inversion using a root-finding algorithm
+#' (Newton-Raphson by default).
 #' @param x (numeric) - vector with values to evaluate CDF.
 #' @param m (numeric) - the location parameter.
-#' @param a (numeric) - the shape parameter.
-#' @param b (numeric) - the scale parameter
+#' @param a (numeric) - the scale parameter.
+#' @param b (numeric) - the shape parameter
 #' @param lambda (numeric) - the skewness parameter.
-#' @param method (numeric) - If 0, uses the Newton-Raphson procedure for optimization. If 1, uses Steffensen.
-#' @param step_size (numeric) - the size of the step in the numerical optimization (gradient descent). Default is 1e-4.
+#' @param method (numeric) - If 0, uses the Newton-Raphson procedure for
+#' optimization. If 1, uses Steffensen.
+#' @param step_size (numeric) - the size of the step in the numerical
+#' optimization (gradient descent). Default is 1e-4.
 #' @param tol (numeric) - error tolerance (default is 1e-10).
-#' @param max_iter (numeric) - maximum number of iterations for the optimization procedure (default is 100).
+#' @param max_iter (numeric) - maximum number of iterations for the
+#' optimization procedure (default is 100).
 #' @param verb (numeric) - verbosity level of the process (default 0).
 #' @return a vector containing the values for the densities.
 #' @export
@@ -736,12 +690,11 @@ qsep <- function(x, m = 0, a = 2, b = 1, lambda = 0, method = 0L, step_size = 1e
 #' by two parameters, with formula:
 #' \deqn{f(x;a,m) = \frac{1}{2a} e^{- \left| \frac{x-m}{a} \right| }}
 #' where \eqn{a} is a scale parameter, and \eqn{m} is a location parameter.
-#' Copyright (C) 2021 Elias Haddad
 #'
 #' @param x (numeric) - value in the range \eqn{(-\infty, \infty)} to evaluate
 #' the density.
-#' @param a (numeric) - scale parameter. Must be in the range \eqn{(0, \infty)}.
 #' @param m (numeric) - location parameter.
+#' @param a (numeric) - scale parameter. Must be in the range \eqn{(0, \infty)}.
 #' @return a vector containing the values for the densities.
 #' @export
 #' @md
@@ -749,27 +702,30 @@ qlaplace <- function(x, m = 0, a = 1) {
     .Call(`_Rsubbotools_qlaplace`, x, m, a)
 }
 
+#' Returns quantile from Asymmetric Laplace Distribution
+#'
+#' The \code{qalaplace} returns the density at point x for the
 #' Asymmetric Laplace distribution with parameters \eqn{a*} and \eqn{m}.
 #'
 #' The Asymmetric Laplace distribution is a distribution controlled
 #' by three parameters, with formula:
 #' \deqn{f(x;a_l,a_r,m) =
-#' \begin{cases}
-#' \frac{1}{A} e^{-|\frac{x-m}{a_l}| }, & x < m \\
-#' \frac{1}{A} e^{-|\frac{x-m}{a_r}| }, & x > m
-#' \end{cases}}
+#' \frac{1}{A} e^{-|\frac{x-m}{a_l}| }, x < m
+#' }
+#' \deqn{f(x;a_l,a_r,m) =
+#' \frac{1}{A} e^{-|\frac{x-m}{a_r}| }, x > m
+#' }
 #' with:
 #' \deqn{A = a_l + a_r}
 #' where \eqn{a*} are scale parameters, and \eqn{m} is a location parameter.
 #' It is basically derived from the Asymmetric Exponential Power distribution
 #' by setting \eqn{b_l = b_r = b}.
-#' Copyright (C) 2021 Elias Haddad
 #'
 #' @param x (numeric) - value in the range \eqn{(-\infty, \infty)} to evaluate
 #' the density.
+#' @param m (numeric) - location parameter.
 #' @param al,ar (numeric) - scale parameters. Must be in the range
 #' \eqn{(0, \infty)}.
-#' @param m (numeric) - location parameter.
 #' @return a vector containing the values for the densities.
 #' @export
 #' @md
@@ -789,13 +745,12 @@ qalaplace <- function(x, m = 0, al = 1, ar = 1) {
 #' \deqn{P(x, 1/b) = 1 - \frac{1}{\Gamma(1/b)} \int_{0}^{x} t^{1/b -1}e^{-t} }
 #' and \eqn{a} is a scale parameter, \eqn{b} controls the tails (lower values
 #' represent fatter tails), and \eqn{m} is a location parameter.
-#' Copyright (C) 2021 Elias Haddad
 #'
 #' @param x (numeric) - value in the range \eqn{(-\infty, \infty)} to evaluate
 #' the density.
+#' @param m (numeric) - location parameter.
 #' @param a (numeric) - scale parameter. Must be in the range \eqn{(0, \infty)}.
 #' @param b (numeric) - shape parameter. Must be in the range \eqn{(0, \infty)}.
-#' @param m (numeric) - location parameter.
 #' @return a vector containing the values for the densities.
 #' @export
 #' @md
@@ -811,24 +766,24 @@ qsubbo <- function(x, m = 0, a = 1, b = 2) {
 #' The AEP is a exponential power distribution controlled
 #' by five parameters, with formula:
 #' \deqn{ f(x;a_l,a_r,b_l,b_r,m) =
-#' \begin{cases}
-#' \frac{1}{A} e^{- \frac{1}{b_l} |\frac{x-m}{a_l}|^{b_l} }, & x < m \\
-#' \frac{1}{A} e^{- \frac{1}{b_r} |\frac{x-m}{a_r}|^{b_r} }, & x > m
-#' \end{cases} }
+#' \frac{1}{A} e^{- \frac{1}{b_l} |\frac{x-m}{a_l}|^{b_l} }, x < m
+#' }
+#' \deqn{ f(x;a_l,a_r,b_l,b_r,m) =
+#' \frac{1}{A} e^{- \frac{1}{b_r} |\frac{x-m}{a_r}|^{b_r} }, x > m
+#' }
 #' with:
 #' \deqn{A = a_lb_l^{1/b_l}\Gamma(1+1/b_l) + a_rb_r^{1/b_r}\Gamma(1+1/b_r)}
 #' where \eqn{l} and \eqn{r} represent left and right tails, \eqn{a*} are
 #' scale parameters, \eqn{b*} control the tails (lower values represent
 #' fatter tails), and \eqn{m} is a location parameter.
-#' Copyright (C) 2020-2021 Elias Haddad
 #'
 #' @param x (numeric) - value in the range \eqn{(-\infty, \infty)} to evaluate
 #' the density.
+#' @param m (numeric) - location parameter.
 #' @param al,ar (numeric) - scale parameters. Must be in the range
 #' \eqn{(0, \infty)}.
 #' @param bl,br (numeric) - shape parameters. Must be in the range
 #' \eqn{(0, \infty)}.
-#' @param m (numeric) - location parameter.
 #' @return a vector containing the values for the densities.
 #' @export
 #' @md
@@ -845,14 +800,13 @@ qasubbo <- function(x, m = 0, al = 1, ar = 1, bl = 2, br = 2) {
 #'
 #' The  SEP is a exponential power distribution controlled
 #' by four parameters, with formula:
-#' \deqn{ f(x; \mu, \alpha, \lambda, \sigma) =
-#' 2 \Phi(w) e^{-|z|^\alpha/\alpha}/ ( \sigma C)}
+#' \deqn{ f(x; m, b, a, \lambda) = 2 \Phi(w) e^{-|z|^b/b}/(c)}
 #' where:
-#' \deqn{z = (x-\mu)/\sigma}
-#' \deqn{w = sign(z) |z|^{(\alpha/2)} \lambda \sqrt{2/\alpha}}
-#' \deqn{C = 2 \alpha^{(1/\alpha-1)} \Gamma(1/\alpha)}
-#' with \eqn{\Phi} the cumulative normal distribution with mean zero and variance
-#' one.
+#' \deqn{z = (x-m)/a}
+#' \deqn{w = sign(z) |z|^{(b/2)} \lambda \sqrt{2/b}}
+#' \deqn{c = 2 ab^{(1/b)-1} \Gamma(1/b)}
+#' with \eqn{\Phi} the cumulative normal distribution with mean zero and
+#' variance one.
 #' Details on this method are available on the package vignette.
 #'
 #' @param data (NumericVector) - the sample used to fit the distribution.
@@ -862,9 +816,9 @@ qasubbo <- function(x, m = 0, al = 1, ar = 1, bl = 2, br = 2) {
 #' * 2  intermediate steps results
 #' * 3  intermediate steps internals
 #' * 4+  details of optim. routine
-#' @param par NumericVector - vector containing the initial guess for
-#' parameters mu, sigma, lambda and alpha, respectively. Default values of are
-#' c(0, 1, 0, 2).
+#' @param par NumericVector - vector containing the initial guess for parameters
+#' m (location), a (scale), b (shape), lambda (skewness), respectively.
+#' Default values of are c(0, 1, 2, 0), i.e. a normal distribution.
 #' @param g_opt_par NumericVector - vector containing the global optimization
 #' parameters.
 #' The optimization parameters are:
@@ -893,7 +847,7 @@ qasubbo <- function(x, m = 0, al = 1, ar = 1, bl = 2, br = 2) {
 #' sepfit(sample_subbo)
 #' @export
 #' @md
-sepfit <- function(data, verb = 0L, par = as.numeric( c(0., 1., 0., 2.)), g_opt_par = as.numeric( c(.1, 1e-2, 100, 1e-3, 1e-5, 2))) {
+sepfit <- function(data, verb = 0L, par = as.numeric( c(0., 1., 2., 0.)), g_opt_par = as.numeric( c(.1, 1e-2, 100, 1e-3, 1e-5, 2))) {
     .Call(`_Rsubbotools_sepfit`, data, verb, par, g_opt_par)
 }
 
@@ -929,10 +883,11 @@ subboafish <- function(size = 1L, bl = 2.0, br = 2.0, m = 0.0, al = 1.0, ar = 1.
 #' The AEP is a exponential power distribution controlled
 #' by five parameters, with formula:
 #' \deqn{ f(x;a_l,a_r,b_l,b_r,m) =
-#' \begin{cases}
-#' \frac{1}{A} e^{- \frac{1}{b_l} |\frac{x-m}{a_l}|^{b_l} }, & x < m \\
-#' \frac{1}{A} e^{- \frac{1}{b_r} |\frac{x-m}{a_r}|^{b_r} }, & x > m
-#' \end{cases} }
+#' \frac{1}{A} e^{- \frac{1}{b_l} |\frac{x-m}{a_l}|^{b_l} }, x < m
+#' }
+#' \deqn{ f(x;a_l,a_r,b_l,b_r,m) =
+#' \frac{1}{A} e^{- \frac{1}{b_r} |\frac{x-m}{a_r}|^{b_r} }, x > m
+#' }
 #' with:
 #' \deqn{A = a_lb_l^{1/b_l}\Gamma(1+1/b_l) + a_rb_r^{1/b_r}\Gamma(1+1/b_r)}
 #' where \eqn{l} and \eqn{r} represent left and right tails, \eqn{a*} are
@@ -1129,10 +1084,11 @@ subbofit <- function(data, verb = 0L, method = 3L, interv_step = 10L, provided_m
 #' The  LAPE is a exponential power distribution controlled
 #' by four parameters, with formula:
 #' \deqn{ f(x;a,b_l,b_r,m) =
-#' \begin{cases}
-#' \frac{1}{A} e^{- \frac{1}{b_l} |\frac{x-m}{a}|^{b_l} }, & x < m \\
-#' \frac{1}{A} e^{- \frac{1}{b_r} |\frac{x-m}{a}|^{b_r} }, & x > m
-#' \end{cases} }
+#' \frac{1}{A} e^{- \frac{1}{b_l} |\frac{x-m}{a}|^{b_l} }, x < m
+#' }
+#' \deqn{ f(x;a,b_l,b_r,m) =
+#' \frac{1}{A} e^{- \frac{1}{b_r} |\frac{x-m}{a}|^{b_r} }, x > m
+#' }
 #' with:
 #' \deqn{A = ab_l^{1/b_l}\Gamma(1+1/b_l) + ab_r^{1/b_r}\Gamma(1+1/b_r)}
 #' where \eqn{l} and \eqn{r} represent left and right tails, \eqn{a} is a
@@ -1194,7 +1150,6 @@ subbofit <- function(data, verb = 0L, method = 3L, interv_step = 10L, provided_m
 #' @return a list containing the following items:
 #' * "dt" - dataset containing parameters estimations and standard deviations.
 #' * "log-likelihood" - negative log-likelihood value.
-#' * "matrix" - the covariance matrix for the parameters.
 #'
 #' @examples
 #' sample_subbo <- rpower(1000, 1, 2)

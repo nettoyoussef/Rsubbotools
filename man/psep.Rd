@@ -41,6 +41,4 @@ where:
 \deqn{c = 2 ab^{(1/b)-1} \Gamma(1/b)}
 with \eqn{\Phi} the cumulative normal distribution with mean zero and variance
 one. The CDF is calculated through numerical integration using the GSL suite.
-Copyright (C) 2007-2014 Giulio Bottazzi
-Copyright (C) 2020-2021 Elias Haddad
 }

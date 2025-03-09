@@ -1,32 +1,52 @@
 Package: Rsubbotools
-Title: functions for the Subbottin and AEP distributions 
-Version: 0.0.0.9000
+Title: Functions for the Subbottin and AEP Distributions (Generalized Error Distribution) 
+Version: 0.0.0.9
 Authors@R: 
-    c(person(given = "Elias",
+    c(
+      person(given = "Elias",
            family = "Haddad",
            role = c("aut", "cre"),
            email = "eliasynetto@gmail.com",
-           comment = c(ORCID = "0000-0003-1863-1022"))
+           comment = c(ORCID = "0000-0003-1863-1022")
+      )
       ,person(given = "Giulio",
            family = " Bottazzi",
            role = c("aut"),
-           email = "bottazzi at sssup.it",
-           comment = c(ORCID = "0000-0003-2565-4732"))
+           email = "bottazzi@sssup.it",
+           comment = c(ORCID = "0000-0003-2565-4732")
+      )
+      ,person(given = "Fernando J.",
+           family = " Von Zuben",
+           role = c("aut", "ths"),
+           comment = c(ORCID = "0000-0002-4128-5415")
+      )
+      ,person(given = "Jochen",
+           family = " Voss",
+           role = c("ctb"),
+      )
+      ,person(given = "J.D.",
+           family = " Lamb",
+           role = c("ctb"),
+           )
+      ,person(given = "Brian",
+           family = " Gough",
+           role = c("ctb"),
+           )
      )
-Description: estimation of the symmetric and asymmetric power exponential, 
-    a.k.a. the Subbottin family of distributions. The package is able to draw 
-    samples and create parametric fits using Maximum Likelihood estimation. It 
-    also provides functions for the asymmetric Laplace and skewed power 
-    exponential distributions.
+Description: This library is able to create densities, probabilities, random numbers, quantiles, and 
+    maximum likelihood estimation for several distributions, mainly the symmetric and asymmetric power 
+    exponential (AEP), a.k.a. the Subbottin family of distributions, also known as the generalized error distribution.
+    Estimation is made using the design of Bottazzi (2004) <https://ideas.repec.org/p/ssa/lemwps/2004-14.html>, where 
+    the likelihood is maximized by several optimization procedures using the GNU Scientific Library, translated to C++ 
+    code, which makes it both fast and accurate. The package also provides functions for the gamma, Laplace, and Asymmetric
+    Laplace distributions.
 License: GPL-3
 Encoding: UTF-8
-VignetteBuilder: knitr
-LazyData: true
-LazyDataCompression: gzip
+BugReports: https://github.com/nettoyoussef/Rsubbotools/issues
 RoxygenNote: 7.3.2
 Suggests: 
     testthat (>= 2.1.0),
-    knitr,
+    usethis,
     rmarkdown
 Imports: 
     Rcpp

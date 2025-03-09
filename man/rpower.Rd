@@ -40,12 +40,6 @@ Distribution", Journal of the American Statistical Association,
 September 1980, Volume 75, Number 371, pages 683-686.
 This function is based on the original GSL version, adapted to
 use R's system of RNGs by Elias Haddad. All credits to the original authors.
-Copyright (C) 1996, 1997, 1998, 1999, 2000, 2006, 2007 James Theiler, Brian Gough
-Copyright (C) 2006 Giulio Bottazzi
-Copyright (C) 2020-2021 Elias Haddad
-License: GPL 3+
-GSL file: randist/exppow.c
-GSL function: gsl_ran_exppow
 }
 \examples{
 sample_gamma <- rpower(1000)

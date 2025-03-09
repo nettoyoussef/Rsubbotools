@@ -24,9 +24,6 @@ The Laplace distribution is given by the two-sided exponential distribution
 given by the function:
 \deqn{ f(x;a,m) = \frac{1}{2a} e^{- \left| \frac{x-m}{a} \right|} }
 The random sampling is done by inverse transform sampling.
-
-Copyright (C) 2020-2021 Elias Haddad
-License: GPL 3+
 }
 \examples{
 sample_gamma <- rlaplace(1000, 0, 1)

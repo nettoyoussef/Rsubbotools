@@ -26,5 +26,4 @@ The Laplace distribution is a distribution controlled
 by two parameters, with formula:
 \deqn{f(x;a,m) = \frac{1}{2a} e^{- \left| \frac{x-m}{a} \right| }}
 where \eqn{a} is a scale parameter, and \eqn{m} is a location parameter.
-Copyright (C) 2021 Elias Haddad
 }

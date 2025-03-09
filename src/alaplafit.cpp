@@ -59,11 +59,8 @@ double alapla_nll(Rcpp::NumericVector data, const double m){
 //'
 //' The Asymmetric Laplace distribution is a distribution controlled
 //' by three parameters, with formula:
-//' \deqn{f(x;a_l,a_r,m) =
-//' \begin{cases}
-//' \frac{1}{A} e^{-|\frac{x-m}{a_l}| }, & x < m
-//' \frac{1}{A} e^{-|\frac{x-m}{a_r}| }, & x > m
-//' \end{cases}}
+//' \deqn{f(x;a_l,a_r,m) = \frac{1}{A} e^{-|\frac{x-m}{a_l}| }, x < m}
+//' \deqn{f(x;a_l,a_r,m) = \frac{1}{A} e^{-|\frac{x-m}{a_r}| }, x > m}
 //' with:
 //' \deqn{A = a_l + a_r}
 //' where \eqn{a*} are scale parameters, and \eqn{m} is a location parameter.

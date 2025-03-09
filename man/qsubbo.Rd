@@ -31,5 +31,4 @@ where \eqn{P} is the normalized incomplete gamma function:
 \deqn{P(x, 1/b) = 1 - \frac{1}{\Gamma(1/b)} \int_{0}^{x} t^{1/b -1}e^{-t} }
 and \eqn{a} is a scale parameter, \eqn{b} controls the tails (lower values
 represent fatter tails), and \eqn{m} is a location parameter.
-Copyright (C) 2021 Elias Haddad
 }

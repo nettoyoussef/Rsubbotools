@@ -23,8 +23,8 @@ sepfit(
 \item 4+  details of optim. routine
 }}
 
-\item{par}{NumericVector - vector containing the initial guess for
-parameters m (location, a (scale), b (shape), lambda (skewness), respectively.
+\item{par}{NumericVector - vector containing the initial guess for parameters
+m (location), a (scale), b (shape), lambda (skewness), respectively.
 Default values of are c(0, 1, 2, 0), i.e. a normal distribution.}
 
 \item{g_opt_par}{NumericVector - vector containing the global optimization

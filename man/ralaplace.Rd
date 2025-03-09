@@ -23,16 +23,14 @@ This function returns a sample from an Asymetric Laplace distribution.
 The Asymmetric Laplace distribution is given by the two-sided exponential
 distribution given by the function:
 \deqn{f(x;a_l,a_r,m) =
-\begin{cases}
-\frac{1}{A} e^{-|\frac{x-m}{a_l}| }, & x < m
-\frac{1}{A} e^{-|\frac{x-m}{a_r}| }, & x > m
-\end{cases}}
+\frac{1}{A} e^{-|\frac{x-m}{a_l}| }, x < m
+}
+\deqn{f(x;a_l,a_r,m) =
+\frac{1}{A} e^{-|\frac{x-m}{a_r}| }, x > m
+}
 with:
 \deqn{A = a_l + a_r}
 The random sampling is done by inverse transform sampling.
-
-Copyright (C) 2020-2021 Elias Haddad
-License: GPL 3+
 }
 \examples{
 sample_gamma <- ralaplace(1000)

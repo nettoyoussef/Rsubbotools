@@ -79,6 +79,22 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// rasubbo_orig
+Rcpp::NumericVector rasubbo_orig(unsigned n, double m, double al, double ar, double bl, double br);
+RcppExport SEXP _Rsubbotools_rasubbo_orig(SEXP nSEXP, SEXP mSEXP, SEXP alSEXP, SEXP arSEXP, SEXP blSEXP, SEXP brSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< unsigned >::type n(nSEXP);
+    Rcpp::traits::input_parameter< double >::type m(mSEXP);
+    Rcpp::traits::input_parameter< double >::type al(alSEXP);
+    Rcpp::traits::input_parameter< double >::type ar(arSEXP);
+    Rcpp::traits::input_parameter< double >::type bl(blSEXP);
+    Rcpp::traits::input_parameter< double >::type br(brSEXP);
+    rcpp_result_gen = Rcpp::wrap(rasubbo_orig(n, m, al, ar, bl, br));
+    return rcpp_result_gen;
+END_RCPP
+}
 // rasubbo
 Rcpp::NumericVector rasubbo(unsigned n, double m, double al, double ar, double bl, double br);
 RcppExport SEXP _Rsubbotools_rasubbo(SEXP nSEXP, SEXP mSEXP, SEXP alSEXP, SEXP arSEXP, SEXP blSEXP, SEXP brSEXP) {
@@ -92,22 +108,6 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type bl(blSEXP);
     Rcpp::traits::input_parameter< double >::type br(brSEXP);
     rcpp_result_gen = Rcpp::wrap(rasubbo(n, m, al, ar, bl, br));
-    return rcpp_result_gen;
-END_RCPP
-}
-// rasubbo2
-Rcpp::NumericVector rasubbo2(unsigned n, double m, double al, double ar, double bl, double br);
-RcppExport SEXP _Rsubbotools_rasubbo2(SEXP nSEXP, SEXP mSEXP, SEXP alSEXP, SEXP arSEXP, SEXP blSEXP, SEXP brSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< unsigned >::type n(nSEXP);
-    Rcpp::traits::input_parameter< double >::type m(mSEXP);
-    Rcpp::traits::input_parameter< double >::type al(alSEXP);
-    Rcpp::traits::input_parameter< double >::type ar(arSEXP);
-    Rcpp::traits::input_parameter< double >::type bl(blSEXP);
-    Rcpp::traits::input_parameter< double >::type br(brSEXP);
-    rcpp_result_gen = Rcpp::wrap(rasubbo2(n, m, al, ar, bl, br));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -140,17 +140,17 @@ BEGIN_RCPP
 END_RCPP
 }
 // psep
-Rcpp::NumericVector psep(Rcpp::NumericVector x, double m, double alpha, double sigma, double lambda);
-RcppExport SEXP _Rsubbotools_psep(SEXP xSEXP, SEXP mSEXP, SEXP alphaSEXP, SEXP sigmaSEXP, SEXP lambdaSEXP) {
+Rcpp::NumericVector psep(Rcpp::NumericVector x, double m, double a, double b, double lambda);
+RcppExport SEXP _Rsubbotools_psep(SEXP xSEXP, SEXP mSEXP, SEXP aSEXP, SEXP bSEXP, SEXP lambdaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< Rcpp::NumericVector >::type x(xSEXP);
     Rcpp::traits::input_parameter< double >::type m(mSEXP);
-    Rcpp::traits::input_parameter< double >::type alpha(alphaSEXP);
-    Rcpp::traits::input_parameter< double >::type sigma(sigmaSEXP);
+    Rcpp::traits::input_parameter< double >::type a(aSEXP);
+    Rcpp::traits::input_parameter< double >::type b(bSEXP);
     Rcpp::traits::input_parameter< double >::type lambda(lambdaSEXP);
-    rcpp_result_gen = Rcpp::wrap(psep(x, m, alpha, sigma, lambda));
+    rcpp_result_gen = Rcpp::wrap(psep(x, m, a, b, lambda));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -247,21 +247,6 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type b(bSEXP);
     Rcpp::traits::input_parameter< double >::type lambda(lambdaSEXP);
     rcpp_result_gen = Rcpp::wrap(dsep(x, m, a, b, lambda));
-    return rcpp_result_gen;
-END_RCPP
-}
-// dsep_bottazzi
-Rcpp::NumericVector dsep_bottazzi(Rcpp::NumericVector x, double m, double a, double b, double lambda);
-RcppExport SEXP _Rsubbotools_dsep_bottazzi(SEXP xSEXP, SEXP mSEXP, SEXP aSEXP, SEXP bSEXP, SEXP lambdaSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type x(xSEXP);
-    Rcpp::traits::input_parameter< double >::type m(mSEXP);
-    Rcpp::traits::input_parameter< double >::type a(aSEXP);
-    Rcpp::traits::input_parameter< double >::type b(bSEXP);
-    Rcpp::traits::input_parameter< double >::type lambda(lambdaSEXP);
-    rcpp_result_gen = Rcpp::wrap(dsep_bottazzi(x, m, a, b, lambda));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -560,8 +545,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_Rsubbotools_ralaplace", (DL_FUNC) &_Rsubbotools_ralaplace, 4},
     {"_Rsubbotools_rpower", (DL_FUNC) &_Rsubbotools_rpower, 4},
     {"_Rsubbotools_rsubbo", (DL_FUNC) &_Rsubbotools_rsubbo, 4},
+    {"_Rsubbotools_rasubbo_orig", (DL_FUNC) &_Rsubbotools_rasubbo_orig, 6},
     {"_Rsubbotools_rasubbo", (DL_FUNC) &_Rsubbotools_rasubbo, 6},
-    {"_Rsubbotools_rasubbo2", (DL_FUNC) &_Rsubbotools_rasubbo2, 6},
     {"_Rsubbotools_alaplafit", (DL_FUNC) &_Rsubbotools_alaplafit, 4},
     {"_Rsubbotools_ppower", (DL_FUNC) &_Rsubbotools_ppower, 4},
     {"_Rsubbotools_psep", (DL_FUNC) &_Rsubbotools_psep, 5},
@@ -572,7 +557,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_Rsubbotools_sortRcpp", (DL_FUNC) &_Rsubbotools_sortRcpp, 1},
     {"_Rsubbotools_dpower", (DL_FUNC) &_Rsubbotools_dpower, 4},
     {"_Rsubbotools_dsep", (DL_FUNC) &_Rsubbotools_dsep, 5},
-    {"_Rsubbotools_dsep_bottazzi", (DL_FUNC) &_Rsubbotools_dsep_bottazzi, 5},
     {"_Rsubbotools_dlaplace", (DL_FUNC) &_Rsubbotools_dlaplace, 3},
     {"_Rsubbotools_dalaplace", (DL_FUNC) &_Rsubbotools_dalaplace, 4},
     {"_Rsubbotools_dsubbo", (DL_FUNC) &_Rsubbotools_dsubbo, 4},

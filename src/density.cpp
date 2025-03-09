@@ -208,10 +208,11 @@ Rcpp::NumericVector dlaplace(
 //' The Asymmetric Laplace distribution is a distribution controlled
 //' by three parameters, with formula:
 //' \deqn{f(x;a_l,a_r,m) =
-//' \begin{cases}
-//' \frac{1}{A} e^{-|\frac{x-m}{a_l}| }, & x < m
-//' \frac{1}{A} e^{-|\frac{x-m}{a_r}| }, & x > m
-//' \end{cases}}
+//' \frac{1}{A} e^{-|\frac{x-m}{a_l}| }, x < m
+//' }
+//' \deqn{f(x;a_l,a_r,m) =
+//' \frac{1}{A} e^{-|\frac{x-m}{a_r}| }, x > m
+//' }
 //' with:
 //' \deqn{A = a_l + a_r}
 //' where \eqn{a*} are scale parameters, and \eqn{m} is a location parameter.
@@ -314,10 +315,11 @@ Rcpp::NumericVector dsubbo(
 //' The AEP is a exponential power distribution controlled
 //' by five parameters, with formula:
 //' \deqn{ f(x;a_l,a_r,b_l,b_r,m) =
-//' \begin{cases}
-//' \frac{1}{A} e^{- \frac{1}{b_l} |\frac{x-m}{a_l}|^{b_l} }, & x < m
-//' \frac{1}{A} e^{- \frac{1}{b_r} |\frac{x-m}{a_r}|^{b_r} }, & x > m
-//' \end{cases} }
+//' \frac{1}{A} e^{- \frac{1}{b_l} |\frac{x-m}{a_l}|^{b_l} }, x < m
+//' }
+//' \deqn{ f(x;a_l,a_r,b_l,b_r,m) =
+//' \frac{1}{A} e^{- \frac{1}{b_r} |\frac{x-m}{a_r}|^{b_r} }, x > m
+//' }
 //' with:
 //' \deqn{A = a_lb_l^{1/b_l}\Gamma(1+1/b_l) + a_rb_r^{1/b_r}\Gamma(1+1/b_r)}
 //' where \eqn{l} and \eqn{r} represent left and right tails, \eqn{a*} are

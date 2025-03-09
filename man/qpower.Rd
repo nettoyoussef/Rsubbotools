@@ -29,5 +29,4 @@ The Exponential Power distribution (EP) is given by the function:
 \deqn{ f(a,b) = \frac{1}{2a\Gamma(1+1/b)}e^{-|(x-m)/a|^b}, -\infty < x < \infty }.
 where \eqn{b} is a shape parameter, \eqn{a} is a scale parameter, \eqn{m}
 is a location parameter and \eqn{\Gamma} represents the gamma function.
-Copyright (C) 2021 Elias Haddad
 }

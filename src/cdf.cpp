@@ -1,4 +1,23 @@
-// Cumulative Distribution Functions Functions
+/*
+  Probability Functions for several distributions (CDFs)
+  likelihood maximization
+
+  Copyright (C) 2007-2014 Giulio Bottazzi
+  Copyright (C) 2020-2021 Elias Youssef Haddad Netto
+
+  This program is free software; you can redistribute it and/or
+  modify it under the terms of the GNU General Public License
+  (version 2) as published by the Free Software Foundation;
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+*/
 
 #include "common.h"
 #include <gsl/gsl_cdf.h>
@@ -138,8 +157,6 @@ double fSEP(double x, void *params){
 //' \deqn{c = 2 ab^{(1/b)-1} \Gamma(1/b)}
 //' with \eqn{\Phi} the cumulative normal distribution with mean zero and variance
 //' one. The CDF is calculated through numerical integration using the GSL suite.
-//' Copyright (C) 2007-2014 Giulio Bottazzi
-//' Copyright (C) 2020-2021 Elias Haddad
 //' @param x - vector with values to evaluate CDF.
 //' @param m - the location parameter.
 //' @param a - the scale parameter.
@@ -260,10 +277,11 @@ Rcpp::NumericVector plaplace(
 //' The Asymmetric Laplace distribution is a distribution controlled
 //' by three parameters, with formula:
 //' \deqn{f(x;a_l,a_r,m) =
-//' \begin{cases}
-//' \frac{1}{A} e^{-|\frac{x-m}{a_l}| }, & x < m
-//' \frac{1}{A} e^{-|\frac{x-m}{a_r}| }, & x > m
-//' \end{cases}}
+//' \frac{1}{A} e^{-|\frac{x-m}{a_l}| }, x < m
+//' }
+//' \deqn{f(x;a_l,a_r,m) =
+//' \frac{1}{A} e^{-|\frac{x-m}{a_r}| }, x > m
+//' }
 //' with:
 //' \deqn{A = a_l + a_r}
 //' where \eqn{a*} are scale parameters, and \eqn{m} is a location parameter.
@@ -367,10 +385,11 @@ Rcpp::NumericVector psubbo(
 //' The AEP is a exponential power distribution controlled
 //' by five parameters, with formula:
 //' \deqn{ f(x;a_l,a_r,b_l,b_r,m) =
-//' \begin{cases}
-//' \frac{1}{A} e^{- \frac{1}{b_l} |\frac{x-m}{a_l}|^{b_l} }, & x < m
-//' \frac{1}{A} e^{- \frac{1}{b_r} |\frac{x-m}{a_r}|^{b_r} }, & x > m
-//' \end{cases} }
+//' \frac{1}{A} e^{- \frac{1}{b_l} |\frac{x-m}{a_l}|^{b_l} }, x < m
+//' }
+//' \deqn{ f(x;a_l,a_r,b_l,b_r,m) =
+//' \frac{1}{A} e^{- \frac{1}{b_r} |\frac{x-m}{a_r}|^{b_r} }, x > m
+//' }
 //' with:
 //' \deqn{A = a_lb_l^{1/b_l}\Gamma(1+1/b_l) + a_rb_r^{1/b_r}\Gamma(1+1/b_r)}
 //' where \eqn{l} and \eqn{r} represent left and right tails, \eqn{a*} are

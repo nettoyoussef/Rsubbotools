@@ -28,13 +28,16 @@ qsep(
 
 \item{lambda}{(numeric) - the skewness parameter.}
 
-\item{method}{(numeric) - If 0, uses the Newton-Raphson procedure for optimization. If 1, uses Steffensen.}
+\item{method}{(numeric) - If 0, uses the Newton-Raphson procedure for
+optimization. If 1, uses Steffensen.}
 
-\item{step_size}{(numeric) - the size of the step in the numerical optimization (gradient descent). Default is 1e-4.}
+\item{step_size}{(numeric) - the size of the step in the numerical
+optimization (gradient descent). Default is 1e-4.}
 
 \item{tol}{(numeric) - error tolerance (default is 1e-10).}
 
-\item{max_iter}{(numeric) - maximum number of iterations for the optimization procedure (default is 100).}
+\item{max_iter}{(numeric) - maximum number of iterations for the
+optimization procedure (default is 100).}
 
 \item{verb}{(numeric) - verbosity level of the process (default 0).}
 }
@@ -48,14 +51,13 @@ the Skewed Exponential Power distribution with parameters \eqn{a}, \eqn{b}.
 \details{
 The  SEP is a exponential power distribution controlled
 by four parameters, with formula:
-\deqn{ f(x; \mu, a, \lambda, b) =
-2 \Phi(w) e^{-|z|^a/a}/ ( b C)}
+\deqn{ f(x; m, b, a, \lambda) = 2 \Phi(w) e^{-|z|^b/b}/(c)}
 where:
-\deqn{z = (x-\mu)/b}
-\deqn{w = sign(z) |z|^{(a/2)} \lambda \sqrt{2/a}}
-\deqn{C = 2 a^{(1/a-1)} \Gamma(1/a)}
+\deqn{z = (x-m)/a}
+\deqn{w = sign(z) |z|^{(b/2)} \lambda \sqrt{2/b}}
+\deqn{c = 2 ab^{(1/b)-1} \Gamma(1/b)}
 with \eqn{\Phi} the cumulative normal distribution with mean zero and variance
-one. The CDF is calculated through numerical integration using the GSL suite.
-Copyright (C) 2007-2014 Giulio Bottazzi
-Copyright (C) 2020-2021 Elias Haddad
+one. The CDF is calculated through numerical integration using the GSL suite
+and the quantile is solved by inversion using a root-finding algorithm
+(Newton-Raphson by default).
 }

@@ -1,3 +1,52 @@
+/*
+  RNG Functions for several distributions
+
+  Functions:
+  - rnorm_zig
+    - Copyright (C) 2005  Jochen Voss.
+    - Copyright (C) 2020  Elias Haddad.
+
+  - rgamma_c
+    - Copyright (C) J.D. Lamb, Brian Gough.
+    - Copyright (C) 2020-2021 Elias Haddad
+    - License: GPL 3+
+    - GSL file: randist/gamma.c
+
+  - rlaplace
+    - Copyright (C) 2020-2021 Elias Haddad
+
+  - ralaplace
+    - Copyright (C) 2020-2021 Elias Haddad
+
+  - rpower
+    - Copyright (C) 1996, 1997, 1998, 1999, 2000, 2006, 2007 James Theiler, Brian Gough
+    - Copyright (C) 2006 Giulio Bottazzi
+    - Copyright (C) 2020-2021 Elias Haddad
+    - GSL file: randist/exppow.c
+    - GSL function: gsl_ran_exppow
+
+  - rsubbo/rasubbo
+    - Copyright (C) 2002-2014 Giulio Bottazzi
+    - Copyright (C) 2020-2021 Elias Haddad
+
+  License: GPL 3+
+  This program is free software; you can redistribute it and/or
+  modify it under the terms of the GNU General Public License
+  (version 2) as published by the Free Software Foundation;
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+*/
+
+
+
+
 #include "common.h"
 
 // tabulated values for the height of the Ziggurat levels
@@ -152,9 +201,6 @@ static const double wtab[128] = {
 //
 // This function is based on the original GSL version, adapted to
 // use R's system of RNGs. All credits to the original authors.
-// Copyright (C) 2005  Jochen Voss.
-// Copyright (C) 2020  Elias Haddad.
-// License: GPL 3+
 // GSL file: randist/gausszig.c
 /// [[Rcpp::export]]
 // Rcpp::NumericVector rnorm_zig(
@@ -240,16 +286,11 @@ static const double wtab[128] = {
 //' The RNG is given by Marsaglia and Tsang, "A Simple Method for
 //' generating gamma variables", ACM Transactions on Mathematical
 //' Software, Vol 26, No 3 (2000), p363-372.
-//' Available at:
-//' https://doi.org/10.1145/358407.358414
+//' Available at \doi{10.1145/358407.358414}.
 //' This function is based on the original GSL version, adapted to
 //' use R's system of RNGs. All credits to the original authors.
 //' Implemented by J.D.Lamb@btinternet.com, minor modifications for GSL
 //' by Brian Gough. Adapted to R by Elias Haddad.
-//' Copyright (C) J.D.Lamb, Brian Gough.
-//' Copyright (C) 2020-2021 Elias Haddad
-//' License: GPL 3+
-//' GSL file: randist/gamma.c
 //'
 //' @param n (int)
 //' @param b (numeric) - shape parameter. Must be in the range \eqn{(0, \infty)}.
@@ -321,10 +362,6 @@ Rcpp::NumericVector rgamma_c(
 //' given by the function:
 //' \deqn{ f(x;a,m) = \frac{1}{2a} e^{- \left| \frac{x-m}{a} \right|} }
 //' The random sampling is done by inverse transform sampling.
-//'
-//' Copyright (C) 2020-2021 Elias Haddad
-//' License: GPL 3+
-//'
 //' @param n (int) - the size of the sample.
 //' @param m (numeric) - the location parameter.
 //' @param a (numeric) - the scale parameter.
@@ -368,17 +405,14 @@ Rcpp::NumericVector rlaplace(
 //' The Asymmetric Laplace distribution is given by the two-sided exponential
 //' distribution given by the function:
 //' \deqn{f(x;a_l,a_r,m) =
-//' \begin{cases}
-//' \frac{1}{A} e^{-|\frac{x-m}{a_l}| }, & x < m
-//' \frac{1}{A} e^{-|\frac{x-m}{a_r}| }, & x > m
-//' \end{cases}}
+//' \frac{1}{A} e^{-|\frac{x-m}{a_l}| }, x < m
+//' }
+//' \deqn{f(x;a_l,a_r,m) =
+//' \frac{1}{A} e^{-|\frac{x-m}{a_r}| }, x > m
+//' }
 //' with:
 //' \deqn{A = a_l + a_r}
 //' The random sampling is done by inverse transform sampling.
-//'
-//' Copyright (C) 2020-2021 Elias Haddad
-//' License: GPL 3+
-//'
 //' @param n (int) - the size of the sample.
 //' @param m (numeric) - the location parameter.
 //' @param al,ar (numeric) - left and right scale parameters, respectively.
@@ -444,13 +478,6 @@ Rcpp::NumericVector ralaplace(
 //' September 1980, Volume 75, Number 371, pages 683-686.
 //' This function is based on the original GSL version, adapted to
 //' use R's system of RNGs by Elias Haddad. All credits to the original authors.
-//' Copyright (C) 1996, 1997, 1998, 1999, 2000, 2006, 2007 James Theiler, Brian Gough
-//' Copyright (C) 2006 Giulio Bottazzi
-//' Copyright (C) 2020-2021 Elias Haddad
-//' License: GPL 3+
-//' GSL file: randist/exppow.c
-//' GSL function: gsl_ran_exppow
-//'
 //' @param n (int) - size of the sample.
 //' @param m (numeric) - the location parameter.
 //' @param a (numeric) - scale parameter.
@@ -553,10 +580,6 @@ Rcpp::NumericVector rpower(
 //' with scale parameter \eqn{a = ab^{1/b}} and \eqn{m=0}, we use the same
 //' method of the exponential power RNG and add the location parameter.
 //' Details can be found on the documentation of the \code{rpower} function.
-//' Copyright (C) 2002-2014 Giulio Bottazzi
-//' Copyright (C) 2020-2021 Elias Haddad
-//' License: GPL 3+
-//'
 //' @param n (int) - the size of the sample.
 //' @param m (numeric) - the location parameter.
 //' @param a (numeric) - the scale parameter.
@@ -595,10 +618,11 @@ Rcpp::NumericVector rsubbo(
 //'
 //' The AEP distribution is expressed by the function:
 //' \deqn{f(x;a_l,a_r,b_l,b_r,m) =
-//' \begin{cases}
-//' \frac{1}{A} e^{- \frac{1}{b_l} |\frac{x-m}{a_l}|^{b_l} }, & x < m
-//' \frac{1}{A} e^{- \frac{1}{b_r} |\frac{x-m}{a_r}|^{b_r} }, & x > m
-//' \end{cases} }
+//' \frac{1}{A} e^{- \frac{1}{b_l} |\frac{x-m}{a_l}|^{b_l} }, x < m
+//' }
+//' \deqn{f(x;a_l,a_r,b_l,b_r,m) =
+//' \frac{1}{A} e^{- \frac{1}{b_r} |\frac{x-m}{a_r}|^{b_r} }, x > m
+//' }
 //' with:
 //' \deqn{A = a_lb_l^{1/b_l}\Gamma(1+1/b_l) + a_rb_r^{1/b_r}\Gamma(1+1/b_r)}
 //' where \eqn{m} is a location parameter, \eqn{b*} are shape parameters, \eqn{a*}
@@ -610,10 +634,6 @@ Rcpp::NumericVector rsubbo(
 //' This values are then weighted by a constant expressed in the parameters.
 //' More details are available on the package vignette and on the
 //' function \code{rpower}.
-//' Copyright (C) 2003-2014 Giulio Bottazzi
-//' Copyright (C) 2020-2021 Elias Haddad
-//' License: GPL 3+
-//'
 //' @param n (int) - size of the sample.
 //' @param m (numeric) - location parameter.
 //' @param bl,br (numeric) - shape parameters.
@@ -674,10 +694,11 @@ Rcpp::NumericVector rasubbo_orig(
 //'
 //' The AEP distribution is expressed by the function:
 //' \deqn{f(x;a_l,a_r,b_l,b_r,m) =
-//' \begin{cases}
-//' \frac{1}{A} e^{- \frac{1}{b_l} |\frac{x-m}{a_l}|^{b_l} }, & x < m
-//' \frac{1}{A} e^{- \frac{1}{b_r} |\frac{x-m}{a_r}|^{b_r} }, & x > m
-//' \end{cases} }
+//' \frac{1}{A} e^{- \frac{1}{b_l} |\frac{x-m}{a_l}|^{b_l} }, x < m
+//' }
+//' \deqn{f(x;a_l,a_r,b_l,b_r,m) =
+//' \frac{1}{A} e^{- \frac{1}{b_r} |\frac{x-m}{a_r}|^{b_r} }, x > m
+//' }
 //' with:
 //' \deqn{A = a_lb_l^{1/b_l}\Gamma(1+1/b_l) + a_rb_r^{1/b_r}\Gamma(1+1/b_r)}
 //' where \eqn{m} is a location parameter, \eqn{b*} are shape parameters, \eqn{a*}
@@ -689,10 +710,6 @@ Rcpp::NumericVector rasubbo_orig(
 //' This values are then weighted by a constant expressed in the parameters.
 //' More details are available on the package vignette and on the
 //' function \code{rpower}.
-//' Copyright (C) 2003-2014 Giulio Bottazzi
-//' Copyright (C) 2020-2021 Elias Haddad
-//' License: GPL 3+
-//'
 //' @param n (int) - size of the sample.
 //' @param m (numeric) - location parameter.
 //' @param bl,br (numeric) - shape parameters.
