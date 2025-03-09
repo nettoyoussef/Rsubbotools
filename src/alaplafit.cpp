@@ -26,7 +26,7 @@
 
 double alapla_nll(Rcpp::NumericVector data, const double m){
 
-  int size = data.size();
+  unsigned size = data.size();
   unsigned utmp1;
 
   double sumL=0.0;
@@ -160,7 +160,7 @@ Rcpp::List alaplafit(
     fmin = alapla_nll(data, m);
 
     if(verb > 0){
-      Rprintf("# index=%d\n", index);
+      Rprintf("# index=%ld\n", index);
       Rprintf("#>>> Initial minimum: m=%e ll=%e\n", m, fmin);
     }
 
@@ -238,7 +238,7 @@ Rcpp::List alaplafit(
     Rprintf("Results of interval optimization: \n");
     Rprintf("#>>> m=%e ll=%e\n", m, tmp_fmin);
     Rprintf("\n");
-    Rprintf("#  intervals explored: %d\n",max-min);
+    Rprintf("#  intervals explored: %ld\n",max-min);
     Rprintf("\n");
   }
 

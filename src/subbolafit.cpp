@@ -89,7 +89,7 @@ void subbola_printdensity(Rcpp::NumericVector data, double param[]){
 void subbola_objf(Rcpp::NumericVector data, const size_t n, Rcpp::NumericVector x, void *params, double *f){
 
   // data size
-  int size = data.size();
+  unsigned size = data.size();
 
   double dtmp1;
   unsigned utmp1;
@@ -139,7 +139,7 @@ void subbola_objf(Rcpp::NumericVector data, const size_t n, Rcpp::NumericVector 
 void subbola_objdf(Rcpp::NumericVector data, const size_t n, Rcpp::NumericVector x, void *params, Rcpp::NumericVector df){
 
   // data size
-  int size = data.size();
+  unsigned size = data.size();
 
   // temp variables
   double dtmp1;
@@ -226,7 +226,7 @@ void subbola_objfdf(Rcpp::NumericVector data, const size_t n, Rcpp::NumericVecto
 
 
   // data size
-  int size = data.size();
+  unsigned size = data.size();
 
   // temp variables
   double dtmp1;
@@ -486,9 +486,8 @@ Rcpp::List subbolafit(
   /* ------------------------ */
   if(verb > 0){
     Rprintf("INITIAL VALUES\n");
-    Rprintf("INITIAL VALUES\n");
     Rprintf("#  par    bl    br    a     m     ll\n");
-    Rprintf("#  value  %.2f  %.2f  %.2f  %.2f  %.2f  %.2f\n", par[0], par[1], par[2], par[3], fmin);
+    Rprintf("#  value  %.2f  %.2f  %.2f  %.2f  %.2f\n", par[0], par[1], par[2], par[3], fmin);
     Rprintf("\n");
   }
 

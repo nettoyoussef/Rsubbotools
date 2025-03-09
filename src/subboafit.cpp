@@ -202,7 +202,7 @@ RcppGSL::Matrix subboa_varcovar(const Rcpp::NumericVector par, const size_t N, c
 void subboa_objf(Rcpp::NumericVector data, const size_t n, Rcpp::NumericVector x, void *params, double *f){
 
   // data size
-  int size = data.size();
+  unsigned size = data.size();
 
   // temporary variables
   double dtmp1;
@@ -256,7 +256,7 @@ void subboa_objdf(Rcpp::NumericVector data, const size_t n, Rcpp::NumericVector 
 
 
   // data size
-  int size = data.size();
+  unsigned size = data.size();
 
   // temp variables
   double dtmp1;
@@ -327,7 +327,7 @@ void subboa_objdf(Rcpp::NumericVector data, const size_t n, Rcpp::NumericVector 
 void subboa_objfdf(Rcpp::NumericVector data, const size_t n, Rcpp::NumericVector x, void *params, double *f, Rcpp::NumericVector df){
 
   // data size
-  int size = data.size();
+  unsigned size = data.size();
 
   // temp variables
   double dtmp1;

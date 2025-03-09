@@ -221,25 +221,26 @@ void Rcppdeepcopy(Rcpp::NumericVector x_orig, Rcpp::NumericVector x_dest){
   }
 }
 
-void create_parameter_names(char *par_names[], int size){
+// void create_parameter_names(const char *par_names[], int size){
+void create_parameter_names(std::vector<std::string> *par_names, int size){
 
   if(size == 2){
-    par_names[0] = "b";
-    par_names[1] = "m";
+    (*par_names)[0] = "b";
+    (*par_names)[1] = "m";
   }
   else if(size == 4){
-    par_names[0] = "bl";
-    par_names[1] = "br";
-    par_names[2] = "a";
-    par_names[3] = "m";
+   (*par_names)[0] = "bl";
+   (*par_names)[1] = "br";
+   (*par_names)[2] = "a";
+   (*par_names)[3] = "m";
 
   }
   else if(size == 5){
-    par_names[0] = "bl";
-    par_names[1] = "br";
-    par_names[2] = "al";
-    par_names[3] = "ar";
-    par_names[4] = "m";
+    (*par_names)[0] = "bl";
+    (*par_names)[1] = "br";
+    (*par_names)[2] = "al";
+    (*par_names)[3] = "ar";
+    (*par_names)[4] = "m";
   }
 }
 
@@ -251,13 +252,14 @@ void print_parameters(
                       ){
 
   int size = xtmp.size();
-  char *par_names[size];
+  std::vector<std::string> par_names(size);
 
-  create_parameter_names(par_names, size);
+  create_parameter_names(&par_names, size);
 
   Rprintf("#  par  value  type   xmin   xmax\n");
   for(int i=0; i<size; ++i){
-    Rprintf("#  %s    %.2f      %i   %.2f   %.2f\n", par_names[i], xtmp[i], type[i], xmin[i], xmax[i]);
+    //.c_str method is necessary to print C++ strings in C format (const char*)
+    Rprintf("#  %s    %.2f      %i   %.2f   %.2f\n", par_names[i].c_str(), xtmp[i], type[i], xmin[i], xmax[i]);
   }
   Rprintf("\n");
 }
@@ -268,13 +270,15 @@ void print_results(
                    ){
 
   int size = par.size();
-  char *par_names[size];
+  // const char *par_names = new char[size];
+  std::vector<std::string> par_names(size);
 
-  create_parameter_names(par_names, size);
+  create_parameter_names(&par_names, size);
 
   Rprintf("#  par    ");
   for(int i =0; i<size; ++i){
-    Rprintf("%s      ", par_names[i]);
+    //.c_str method is necessary to print C++ strings in C format (const char*)
+    Rprintf("%s      ", par_names[i].c_str());
   }
   Rprintf("ll\n");
 
@@ -645,7 +649,7 @@ Rcpp::List interval_optim(
     // computation
     Rcpp::checkUserInterrupt();
 
-    for(i = min-1; (int) i >= (int) min-interv_step && (int) i >= 0; i--){
+    for(i = min-1; i >= min-interv_step && i >= 0; i--){
 
       // set initial condition
       Rcppdeepcopy(par, xtmp); // set values to the last best value
@@ -749,7 +753,7 @@ double newton_c(newton_args x){
   iter      = 0;
   f_x       = f(x);
   if(x.verb > 0){
-    Rprintf("iteration: 0; x value: %.4f; f(x) value: %.4f\n", x, f_x);
+    Rprintf("iteration: 0; x value: %.4f; f(x) value: %.4f\n", x.x_guess, f_x);
   }
 
   // checks convergence of the algorithm
@@ -806,7 +810,7 @@ double steffensen_c(newton_args x){
   f_x       = f(x);
   x_vec[0] = x.x_guess;
   if(x.verb > 0){
-    Rprintf("iteration: 0; x value: %.4f; f(x) value: %.4f\n", x, f_x);
+    Rprintf("iteration: 0; x value: %.4f; f(x) value: %.4f\n", x.x_guess, f_x);
   }
 
   // checks convergence of the algorithm

@@ -190,8 +190,6 @@ void sep_objdf(
                ){
 
   unsigned size = data.size();
-  double dtmp1;
-
   size_t i;
 
   const double m=x[0];
@@ -380,7 +378,7 @@ Rcpp::List sepfit(
 
    // Fisher Matrix or negative log-likelihood?
    // log_likelihood
-   double fmin = 0;
+   double fmin = 0.0;
 
    /* customized admin. of errors */
    /* --------------------------- */
@@ -400,7 +398,7 @@ Rcpp::List sepfit(
    if(verb >0){
      Rprintf("INITIAL VALUES\n");
      Rprintf("#  par    mu     sigma     lambda     alpha     ll\n");
-     Rprintf("#  value  %.2f  %.2f  %.2f  %.2f  %.2f  %.2f\n"
+     Rprintf("#  value  %.2f  %.2f  %.2f  %.2f  %.2f\n"
              , par[0], par[1], par[2], par[3], fmin);
      Rprintf("\n");
    }

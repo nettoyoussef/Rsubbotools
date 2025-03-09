@@ -34,7 +34,7 @@ double geta(Rcpp::NumericVector& data, const double b, const double mu){
 
   double sum = 0.0;
   unsigned utmp1;
-  int size = data.size();
+  unsigned size = data.size();
 
   for(utmp1 = 0;utmp1<size;utmp1++){
     sum+=pow(fabs(mu-data[utmp1]),b);
@@ -199,7 +199,7 @@ Rcpp::List moment(Rcpp::NumericVector& data){
   double average, aad, sdev, var;
   unsigned j;
   double s = 0.0, p = 0.0;
-  int size = data.size();
+  unsigned size = data.size();
 
 
   for (j = 0;j<size;j++){
@@ -258,7 +258,7 @@ double mm_subbotin(const double std_over_aad, int verb = 0){
   unsigned iter;
   double dtmp1;
   int status;
-  int max_iter = 500;
+  unsigned max_iter = 500;
 
   /* initialize the parameter */
   params.l = log(std_over_aad);
@@ -360,7 +360,7 @@ void subbo_objf(Rcpp::NumericVector data, const size_t n, Rcpp::NumericVector x,
   const double mu = x[1]; // default to 0
 
   double sum = 0.0;
-  int i = 0;
+  size_t i = 0;
   int status;
   gsl_sf_result result;
 
@@ -419,7 +419,7 @@ void subbo_objdf(Rcpp::NumericVector data, const size_t n, Rcpp::NumericVector x
 /* reduced likelyhood and derivatives x[0] = b x[1] = mu */
 void subbo_objfdf(Rcpp::NumericVector data, const size_t n, Rcpp::NumericVector x, void *params, double *f, Rcpp::NumericVector df){
 
-  int size = data.size();
+  unsigned size = data.size();
   const double b = x[0];
   const double mu = x[1];
 
