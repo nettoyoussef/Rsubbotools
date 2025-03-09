@@ -1,3 +1,5 @@
+library(usethis)
+
 test_function <- function(b, func1, func2, msg_param) {
   lapply(1:length(b), function(i) {
     # there is numerical difference, so we use equal instead of identical
@@ -222,4 +224,12 @@ sample_datasets <- function() {
     # saves the data to be available internally on sysdata.rda
     # ,internal = TRUE
   )
+}
+
+r_inc_lower_gamma <- function(p, b) {
+  return(gamma(b) * pgamma(p, shape = b, scale = 1))
+}
+
+r_inv_inc_lower_gamma <- function(p, b) {
+  return(qgamma(p / gamma(b), shape = b, scale = 1, lower.tail = 1, log.p = 0))
 }
