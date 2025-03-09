@@ -2,7 +2,7 @@
 % Please edit documentation in R/RcppExports.R
 \name{rpower}
 \alias{rpower}
-\title{GSL function: gsl_ran_exppow}
+\title{Generates a random sample from a Exponential Power distribution}
 \usage{
 rpower(n, m = 0, a = 1, b = 2)
 }
@@ -19,6 +19,32 @@ rpower(n, m = 0, a = 1, b = 2)
 a numeric vector containing a random sample with above parameters.
 }
 \description{
+This function returns a sample from a gamma-distributed random variable.
+}
+\details{
+The exponential power distribution (EP) is given by the function:
+\deqn{ f(a,b) = \frac{1}{2a\Gamma(1+1/b)}e^{-|x/a|^b}, -\infty < x < \infty }.
+where \eqn{b} is a shape parameter, \eqn{a} is a scale parameter and \eqn{\Gamma}
+representes the gamma function. While not done here, this distribution can
+be adapted to have non-zero location parameter.
+The Exponential Power distribution is related to the gamma distribution by
+the equation:
+\deqn{E = a*G(1/b)^{1/b}}
+where E and G are respectively EP and gamma random variables. This property
+is used for cases where \eqn{b<1} and \eqn{b>4}. For \eqn{1 \leq b \leq 4}
+rejection methods based on the Laplace and normal distributions are used,
+which should be faster.
+Technical details about this algorithm are available on:
+P. R. Tadikamalla, "Random Sampling from the Exponential Power
+Distribution", Journal of the American Statistical Association,
+September 1980, Volume 75, Number 371, pages 683-686.
+This function is based on the original GSL version, adapted to
+use R's system of RNGs by Elias Haddad. All credits to the original authors.
+Copyright (C) 1996, 1997, 1998, 1999, 2000, 2006, 2007 James Theiler, Brian Gough
+Copyright (C) 2006 Giulio Bottazzi
+Copyright (C) 2020-2021 Elias Haddad
+License: GPL 3+
+GSL file: randist/exppow.c
 GSL function: gsl_ran_exppow
 }
 \examples{

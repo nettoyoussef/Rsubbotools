@@ -247,7 +247,7 @@ static const double wtab[128] = {
 //' Implemented by J.D.Lamb@btinternet.com, minor modifications for GSL
 //' by Brian Gough. Adapted to R by Elias Haddad.
 //' Copyright (C) J.D.Lamb, Brian Gough.
-/// Copyright (C) 2020-2021 Elias Haddad
+//' Copyright (C) 2020-2021 Elias Haddad
 //' License: GPL 3+
 //' GSL file: randist/gamma.c
 //'
@@ -262,10 +262,10 @@ static const double wtab[128] = {
 //' @md
 // [[Rcpp::export]]
 Rcpp::NumericVector rgamma_c(
-                             unsigned n
-                             ,double  b = 2.
-                             ,double  a = 1/2
-                             ){
+  unsigned n
+  ,double  b = 2
+  ,double  a = 1/2
+){
 
   // use R's RNG
   Rcpp::RNGScope scope;
@@ -306,7 +306,7 @@ Rcpp::NumericVector rgamma_c(
           break;
       }
 
-      sample[i] = b * d * v;
+      sample[i] = a * d * v;
     }
 
     return sample;
@@ -335,10 +335,11 @@ Rcpp::NumericVector rgamma_c(
 //' @export
 //' @md
 // [[Rcpp::export]]
-Rcpp::NumericVector rlaplace( unsigned n
-                             ,const double m = 0.
-                             ,const double a = 1.
-                            ){
+Rcpp::NumericVector rlaplace(
+  unsigned n
+  ,const double m = 0
+  ,const double a = 1
+){
 
   // use R's RNG
   Rcpp::RNGScope scope;
@@ -346,7 +347,7 @@ Rcpp::NumericVector rlaplace( unsigned n
   //Rcpp::NumericVector sample(n);
   Rcpp::NumericVector sample = Rcpp::runif(n);
 
-  for(int i=0; i<n; ++i){
+  for(unsigned i=0; i<n; ++i){
 
     // this recovers the sign of the random draw
     double signal = sgn(sample[i]-0.5);
@@ -368,7 +369,7 @@ Rcpp::NumericVector rlaplace( unsigned n
 //' distribution given by the function:
 //' \deqn{f(x;a_l,a_r,m) =
 //' \begin{cases}
-//' \frac{1}{A} e^{-|\frac{x-m}{a_l}| }, & x < m \\
+//' \frac{1}{A} e^{-|\frac{x-m}{a_l}| }, & x < m
 //' \frac{1}{A} e^{-|\frac{x-m}{a_r}| }, & x > m
 //' \end{cases}}
 //' with:
@@ -389,11 +390,11 @@ Rcpp::NumericVector rlaplace( unsigned n
 //' @md
 // [[Rcpp::export]]
 Rcpp::NumericVector ralaplace(
-                              unsigned n
-                             ,double   m  = 0.
-                             ,double   al = 1.
-                             ,double   ar = 1.
-                            ){
+   unsigned n
+  ,double   m  = 0
+  ,double   al = 1
+  ,double   ar = 1
+){
 
   // use R's RNG
   Rcpp::RNGScope scope;
@@ -402,17 +403,18 @@ Rcpp::NumericVector ralaplace(
   Rcpp::NumericVector sample = Rcpp::runif(n);
   double value;
   double signal;
-  for(int i=0; i<n; ++i){
+  double A = al+ar;
+  for(unsigned i=0; i<n; ++i){
 
     // this recovers the sign of the random draw
-    signal = sgn(sample[i]-0.5);
+    signal = sgn(sample[i]- al/A);
 
     // this calculates the inverse (quantile function)
     //Rprintf("signal:%f", signal);
     if(signal < 0){
-      value = m - signal*al*log(1 + signal*(1 - 2*sample[i]));
+      value = m + al*log(A*sample[i]/al);
     }else{
-      value = m - signal*ar*log(1 + signal*(1 - 2*sample[i]));
+      value = m - ar*log( A*(1 - sample[i])/ar );
     }
     sample[i] = value;
   }
@@ -431,7 +433,7 @@ Rcpp::NumericVector ralaplace(
 //' be adapted to have non-zero location parameter.
 //' The Exponential Power distribution is related to the gamma distribution by
 //' the equation:
-//' E = a*G(1/b)^{1/b}
+//' \deqn{E = a*G(1/b)^{1/b}}
 //' where E and G are respectively EP and gamma random variables. This property
 //' is used for cases where \eqn{b<1} and \eqn{b>4}. For \eqn{1 \leq b \leq 4}
 //' rejection methods based on the Laplace and normal distributions are used,
@@ -446,7 +448,7 @@ Rcpp::NumericVector ralaplace(
 //' Copyright (C) 2006 Giulio Bottazzi
 //' Copyright (C) 2020-2021 Elias Haddad
 //' License: GPL 3+
-//  GSL file: randist/exppow.c
+//' GSL file: randist/exppow.c
 //' GSL function: gsl_ran_exppow
 //'
 //' @param n (int) - size of the sample.
@@ -461,11 +463,11 @@ Rcpp::NumericVector ralaplace(
 //' @md
 // [[Rcpp::export]]
 Rcpp::NumericVector rpower(
-                            unsigned n
-                           ,double   m = 0.
-                           ,double   a = 1.
-                           ,double   b = 2.
-                           ){
+   unsigned n
+  ,double   m = 0
+  ,double   a = 1
+  ,double   b = 2
+){
 
   // use R's RNG
   Rcpp::RNGScope scope;
@@ -479,17 +481,14 @@ Rcpp::NumericVector rpower(
       // allows for zero, while R's runif does not.
       // Does this impact the RNG in any meaningful way?
       Rcpp::NumericVector u = Rcpp::runif(n);
-      Rcpp::NumericVector v = rgamma(n, 1 / b, 1.0);
+      Rcpp::NumericVector v = rgamma_c(n, 1 / b, 1.0);
       Rcpp::NumericVector z = a * pow (v, 1 / b);
 
-     result = Rcpp::ifelse(u > 0.5, z, -z);
-
-     return result;
-
+      result = m + Rcpp::ifelse(u > 0.5, z, -z);
   }
   else if (b == 1){
       // Laplace distribution
-      return rlaplace(n, 0, a);
+    result =  rlaplace(n, m, a);
   }
   else if ( (b>1) && (b < 2) ){
       // Use laplace distribution for rejection method, from Tadikamalla
@@ -509,15 +508,12 @@ Rcpp::NumericVector rpower(
         while (log (u) > h);
 
         // stores result in array
-        result[i] = a*x;
+        result[i] = m + a*x;
       }
-
-      return result;
-
   }
   else if (b == 2){
-      // Gaussian distribution
-     return Rcpp::rnorm(n, 0, a/sqrt(2.0)); // to do: check if sd is correct
+    // Gaussian distribution
+    result = Rcpp::rnorm(n, m, a/sqrt(2.0));
   }
   else if ( (b > 2) && (b < 4) ){
       // Use gaussian for rejection method, from Tadikamalla
@@ -537,11 +533,10 @@ Rcpp::NumericVector rpower(
         while (log (u) > h);
 
         // stores result in array
-        result[i] = a*x;
+        result[i] = m + a*x;
       }
-
-      return result;
   }
+  return result;
 }
 
 
@@ -574,24 +569,21 @@ Rcpp::NumericVector rpower(
 //' @md
 // [[Rcpp::export]]
 Rcpp::NumericVector rsubbo(
-                            unsigned n
-                           ,double   m = 0.
-                           ,double   a = 1.
-                           ,double   b = 2.
-                           ){
+   unsigned n
+  ,double   m = 0
+  ,double   a = 1
+  ,double   b = 2
+){
 
   // use R's RNG
   Rcpp::RNGScope scope;
 
  // calculate inverse distribution
   const double dtmp1 = a * pow(b, 1./b);
-  Rcpp::NumericVector sample = m + rpower(n, dtmp1, b);
+  Rcpp::NumericVector sample = m + rpower(n, 0, dtmp1, b);
 
   return sample;
 }
-
-
-
 
 
 //' Produces a random sample from a Asymmetric Power Exponential distribution
@@ -599,11 +591,91 @@ Rcpp::NumericVector rsubbo(
 //'
 //' Generate pseudo random-number from an asymmetric power exponential distribution
 //' using the Tadikamalla method.
+//' This is the original version of Bottazzi (2004)
 //'
 //' The AEP distribution is expressed by the function:
 //' \deqn{f(x;a_l,a_r,b_l,b_r,m) =
 //' \begin{cases}
-//' \frac{1}{A} e^{- \frac{1}{b_l} |\frac{x-m}{a_l}|^{b_l} }, & x < m \\
+//' \frac{1}{A} e^{- \frac{1}{b_l} |\frac{x-m}{a_l}|^{b_l} }, & x < m
+//' \frac{1}{A} e^{- \frac{1}{b_r} |\frac{x-m}{a_r}|^{b_r} }, & x > m
+//' \end{cases} }
+//' with:
+//' \deqn{A = a_lb_l^{1/b_l}\Gamma(1+1/b_l) + a_rb_r^{1/b_r}\Gamma(1+1/b_r)}
+//' where \eqn{m} is a location parameter, \eqn{b*} are shape parameters, \eqn{a*}
+//' are scale parameters and \eqn{\Gamma} representes the gamma function.
+//' By a suitably transformation, it is possible to use the EP distribution with
+//' the Tadikamalla method to sample from this distribution. We basically take
+//' the absolute values of the numbers sampled from the \code{rpower} function,
+//' which is equivalent from sampling from a half Exponential Power distribution.
+//' This values are then weighted by a constant expressed in the parameters.
+//' More details are available on the package vignette and on the
+//' function \code{rpower}.
+//' Copyright (C) 2003-2014 Giulio Bottazzi
+//' Copyright (C) 2020-2021 Elias Haddad
+//' License: GPL 3+
+//'
+//' @param n (int) - size of the sample.
+//' @param m (numeric) - location parameter.
+//' @param bl,br (numeric) - shape parameters.
+//' @param al,ar (numeric) - scale parameters.
+//' @return a numeric vector containing a random sample.
+//'
+//' @examples
+//' sample_gamma <- rasubbo(1000, 0, 0.5, 0.5,  1, 1)
+//' @export
+//' @md
+// [[Rcpp::export]]
+Rcpp::NumericVector rasubbo_orig(
+   unsigned n
+  ,double   m  = 0
+  ,double   al = 1
+  ,double   ar = 1
+  ,double   bl = 2
+  ,double   br = 2
+){
+
+  // use R's RNG
+  Rcpp::RNGScope scope;
+
+  // variables
+  Rcpp::NumericVector sample(n);
+
+  // generate variate
+  const double Aleft  = al*pow(bl, 1./bl);
+  const double Aright = ar*pow(br, 1./br);
+
+  const double probleft = Aleft*gsl_sf_gamma(1./bl+1.)/
+    (Aleft * gsl_sf_gamma(1./bl+1.) + Aright * gsl_sf_gamma(1./br+1.));
+
+  sample = Rcpp::runif(n); // original implementation includes zero, while R's doesn't
+
+  // calculates RNG
+  for(unsigned i=0; i<n; ++i){
+
+    if(sample[i] < probleft){
+      sample[i] = m - fabs(rpower(1, 0, Aleft, bl)[0]);
+    }
+    else{
+      sample[i] = m + fabs(rpower(1, 0, Aright, br)[0]);
+    }
+  }
+  return sample;
+}
+
+
+//' Produces a random sample from a Asymmetric Power Exponential distribution
+//'
+//'
+//' Generate pseudo random-number from an asymmetric power exponential distribution
+//' using the Tadikamalla method.
+//' This version improves on Bottazzi (2004) by making the mass of each
+//' distribution to depend on the ratio between the \eqn{al} and the \eqn{ar}
+//' parameters.
+//'
+//' The AEP distribution is expressed by the function:
+//' \deqn{f(x;a_l,a_r,b_l,b_r,m) =
+//' \begin{cases}
+//' \frac{1}{A} e^{- \frac{1}{b_l} |\frac{x-m}{a_l}|^{b_l} }, & x < m
 //' \frac{1}{A} e^{- \frac{1}{b_r} |\frac{x-m}{a_r}|^{b_r} }, & x > m
 //' \end{cases} }
 //' with:
@@ -633,23 +705,27 @@ Rcpp::NumericVector rsubbo(
 //' @md
 // [[Rcpp::export]]
 Rcpp::NumericVector rasubbo(
-                             unsigned n
-                            ,double   m  = 0.
-                            ,double   al = 1.
-                            ,double   ar = 1.
-                            ,double   bl = 2.
-                            ,double   br = 2.
-                            ){
+   unsigned n
+  ,double   m  = 0
+  ,double   al = 1
+  ,double   ar = 1
+  ,double   bl = 2
+  ,double   br = 2
+){
 
   // use R's RNG
   Rcpp::RNGScope scope;
 
   // variables
   Rcpp::NumericVector sample(n);
+  double tmp;
 
   // generate variate
-  const double Aleft  = al*pow(bl, 1./bl);
-  const double Aright = ar*pow(br, 1./br);
+  // corretions here
+  const double Aleft  = al*pow(bl, 1./bl)*gsl_sf_gamma(1./bl+1.);
+  const double Aright = ar*pow(br, 1./br)*gsl_sf_gamma(1./br+1.);
+  // this term creates the weighting
+  const double Asum   = Aleft + Aright;
 
   const double probleft = Aleft*gsl_sf_gamma(1./bl+1.)/
     (Aleft * gsl_sf_gamma(1./bl+1.) + Aright * gsl_sf_gamma(1./br+1.));
@@ -657,17 +733,17 @@ Rcpp::NumericVector rasubbo(
   sample = Rcpp::runif(n); // original implementation includes zero, while R's doesn't
 
   // calculates RNG
-  for(int i=0; i<n; ++i){
-
+  for(unsigned i=0; i<n; ++i){
     if(sample[i] < probleft){
-      sample[i] = m - fabs(rpower(1, Aleft, bl)[0]);
+      // here we use the weight to assess the mass in each side of the dist.
+      tmp = bl*inv_inc_upper_gamma(1./bl, gsl_sf_gamma(1./bl)*Asum*sample[i]/Aleft);
+      sample[i] = m - al*pow(tmp, 1./bl) ;
     }
     else{
-      sample[i] = m + fabs(rpower(1, Aright, br)[0]);
+      //sample[i] = m + fabs(rpower(1, 0, Aright, br)[0]);
+      tmp = br*inv_inc_lower_gamma(1./br, gsl_sf_gamma(1./br)*Asum*(sample[i] - Aleft/Asum)/Aright);
+      sample[i] = m + ar*pow(tmp, 1./br) ;
     }
-
   }
-
   return sample;
-
 }

@@ -352,14 +352,14 @@ int main(void){
 
 // compute values of y for initial condition
 void do_initial_data_transform(
-                               Rcpp::NumericVector x
-                               ,const size_t n
-                               ,RcppGSL::vector<double> &y
-                               ,Rcpp::IntegerVector type
-                               ,Rcpp::NumericVector xmin
-                               ,Rcpp::NumericVector xmax
-                               ,int verb
-                               ){
+  Rcpp::NumericVector x
+  ,const size_t n
+  ,RcppGSL::vector<double> &y
+  ,Rcpp::IntegerVector type
+  ,Rcpp::NumericVector xmin
+  ,Rcpp::NumericVector xmax
+  ,int verb
+){
 
   size_t i;
   double dtmp1;
@@ -466,13 +466,13 @@ void do_initial_data_transform(
 
 
 void do_data_transformation(
-                            Rcpp::NumericVector x
-                            ,const size_t n
-                            ,Rcpp::NumericVector y
-                            ,Rcpp::IntegerVector type
-                            ,Rcpp::NumericVector xmin
-                            ,Rcpp::NumericVector xmax
-                            ){
+  Rcpp::NumericVector x
+  ,const size_t n
+  ,Rcpp::NumericVector y
+  ,Rcpp::IntegerVector type
+  ,Rcpp::NumericVector xmin
+  ,Rcpp::NumericVector xmax
+){
 
 
   size_t i;
@@ -527,13 +527,13 @@ void do_data_transformation(
 
 
 void do_data_transformation_df(
-                               Rcpp::NumericVector dx
-                               ,const size_t n
-                               ,Rcpp::NumericVector y
-                               ,Rcpp::IntegerVector type
-                               ,Rcpp::NumericVector xmin
-                               ,Rcpp::NumericVector xmax
-                               ){
+  Rcpp::NumericVector dx
+  ,const size_t n
+  ,Rcpp::NumericVector y
+  ,Rcpp::IntegerVector type
+  ,Rcpp::NumericVector xmin
+  ,Rcpp::NumericVector xmax
+){
 
   //Rcpp::NumericVector x
   size_t i;
@@ -799,9 +799,10 @@ static void gdg(const gsl_vector *y, void *gparams, double *g, gsl_vector *dg){
 // Select the algorithm to be used in the minimization process
 // this function has to be this bizarre turnaround because
 // gsl only accepts const arguments for its minimizers.
-struct multimin_algorithm choose_algorithm(unsigned int method
-                                           ,int verb
-                                           ){
+struct multimin_algorithm choose_algorithm(
+  unsigned int method
+  ,int verb
+){
 
 
   if(verb > 1){
@@ -876,9 +877,6 @@ struct multimin_algorithm choose_algorithm(unsigned int method
   return multimin_alg;
 
 }
-
-
-
 
 
 //' - n - INPUT: dimension of the problem, number of independent variables of the function.
@@ -1134,20 +1132,20 @@ struct multimin_algorithm choose_algorithm(unsigned int method
 //'           if greater then 0 print info on intermediate steps
 
 void multimin(
-              Rcpp::NumericVector data
-              ,size_t n
-              ,Rcpp::NumericVector x
-              ,double *fun
-              ,Rcpp::IntegerVector type
-              ,Rcpp::NumericVector xmin
-              ,Rcpp::NumericVector xmax
-              ,void (*f)    (Rcpp::NumericVector, const size_t, Rcpp::NumericVector, void *, double *)
-              ,void (* df)  (Rcpp::NumericVector, const size_t, Rcpp::NumericVector, void *, Rcpp::NumericVector)
-              ,void (* fdf) (Rcpp::NumericVector, const size_t, Rcpp::NumericVector, void *, double *, Rcpp::NumericVector)
-              ,void *fparams
-              ,const struct multimin_params oparams
-              ,int verb
-              ){
+  Rcpp::NumericVector data
+  ,size_t n
+  ,Rcpp::NumericVector x
+  ,double *fun
+  ,Rcpp::IntegerVector type
+  ,Rcpp::NumericVector xmin
+  ,Rcpp::NumericVector xmax
+  ,void (*f)    (Rcpp::NumericVector, const size_t, Rcpp::NumericVector, void *, double *)
+  ,void (* df)  (Rcpp::NumericVector, const size_t, Rcpp::NumericVector, void *, Rcpp::NumericVector)
+  ,void (* fdf) (Rcpp::NumericVector, const size_t, Rcpp::NumericVector, void *, double *, Rcpp::NumericVector)
+  ,void *fparams
+  ,const struct multimin_params oparams
+  ,int verb
+){
 
 
   size_t i=0;
@@ -1233,12 +1231,13 @@ void multimin(
     GdG.params = (void *) &gparams;
 
     /* initialize minimizer */
-    status1=gsl_multimin_fdfminimizer_set(s                        // minimizer
-                                          ,&GdG                    // function to be minimized
-                                          ,y                       // initial point
-                                          ,oparams.step_size       // step size
-                                          ,oparams.tol             // tolerance of line minimization (error proxy)
-                                          );
+    status1=gsl_multimin_fdfminimizer_set(
+      s                        // minimizer
+      ,&GdG                    // function to be minimized
+      ,y                       // initial point
+      ,oparams.step_size       // step size
+      ,oparams.tol             // tolerance of line minimization (error proxy)
+    );
 
     if(status1){
       Rcpp::stop("#ERROR: %s\n",gsl_strerror (status1));

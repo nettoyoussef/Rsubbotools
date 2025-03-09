@@ -49,14 +49,18 @@
    I     the variance-covariance matrix
 */
 
-RcppGSL::Matrix sep_varcovar(const Rcpp::NumericVector par, const size_t N, const size_t dim){
+RcppGSL::Matrix sep_varcovar(
+  const Rcpp::NumericVector par
+  , const size_t N
+  , const size_t dim
+){
 
   size_t i,j;
 
-  const double m=par[0];
-  const double s=par[1];
-  const double l=par[2];
-  const double a=par[3];
+  // const double m=par[0];
+  // const double s=par[1];
+  // const double l=par[2];
+  // const double a=par[3];
 
   // main matrix
   RcppGSL::matrix<double> I(dim,dim);
@@ -160,12 +164,12 @@ void sep_objf(
 
 
 void sep_objdf(
-               Rcpp::NumericVector data
-               ,const size_t n
-               ,Rcpp::NumericVector x
-               ,void *params
-               ,Rcpp::NumericVector df
-               ){
+  Rcpp::NumericVector data
+  ,const size_t n
+  ,Rcpp::NumericVector x
+  ,void *params
+  ,Rcpp::NumericVector df
+){
 
   unsigned size = data.size();
   size_t i;
@@ -204,8 +208,14 @@ void sep_objdf(
 }
 
 
-
-void sep_objfdf(Rcpp::NumericVector data, const size_t n, Rcpp::NumericVector x, void *params, double *f, Rcpp::NumericVector df){
+void sep_objfdf(
+  Rcpp::NumericVector data
+  , const size_t n
+  , Rcpp::NumericVector x
+  , void *params
+  , double *f
+  , Rcpp::NumericVector df
+){
 
   unsigned size = data.size();
   size_t i;
@@ -446,10 +456,10 @@ Rcpp::List sepfit(
   colnames(matrix) = param_names;
 
   Rcpp::List ans = Rcpp::List::create(
-                                      Rcpp::Named("dt")              = dt
-                                      ,Rcpp::Named("log-likelihood") = fmin
-                                      ,Rcpp::Named("matrix")         = matrix
-                                      );
+    Rcpp::Named("dt")              = dt
+    ,Rcpp::Named("log-likelihood") = fmin
+    ,Rcpp::Named("matrix")         = matrix
+  );
 
   return ans;
 }

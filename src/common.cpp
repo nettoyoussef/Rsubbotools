@@ -15,9 +15,7 @@
   along with this program; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
-
 #include "common.h"
-
 
 double inc_lower_gamma(double b, double p){
   // double pgamma(double x, double shape, double scale, int lower_tail, int log_p)
@@ -293,29 +291,30 @@ void print_results(
 
 // global optimization
 Rcpp::List global_optim(
-                        Rcpp::NumericVector data
-                        ,double fmin
-                        ,struct multimin_params global_oparams
-                        ,Rcpp::NumericVector par
-                        ,unsigned n_param
-                        ,unsigned m_position
-                        ,void (*f)    (Rcpp::NumericVector
-                                       , const size_t
-                                       , Rcpp::NumericVector, void *, double *)
-                        ,void (* df)  (Rcpp::NumericVector
-                                       , const size_t
-                                       , Rcpp::NumericVector
-                                       , void *
-                                       , Rcpp::NumericVector)
-                        ,void (* fdf) (Rcpp::NumericVector
-                                       , const size_t
-                                       , Rcpp::NumericVector
-                                       , void *
-                                       , double *
-                                       , Rcpp::NumericVector)
-                        ,Rcpp::Nullable<Rcpp::NumericVector> provided_m_ = R_NilValue
-                        ,int verb = 0
-                        ){
+  Rcpp::NumericVector data
+  ,double fmin
+  ,struct multimin_params global_oparams
+  ,Rcpp::NumericVector par
+  ,unsigned n_param
+  ,unsigned m_position
+  ,void (*f)    (Rcpp::NumericVector
+                 , const size_t
+                 , Rcpp::NumericVector, void *, double *)
+  ,void (* df)  (Rcpp::NumericVector
+                 , const size_t
+                 , Rcpp::NumericVector
+                 , void *
+                 , Rcpp::NumericVector)
+  ,void (* fdf) (Rcpp::NumericVector
+                 , const size_t
+                 , Rcpp::NumericVector
+                 , void *
+                 , double *
+                 , Rcpp::NumericVector)
+  ,Rcpp::Nullable<Rcpp::NumericVector> provided_m_ = R_NilValue
+  ,int verb = 0
+  )
+{
 
 
   /* ML estimation: global maximization */
@@ -442,44 +441,44 @@ Rcpp::List global_optim(
 // - interv_step - interval optimization parameters
 // - interv_oparams - interval optimization parameters
 Rcpp::List interval_optim(
-                          Rcpp::NumericVector data
-                          ,Rcpp::IntegerVector type
-                          ,Rcpp::NumericVector xmin
-                          ,Rcpp::NumericVector xmax
-                          ,Rcpp::NumericVector par
-                          ,double fmin
-                          ,struct multimin_params interv_oparams
-                          ,int interv_step
-                          ,unsigned n_param
-                          ,unsigned m_position
-                          ,void (*f)    (Rcpp::NumericVector
-                                         , const size_t
-                                         , Rcpp::NumericVector
-                                         , void *
-                                         , double *)
-                          ,void (* df)  (Rcpp::NumericVector
-                                         , const size_t
-                                         , Rcpp::NumericVector
-                                         , void *
-                                         , Rcpp::NumericVector)
-                          ,void (* fdf) (Rcpp::NumericVector
-                                         , const size_t
-                                         , Rcpp::NumericVector
-                                         , void *
-                                         , double *
-                                         , Rcpp::NumericVector)
-                          ,int verb
-                          ){
+  Rcpp::NumericVector data
+  ,Rcpp::IntegerVector type
+  ,Rcpp::NumericVector xmin
+  ,Rcpp::NumericVector xmax
+  ,Rcpp::NumericVector par
+  ,double fmin
+  ,struct multimin_params interv_oparams
+  ,unsigned interv_step
+  ,unsigned n_param
+  ,unsigned m_position
+  ,void (*f)    (Rcpp::NumericVector
+                 , const size_t
+                 , Rcpp::NumericVector
+                 , void *
+                 , double *)
+  ,void (* df)  (Rcpp::NumericVector
+                 , const size_t
+                 , Rcpp::NumericVector
+                 , void *
+                 , Rcpp::NumericVector)
+  ,void (* fdf) (Rcpp::NumericVector
+                 , const size_t
+                 , Rcpp::NumericVector
+                 , void *
+                 , double *
+                 , Rcpp::NumericVector)
+  ,int verb
+  ){
 
   // local
   double dtmp1;
   Rcpp::NumericVector xtmp(n_param); /* store the temporary minimum  */
-  unsigned int index;
-  unsigned int oldindex;
-  unsigned int i;
-  unsigned int max;
-  unsigned int min;
-  unsigned int size = data.size();
+  unsigned index;
+  unsigned oldindex;
+  unsigned i;
+  unsigned max;
+  unsigned min;
+  unsigned size = data.size();
   //unsigned int n = 2; // number of parameters
 
   // only x[0] = b = par[0] and x[1]=m = par[2] are optimized
@@ -836,11 +835,8 @@ double steffensen_c(newton_args x){
       xlag_2 = x_vec[iter-2];
       denom  = x.x_guess - 2*xlag_1 + xlag_2;
 
-      // if denominator is null, uses Newton method
-      if(denom == 0){
-        x_vec[iter] <- x.x_guess;
-
-      }else{
+      // if denominator is not null, uses accelerated method
+      if(denom != 0){
         // uses accelerated method
         x_vec[iter] = xlag_2 - pow(xlag_1 - xlag_2, 2)/denom;
         x.x_guess = x_vec[iter];

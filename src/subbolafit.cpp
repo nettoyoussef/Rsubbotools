@@ -86,7 +86,13 @@ void subbola_printdensity(Rcpp::NumericVector data, double param[]){
 /* Object Function */
 /*---------------- */
 
-void subbola_objf(Rcpp::NumericVector data, const size_t n, Rcpp::NumericVector x, void *params, double *f){
+void subbola_objf(
+  Rcpp::NumericVector data
+  , const size_t n
+  , Rcpp::NumericVector x
+  , void *params
+  , double *f
+){
 
   // data size
   unsigned size = data.size();
@@ -136,7 +142,13 @@ void subbola_objf(Rcpp::NumericVector data, const size_t n, Rcpp::NumericVector 
 }
 
 
-void subbola_objdf(Rcpp::NumericVector data, const size_t n, Rcpp::NumericVector x, void *params, Rcpp::NumericVector df){
+void subbola_objdf(
+  Rcpp::NumericVector data
+  , const size_t n
+  , Rcpp::NumericVector x
+  , void *params
+  , Rcpp::NumericVector df
+){
 
   // data size
   unsigned size = data.size();
@@ -222,7 +234,14 @@ void subbola_objdf(Rcpp::NumericVector data, const size_t n, Rcpp::NumericVector
 }
 
 
-void subbola_objfdf(Rcpp::NumericVector data, const size_t n, Rcpp::NumericVector x, void *params, double *f, Rcpp::NumericVector df){
+void subbola_objfdf(
+  Rcpp::NumericVector data
+  , const size_t n
+  , Rcpp::NumericVector x
+  , void *params
+  , double *f
+  , Rcpp::NumericVector df
+){
 
 
   // data size
@@ -249,8 +268,6 @@ void subbola_objfdf(Rcpp::NumericVector data, const size_t n, Rcpp::NumericVecto
 
   gsl_sf_result result;
   int status;
-
-
 
   if( (status = gsl_sf_gamma_e(1./bl+1.,&result)) ){
     Rprintf("Error - bl=%e\n",bl);
@@ -327,7 +344,7 @@ void subbola_objfdf(Rcpp::NumericVector data, const size_t n, Rcpp::NumericVecto
 //' by four parameters, with formula:
 //' \deqn{ f(x;a,b_l,b_r,m) =
 //' \begin{cases}
-//' \frac{1}{A} e^{- \frac{1}{b_l} |\frac{x-m}{a}|^{b_l} }, & x < m \\
+//' \frac{1}{A} e^{- \frac{1}{b_l} |\frac{x-m}{a}|^{b_l} }, & x < m
 //' \frac{1}{A} e^{- \frac{1}{b_r} |\frac{x-m}{a}|^{b_r} }, & x > m
 //' \end{cases} }
 //' with:
@@ -400,15 +417,15 @@ void subbola_objfdf(Rcpp::NumericVector data, const size_t n, Rcpp::NumericVecto
 //' @md
 // [[Rcpp::export]]
 Rcpp::List subbolafit(
-                      Rcpp::NumericVector data
-                      ,int verb = 0
-                      ,int method = 2
-                      ,int interv_step = 10
-                      ,Rcpp::Nullable<Rcpp::NumericVector> provided_m_ = R_NilValue
-                      ,Rcpp::NumericVector par = Rcpp::NumericVector::create(2., 2., 1., 0.)
-                      ,Rcpp::NumericVector g_opt_par = Rcpp::NumericVector::create(.1, 1e-2, 100, 1e-3, 1e-5, 2)
-                      ,Rcpp::NumericVector itv_opt_par = Rcpp::NumericVector::create(.01, 1e-3, 200, 1e-3, 1e-5, 2)
-                      ){
+  Rcpp::NumericVector data
+  ,int verb = 0
+  ,int method = 2
+  ,int interv_step = 10
+  ,Rcpp::Nullable<Rcpp::NumericVector> provided_m_ = R_NilValue
+  ,Rcpp::NumericVector par = Rcpp::NumericVector::create(2., 2., 1., 0.)
+  ,Rcpp::NumericVector g_opt_par = Rcpp::NumericVector::create(.1, 1e-2, 100, 1e-3, 1e-5, 2)
+  ,Rcpp::NumericVector itv_opt_par = Rcpp::NumericVector::create(.01, 1e-3, 200, 1e-3, 1e-5, 2)
+){
 
   // check arguments
   int check_par_size = par.size();
@@ -496,16 +513,15 @@ Rcpp::List subbolafit(
   if(method == 0){
 
     // main dataframe with coefficients
-    Rcpp::DataFrame dt =
-      Rcpp::DataFrame::create(Rcpp::Named("param") = param_names
-                              ,Rcpp::Named("coef") = par
-                              );
+    Rcpp::DataFrame dt = Rcpp::DataFrame::create(
+      Rcpp::Named("param") = param_names
+      ,Rcpp::Named("coef") = par
+    );
 
-    Rcpp::List ans =
-      Rcpp::List::create(
-                         Rcpp::Named("dt")              = dt
-                         ,Rcpp::Named("log-likelihood") = fmin
-                         );
+    Rcpp::List ans = Rcpp::List::create(
+      Rcpp::Named("dt")              = dt
+      ,Rcpp::Named("log-likelihood") = fmin
+    );
     return ans;
 
   }
@@ -516,43 +532,41 @@ Rcpp::List subbolafit(
   if(method >= 1){
 
     // notice: par is updated by reference
-    Rcpp::List g_opt_results =
-      global_optim(
-                   data
-                   ,fmin
-                   ,global_oparams
-                   ,par
-                   ,(unsigned) 4
-                   ,(unsigned) 3
-                   ,subbola_objf
-                   ,subbola_objdf
-                   ,subbola_objfdf
-                   ,provided_m_
-                   ,verb
-                   );
+    Rcpp::List g_opt_results = global_optim(
+      data
+      ,fmin
+      ,global_oparams
+      ,par
+      ,(unsigned) 4
+      ,(unsigned) 3
+      ,subbola_objf
+      ,subbola_objdf
+      ,subbola_objfdf
+      ,provided_m_
+      ,verb
+    );
 
     /* interval optimization  */
     /* ---------------------- */
 
     if(method >= 2){
 
-      g_opt_results =
-        interval_optim(
-                       data
-                       ,g_opt_results["type"]
-                       ,g_opt_results["xmin"]
-                       ,g_opt_results["xmax"]
-                       ,par
-                       ,g_opt_results["fmin"]
-                       ,interv_oparams /* interval optimization parameters */
-                       ,interv_step /* interval optimization step */
-                       ,(unsigned) 4
-                       ,(unsigned) 3
-                       ,subbola_objf
-                       ,subbola_objdf
-                       ,subbola_objfdf
-                       ,verb
-                       );
+      g_opt_results = interval_optim(
+        data
+        ,g_opt_results["type"]
+        ,g_opt_results["xmin"]
+        ,g_opt_results["xmax"]
+        ,par
+        ,g_opt_results["fmin"]
+        ,interv_oparams /* interval optimization parameters */
+        ,interv_step /* interval optimization step */
+        ,(unsigned) 4
+        ,(unsigned) 3
+        ,subbola_objf
+        ,subbola_objdf
+        ,subbola_objfdf
+        ,verb
+      );
 
       // updates log-likelihood
       fmin = Rcpp::as<double>(g_opt_results["fmin"]);
@@ -585,9 +599,9 @@ Rcpp::List subbolafit(
   //                              );
 
   // main dataframe with coefficients
-  Rcpp::List dt =
-    Rcpp::DataFrame::create( Rcpp::Named("param")     = param_names
-                            ,Rcpp::Named("coef")      = par
+  Rcpp::List dt = Rcpp::DataFrame::create(
+     Rcpp::Named("param")     = param_names
+    ,Rcpp::Named("coef")      = par
                       );
   //,Rcpp::Named("std_error") = std_error
 
@@ -598,11 +612,10 @@ Rcpp::List subbolafit(
   //colnames(matrix) = param_names;
 
   Rcpp::List ans = Rcpp::List::create(
-                                       Rcpp::Named("dt")             = dt
-                                      ,Rcpp::Named("log-likelihood") = fmin
-                                     );
-                                      //,Rcpp::Named("matrix")         = matrix
-
+     Rcpp::Named("dt")             = dt
+    ,Rcpp::Named("log-likelihood") = fmin
+  );
+  //,Rcpp::Named("matrix")         = matrix
 
   return ans;
 }

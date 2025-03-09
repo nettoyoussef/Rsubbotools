@@ -26,7 +26,11 @@
   dim   dimension of the matrix: 2 m known; 3 m unknown
   I     the variance-covarance matrxi
 */
-RcppGSL::Matrix subboa_varcovar(const Rcpp::NumericVector par, const size_t N, const size_t dim){
+RcppGSL::Matrix subboa_varcovar(
+  const Rcpp::NumericVector par
+  , const size_t N
+  , const size_t dim
+){
 
   const double bl = par[0];
   const double br = par[1];
@@ -199,7 +203,13 @@ RcppGSL::Matrix subboa_varcovar(const Rcpp::NumericVector par, const size_t N, c
 /* Objective Function */
 /*---------------- */
 
-void subboa_objf(Rcpp::NumericVector data, const size_t n, Rcpp::NumericVector x, void *params, double *f){
+void subboa_objf(
+  Rcpp::NumericVector data
+  , const size_t n
+  , Rcpp::NumericVector x
+  , void *params
+  , double *f
+){
 
   // data size
   unsigned size = data.size();
@@ -251,8 +261,13 @@ void subboa_objf(Rcpp::NumericVector data, const size_t n, Rcpp::NumericVector x
 }
 
 
-
-void subboa_objdf(Rcpp::NumericVector data, const size_t n, Rcpp::NumericVector x, void *params, Rcpp::NumericVector df){
+void subboa_objdf(
+  Rcpp::NumericVector data
+  , const size_t n
+  , Rcpp::NumericVector x
+  , void *params
+  , Rcpp::NumericVector df
+){
 
 
   // data size
@@ -324,7 +339,14 @@ void subboa_objdf(Rcpp::NumericVector data, const size_t n, Rcpp::NumericVector 
 }
 
 
-void subboa_objfdf(Rcpp::NumericVector data, const size_t n, Rcpp::NumericVector x, void *params, double *f, Rcpp::NumericVector df){
+void subboa_objfdf(
+  Rcpp::NumericVector data
+  , const size_t n
+  , Rcpp::NumericVector x
+  , void *params
+  , double *f
+  , Rcpp::NumericVector df
+){
 
   // data size
   unsigned size = data.size();
@@ -408,7 +430,7 @@ void subboa_objfdf(Rcpp::NumericVector data, const size_t n, Rcpp::NumericVector
 //' by five parameters, with formula:
 //' \deqn{ f(x;a_l,a_r,b_l,b_r,m) =
 //' \begin{cases}
-//' \frac{1}{A} e^{- \frac{1}{b_l} |\frac{x-m}{a_l}|^{b_l} }, & x < m \\
+//' \frac{1}{A} e^{- \frac{1}{b_l} |\frac{x-m}{a_l}|^{b_l} }, & x < m
 //' \frac{1}{A} e^{- \frac{1}{b_r} |\frac{x-m}{a_r}|^{b_r} }, & x > m
 //' \end{cases} }
 //' with:
@@ -481,15 +503,15 @@ void subboa_objfdf(Rcpp::NumericVector data, const size_t n, Rcpp::NumericVector
 //' @md
 // [[Rcpp::export]]
 Rcpp::List subboafit(
-                     Rcpp::NumericVector data
-                     ,int verb = 0
-                     ,int method = 6
-                     ,int interv_step = 10
-                     ,Rcpp::Nullable<Rcpp::NumericVector> provided_m_ = R_NilValue
-                     ,Rcpp::NumericVector par = Rcpp::NumericVector::create(2., 2., 1., 1., 0.)
-                     ,Rcpp::NumericVector g_opt_par = Rcpp::NumericVector::create(.1, 1e-2, 100, 1e-3, 1e-5, 2)
-                     ,Rcpp::NumericVector itv_opt_par = Rcpp::NumericVector::create(.01, 1e-3, 200, 1e-3, 1e-5, 5)
-                     ){
+  Rcpp::NumericVector data
+  ,int verb = 0
+  ,int method = 6
+  ,int interv_step = 10
+  ,Rcpp::Nullable<Rcpp::NumericVector> provided_m_ = R_NilValue
+  ,Rcpp::NumericVector par = Rcpp::NumericVector::create(2., 2., 1., 1., 0.)
+  ,Rcpp::NumericVector g_opt_par = Rcpp::NumericVector::create(.1, 1e-2, 100, 1e-3, 1e-5, 2)
+  ,Rcpp::NumericVector itv_opt_par = Rcpp::NumericVector::create(.01, 1e-3, 200, 1e-3, 1e-5, 5)
+){
 
   // check arguments
   int check_par_size = par.size();
@@ -615,23 +637,22 @@ Rcpp::List subboafit(
 
     if(method >= 2){
 
-      g_opt_results =
-        interval_optim(
-                       data
-                       ,g_opt_results["type"]
-                       ,g_opt_results["xmin"]
-                       ,g_opt_results["xmax"]
-                       ,par
-                       ,g_opt_results["fmin"]
-                       ,interv_oparams /* interval optimization parameters */
-                       ,interv_step /* interval optimization step */
-                       ,(unsigned) 5
-                       ,(unsigned) 4
-                       ,subboa_objf
-                       ,subboa_objdf
-                       ,subboa_objfdf
-                       ,verb
-                       );
+      g_opt_results = interval_optim(
+        data
+        ,g_opt_results["type"]
+        ,g_opt_results["xmin"]
+        ,g_opt_results["xmax"]
+        ,par
+        ,g_opt_results["fmin"]
+        ,interv_oparams /* interval optimization parameters */
+        ,interv_step /* interval optimization step */
+        ,(unsigned) 5
+        ,(unsigned) 4
+        ,subboa_objf
+        ,subboa_objdf
+        ,subboa_objfdf
+        ,verb
+      );
 
       // updates log-likelihood
       fmin = Rcpp::as<double>(g_opt_results["fmin"]);
@@ -652,21 +673,20 @@ Rcpp::List subboafit(
   // and on its lower diagonal presents the correlation coefficients between the parameters
 
   // vector of standard errors
-  Rcpp::NumericVector std_error =
-    Rcpp::NumericVector::create(
-                                 sqrt(V(0,0)) // bl
-                                ,sqrt(V(1,1)) // br
-                                ,sqrt(V(2,2)) // al
-                                ,sqrt(V(3,3)) // ar
-                                ,sqrt(V(4,4)) // m
-                                );
+  Rcpp::NumericVector std_error = Rcpp::NumericVector::create(
+     sqrt(V(0,0)) // bl
+    ,sqrt(V(1,1)) // br
+    ,sqrt(V(2,2)) // al
+    ,sqrt(V(3,3)) // ar
+    ,sqrt(V(4,4)) // m
+  );
 
   // main dataframe with coefficients
-  Rcpp::List dt =
-    Rcpp::DataFrame::create( Rcpp::Named("param")     = param_names
-                            ,Rcpp::Named("coef")      = par
-                            ,Rcpp::Named("std_error") = std_error
-                      );
+  Rcpp::List dt = Rcpp::DataFrame::create(
+     Rcpp::Named("param")     = param_names
+    ,Rcpp::Named("coef")      = par
+    ,Rcpp::Named("std_error") = std_error
+  );
 
   // convert matrix
   Rcpp::NumericMatrix matrix = Rcpp::as<Rcpp::NumericMatrix>(Rcpp::wrap(V));
@@ -675,10 +695,10 @@ Rcpp::List subboafit(
   colnames(matrix) = param_names;
 
   Rcpp::List ans = Rcpp::List::create(
-                                       Rcpp::Named("dt")             = dt
-                                      ,Rcpp::Named("log-likelihood") = fmin
-                                      ,Rcpp::Named("matrix")         = matrix
-                                     );
+      Rcpp::Named("dt")             = dt
+     ,Rcpp::Named("log-likelihood") = fmin
+     ,Rcpp::Named("matrix")         = matrix
+  );
 
 
   return ans;

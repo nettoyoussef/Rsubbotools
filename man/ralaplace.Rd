@@ -24,7 +24,7 @@ The Asymmetric Laplace distribution is given by the two-sided exponential
 distribution given by the function:
 \deqn{f(x;a_l,a_r,m) =
 \begin{cases}
-\frac{1}{A} e^{-|\frac{x-m}{a_l}| }, & x < m \\
+\frac{1}{A} e^{-|\frac{x-m}{a_l}| }, & x < m
 \frac{1}{A} e^{-|\frac{x-m}{a_r}| }, & x > m
 \end{cases}}
 with:

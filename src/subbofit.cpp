@@ -21,9 +21,7 @@
 
 
 //Main headers
-
 #include "common.h"
-
 /*------------------*/
 
 
@@ -50,7 +48,11 @@ double geta(Rcpp::NumericVector& data, const double b, const double mu){
   dim   dimension of the matrix: 2 m known; 3 m unknown
   I     the variance-covariance matrix
 */
-RcppGSL::Matrix subbo_varcovar(const Rcpp::NumericVector par, const size_t N, const size_t dim){
+RcppGSL::Matrix subbo_varcovar(
+  const Rcpp::NumericVector par
+  , const size_t N
+  , const size_t dim
+){
 
   RcppGSL::Matrix I(dim, dim);
   const double b = par[0];
@@ -225,13 +227,12 @@ Rcpp::List moment(Rcpp::NumericVector& data){
   // calculates standard deviation
   sdev = sqrt(var);
 
-  Rcpp::List ans =
-    Rcpp::List::create(
-                        Rcpp::Named("average") = average
-                       ,Rcpp::Named("aad")     = aad
-                       ,Rcpp::Named("sdev")    = sdev
-                       ,Rcpp::Named("var")     = var
-                       );
+  Rcpp::List ans = Rcpp::List::create(
+     Rcpp::Named("average") = average
+    ,Rcpp::Named("aad")     = aad
+    ,Rcpp::Named("sdev")    = sdev
+    ,Rcpp::Named("var")     = var
+  );
 
   return ans;
 }
@@ -353,7 +354,12 @@ double mm_subbotin(const double std_over_aad, int verb = 0){
 /* -------------------- */
 
 /* reduced log likelyhood x[0] = b x[1] = mu */
-void subbo_objf(Rcpp::NumericVector data, const size_t n, Rcpp::NumericVector x, void *params, double *f){
+void subbo_objf(
+  Rcpp::NumericVector data
+  , const size_t n
+  , Rcpp::NumericVector x
+  , void *params, double *f
+){
 
   size_t size = data.size();
   const double b = x[0]; // default to 2
@@ -380,7 +386,13 @@ void subbo_objf(Rcpp::NumericVector data, const size_t n, Rcpp::NumericVector x,
 
 
 /* derivative of the reduced log likelyhood x[0] = b x[1] = mu */
-void subbo_objdf(Rcpp::NumericVector data, const size_t n, Rcpp::NumericVector x, void *params, Rcpp::NumericVector df){
+void subbo_objdf(
+  Rcpp::NumericVector data
+  , const size_t n
+  , Rcpp::NumericVector x
+  , void *params
+  , Rcpp::NumericVector df
+){
 
   size_t size = data.size();
   const double b = x[0];
@@ -417,7 +429,14 @@ void subbo_objdf(Rcpp::NumericVector data, const size_t n, Rcpp::NumericVector x
 }
 
 /* reduced likelyhood and derivatives x[0] = b x[1] = mu */
-void subbo_objfdf(Rcpp::NumericVector data, const size_t n, Rcpp::NumericVector x, void *params, double *f, Rcpp::NumericVector df){
+void subbo_objfdf(
+  Rcpp::NumericVector data
+  , const size_t n
+  , Rcpp::NumericVector x
+  , void *params
+  , double *f
+  , Rcpp::NumericVector df
+){
 
   unsigned size = data.size();
   const double b = x[0];
@@ -463,11 +482,11 @@ void subbo_objfdf(Rcpp::NumericVector data, const size_t n, Rcpp::NumericVector 
 
 // [[Rcpp::export]]
 Rcpp::List optim_method_moments(
-                                Rcpp::NumericVector data
-                                ,double fmin
-                                ,Rcpp::Nullable<Rcpp::NumericVector> provided_m_ = R_NilValue
-                                ,int verb = 0
-                                ){
+  Rcpp::NumericVector data
+  ,double fmin
+  ,Rcpp::Nullable<Rcpp::NumericVector> provided_m_ = R_NilValue
+  ,int verb = 0
+){
 
   // variables
   Rcpp::NumericVector par(3);
@@ -524,11 +543,10 @@ Rcpp::List optim_method_moments(
     Rprintf("END OF METHOD OF MOMENTS\n");
   }
 
-  Rcpp::List ans =
-    Rcpp::List::create(
-                        Rcpp::Named("par") = par
-                       ,Rcpp::Named("fmin") = fmin
-                       );
+  Rcpp::List ans = Rcpp::List::create(
+     Rcpp::Named("par") = par
+    ,Rcpp::Named("fmin") = fmin
+  );
   return ans;
 }
 
@@ -615,15 +633,15 @@ Rcpp::List optim_method_moments(
 //' @md
 // [[Rcpp::export]]
 Rcpp::List subbofit(
-              Rcpp::NumericVector data
-             ,int verb = 0
-             ,int method = 3
-             ,int interv_step = 10
-             ,Rcpp::Nullable<Rcpp::NumericVector> provided_m_ = R_NilValue
-             ,Rcpp::NumericVector par = Rcpp::NumericVector::create(2.,1.,0.)
-             ,Rcpp::NumericVector g_opt_par = Rcpp::NumericVector::create(.1, 1e-2, 100, 1e-3, 1e-5, 3)
-             ,Rcpp::NumericVector itv_opt_par = Rcpp::NumericVector::create(.01, 1e-3, 200, 1e-3, 1e-5, 5)
-                    ){
+   Rcpp::NumericVector data
+  ,int verb = 0
+  ,int method = 3
+  ,int interv_step = 10
+  ,Rcpp::Nullable<Rcpp::NumericVector> provided_m_ = R_NilValue
+  ,Rcpp::NumericVector par = Rcpp::NumericVector::create(2.,1.,0.)
+  ,Rcpp::NumericVector g_opt_par = Rcpp::NumericVector::create(.1, 1e-2, 100, 1e-3, 1e-5, 3)
+  ,Rcpp::NumericVector itv_opt_par = Rcpp::NumericVector::create(.01, 1e-3, 200, 1e-3, 1e-5, 5)
+){
 
   // check arguments
   int check_par_size = par.size();
@@ -686,7 +704,8 @@ Rcpp::List subbofit(
 
   /* reduced log likelyhood x[0] = b x[1] = mu */
   Rcpp::NumericVector x = Rcpp::NumericVector::create(par[0], par[2]);
-  subbo_objf(data, 2, x, NULL, &fmin); // this updates the value of the reduced log likelyhood in fmin
+  // this updates the value of the reduced log likelyhood in fmin
+  subbo_objf(data, 2, x, NULL, &fmin);
 
   if(verb > 0){
 
@@ -708,15 +727,15 @@ Rcpp::List subbofit(
       Rcpp::CharacterVector::create("b", "a", "m");
 
     // main dataframe with coefficients
-      Rcpp::DataFrame dt =
-        Rcpp::DataFrame::create( Rcpp::Named("param") = param_names
-                                 ,Rcpp::Named("coef") = par
-                                 );
+      Rcpp::DataFrame dt = Rcpp::DataFrame::create(
+         Rcpp::Named("param") = param_names
+         ,Rcpp::Named("coef") = par
+      );
 
       Rcpp::List ans = Rcpp::List::create(
-                                          Rcpp::Named("dt")              = dt
-                                          ,Rcpp::Named("log-likelihood") = fmin
-                                          );
+        Rcpp::Named("dt")              = dt
+        ,Rcpp::Named("log-likelihood") = fmin
+      );
 
       return ans;
 
@@ -727,11 +746,12 @@ Rcpp::List subbofit(
   if(method >= 1){
 
     // calculate parameters with the method of moments
-    Rcpp::List moment_results  = optim_method_moments(data
-                                                      ,fmin
-                                                      ,provided_m_
-                                                      ,verb
-                                                      );
+    Rcpp::List moment_results  = optim_method_moments(
+      data
+      ,fmin
+      ,provided_m_
+      ,verb
+    );
     par = moment_results["par"];
     fmin = moment_results["fmin"];
 
@@ -744,20 +764,19 @@ Rcpp::List subbofit(
     x = Rcpp::NumericVector::create(par[0], par[2]);
 
     // notice: x is updated by reference
-    Rcpp::List g_opt_results =
-      global_optim(
-                   data
-                   ,fmin
-                   ,global_oparams
-                   ,x
-                   ,(unsigned) 2
-                   ,(unsigned) 1
-                   ,subbo_objf
-                   ,subbo_objdf
-                   ,subbo_objfdf
-                   ,provided_m_
-                   ,verb
-                   );
+    Rcpp::List g_opt_results = global_optim(
+      data
+      ,fmin
+      ,global_oparams
+      ,x
+      ,(unsigned) 2
+      ,(unsigned) 1
+      ,subbo_objf
+      ,subbo_objdf
+      ,subbo_objfdf
+      ,provided_m_
+      ,verb
+    );
 
     /* store final values */
     /* ------------------ */
@@ -770,23 +789,22 @@ Rcpp::List subbofit(
 
     if(method >= 3){
 
-      g_opt_results =
-        interval_optim(
-                       data
-                       ,g_opt_results["type"]
-                       ,g_opt_results["xmin"]
-                       ,g_opt_results["xmax"]
-                       ,x
-                       ,g_opt_results["fmin"]
-                       ,interv_oparams /* interval optimization parameters */
-                       ,interv_step /* interval optimization step */
-                       ,(unsigned) 2
-                       ,(unsigned) 1
-                       ,subbo_objf
-                       ,subbo_objdf
-                       ,subbo_objfdf
-                       ,verb
-                       );
+      g_opt_results = interval_optim(
+        data
+        ,g_opt_results["type"]
+        ,g_opt_results["xmin"]
+        ,g_opt_results["xmax"]
+        ,x
+        ,g_opt_results["fmin"]
+        ,interv_oparams /* interval optimization parameters */
+        ,interv_step /* interval optimization step */
+        ,(unsigned) 2
+        ,(unsigned) 1
+        ,subbo_objf
+        ,subbo_objdf
+        ,subbo_objfdf
+        ,verb
+      );
 
       /* store final values */
       /* ------------------ */
@@ -812,22 +830,21 @@ Rcpp::List subbofit(
   // and on its lower diagonal presents the correlation coefficients between the parameters
 
   // vector of standard errors
-  Rcpp::NumericVector std_error =
-    Rcpp::NumericVector::create(
-                                 sqrt(V(0,0)) // b
-                                ,sqrt(V(1,1)) // a
-                                ,sqrt(V(2,2)) // m
-                                );
+  Rcpp::NumericVector std_error = Rcpp::NumericVector::create(
+     sqrt(V(0,0)) // b
+    ,sqrt(V(1,1)) // a
+    ,sqrt(V(2,2)) // m
+  );
 
    // Name of parameters
    Rcpp::CharacterVector param_names = Rcpp::CharacterVector::create("b", "a", "m");
 
    // main dataframe with coefficients
-   Rcpp::List dt =
-     Rcpp::DataFrame::create( Rcpp::Named("param")     = param_names
-                             ,Rcpp::Named("coef")      = par
-                             ,Rcpp::Named("std_error") = std_error
-                       );
+   Rcpp::List dt = Rcpp::DataFrame::create(
+      Rcpp::Named("param")     = param_names
+     ,Rcpp::Named("coef")      = par
+     ,Rcpp::Named("std_error") = std_error
+   );
 
   // convert matrix
   Rcpp::NumericMatrix matrix = Rcpp::as<Rcpp::NumericMatrix>(Rcpp::wrap(V));
@@ -836,11 +853,10 @@ Rcpp::List subbofit(
   colnames(matrix) = param_names;
 
   Rcpp::List ans = Rcpp::List::create(
-                                       Rcpp::Named("dt")             = dt
-                                      ,Rcpp::Named("log-likelihood") = fmin
-                                      ,Rcpp::Named("matrix")         = matrix
-                                     );
-
+      Rcpp::Named("dt")             = dt
+     ,Rcpp::Named("log-likelihood") = fmin
+     ,Rcpp::Named("matrix")         = matrix
+    );
 
   return ans;
 
