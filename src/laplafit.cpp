@@ -95,16 +95,17 @@ Rcpp::List laplafit(
 
   // negative log-likelihood
   double fmin = 0;
-  double tmp_fmin;
+  double tmp_fmin=0;
 
   // indices for pseudo-optimization
-  size_t index, oldindex, max, min;
+  long long int index, oldindex;
+  long long int max=0, min=0;
 
   // index for general loops
-  size_t i;
+  long long int i;
 
   /* store data */
-  size_t size = data.size();/*the number of data*/
+  long long int size = data.size();/*the number of data*/
 
   /* sort data */
   /* --------- */
@@ -134,7 +135,7 @@ Rcpp::List laplafit(
     fmin = lapla_nll(data, m);
 
     if(verb > 0){
-      Rprintf("# index=%ld\n", index);
+      Rprintf("# index=%lld\n", index);
       Rprintf("#>>> Initial minimum: m=%e ll=%e\n", m, fmin);
     }
 
@@ -213,7 +214,7 @@ Rcpp::List laplafit(
     Rprintf("Results of interval optimization: \n");
     Rprintf("#>>> m=%e ll=%e\n", m, tmp_fmin);
     Rprintf("\n");
-    Rprintf("#  intervals explored: %ld\n",max-min);
+    Rprintf("#  intervals explored: %lld\n",max-min);
     Rprintf("\n");
   }
 

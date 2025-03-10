@@ -809,10 +809,9 @@ struct multimin_algorithm choose_algorithm(
     Rprintf("Choosing algorithm:\n");
   }
 
-  const gsl_multimin_fdfminimizer_type *Tfdf;
-  const gsl_multimin_fminimizer_type *Tf;
+  const gsl_multimin_fdfminimizer_type *Tfdf = gsl_multimin_fdfminimizer_vector_bfgs;
+  const gsl_multimin_fminimizer_type *Tf = gsl_multimin_fminimizer_nmsimplex2;
   const char *Tname;
-
 
   /* set the algorithm */
   switch(method){

@@ -409,7 +409,6 @@ void subbola_objfdf(
 //' @return a list containing the following items:
 //' * "dt" - dataset containing parameters estimations and standard deviations.
 //' * "log-likelihood" - negative log-likelihood value.
-//' * "matrix" - the covariance matrix for the parameters.
 //'
 //' @examples
 //' sample_subbo <- rpower(1000, 1, 2)
@@ -440,9 +439,6 @@ Rcpp::List subbolafit(
   // Name of parameters
   Rcpp::CharacterVector param_names = Rcpp::CharacterVector::create("bl", "br", "a", "m");
 
-  /* store possibly provided values for parameters */
-  unsigned is_m_provided = 0;
-
   // define optimization parameters
   struct multimin_params global_oparams =
     { (double)       g_opt_par[0]
@@ -470,14 +466,11 @@ Rcpp::List subbolafit(
   // initial value for m parameter
   if(provided_m_.isNotNull()){
 
-    is_m_provided = 1;
-
     // casting the null value
     // necessary according to
     // https://gallery.rcpp.org/articles/optional-null-function-arguments/
     Rcpp::NumericVector provided_m(provided_m_);
     par[3] = provided_m[0];
-
 
   }
 
@@ -578,45 +571,15 @@ Rcpp::List subbolafit(
 
   // generate outputs
 
-  // variables
-  //const size_t dim=(is_m_provided?4:5); /* set the size of the var-covar matrix */
-
-  /* allocate var-covar matrix */
-  // The V matrix has on its main diagonal the variance of parameters
-  // on the lower diagonal the correlation coefficients
-  // on the upper diagonal the covariances
-  //RcppGSL::Matrix V =  subbola_varcovar(par, Size, dim);
-  // this matrix in its upper diagonal presents the covariances
-  // and on its lower diagonal presents the correlation coefficients between the parameters
-
-  // vector of standard errors
-  //Rcpp::NumericVector std_error =
-  //  Rcpp::NumericVector::create(
-  //                               sqrt(V(0,0)) // bl
-  //                              ,sqrt(V(1,1)) // br
-  //                              ,sqrt(V(2,2)) // al
-  //                              ,sqrt(V(3,3)) // ar
-  //                              ,sqrt(V(4,4)) // m
-  //                              );
-
   // main dataframe with coefficients
   Rcpp::List dt = Rcpp::DataFrame::create(
      Rcpp::Named("param")     = param_names
     ,Rcpp::Named("coef")      = par
                       );
-  //,Rcpp::Named("std_error") = std_error
-
-  // convert matrix
-  //Rcpp::NumericMatrix matrix = Rcpp::as<Rcpp::NumericMatrix>(Rcpp::wrap(V));
-
-  // add names for the matrices
-  //colnames(matrix) = param_names;
-
   Rcpp::List ans = Rcpp::List::create(
      Rcpp::Named("dt")             = dt
     ,Rcpp::Named("log-likelihood") = fmin
   );
-  //,Rcpp::Named("matrix")         = matrix
 
   return ans;
 }
